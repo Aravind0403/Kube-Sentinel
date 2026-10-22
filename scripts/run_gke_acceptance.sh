@@ -338,6 +338,8 @@ spec:
           env:
             - name: PYTHONUNBUFFERED
               value: "1"
+            - name: SENTINEL_ENABLE_TEST_SHUTDOWN
+              value: "true"
       volumes:
         - name: config-volume
           configMap:

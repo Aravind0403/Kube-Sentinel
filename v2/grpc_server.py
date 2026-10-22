@@ -181,6 +181,18 @@ class FederationHTTPServer:
                     }
                     h.wfile.write(json.dumps(response).encode())
                 elif h.path == "/shutdown":
+                    # Explicitly test-only endpoint: forbidden in normal daemon deployments
+                    # and forbidden over non-loopback network listener.
+                    if h.client_address[0] not in ("127.0.0.1", "::1", "localhost"):
+                        h.send_response(403)
+                        h.end_headers()
+                        h.wfile.write(b"Forbidden: test shutdown endpoint is only accessible via loopback\n")
+                        return
+                    if os.environ.get("SENTINEL_ENABLE_TEST_SHUTDOWN", "").lower() not in ("true", "1", "yes"):
+                        h.send_response(403)
+                        h.end_headers()
+                        h.wfile.write(b"Forbidden: test shutdown endpoint is disabled by default\n")
+                        return
                     h.send_response(200)
                     h.end_headers()
                     h.wfile.write(b"shutting down\n")
