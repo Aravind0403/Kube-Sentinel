@@ -49,3 +49,5 @@ sentinel_state.json
 artifacts/benchmarks/
 artifacts/local-acceptance/*/
 !artifacts/local-acceptance/local-20261022-165257/
+!artifacts/local-acceptance/local-20261022-183647/
+!artifacts/local-acceptance/local-20261022-183936/

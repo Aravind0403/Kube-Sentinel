@@ -1,0 +1,248 @@
+I1022 13:08:12.607547       1 flags.go:64] FLAG: --allow-metric-labels="[]"
+I1022 13:08:12.608250       1 flags.go:64] FLAG: --authentication-kubeconfig=""
+I1022 13:08:12.608275       1 flags.go:64] FLAG: --authentication-skip-lookup="false"
+I1022 13:08:12.608286       1 flags.go:64] FLAG: --authentication-token-webhook-cache-ttl="10s"
+I1022 13:08:12.608330       1 flags.go:64] FLAG: --authentication-tolerate-lookup-failure="true"
+I1022 13:08:12.608355       1 flags.go:64] FLAG: --authorization-always-allow-paths="[/healthz,/readyz,/livez]"
+I1022 13:08:12.608376       1 flags.go:64] FLAG: --authorization-kubeconfig=""
+I1022 13:08:12.608415       1 flags.go:64] FLAG: --authorization-webhook-cache-authorized-ttl="10s"
+I1022 13:08:12.608454       1 flags.go:64] FLAG: --authorization-webhook-cache-unauthorized-ttl="10s"
+I1022 13:08:12.608463       1 flags.go:64] FLAG: --bind-address="0.0.0.0"
+I1022 13:08:12.608472       1 flags.go:64] FLAG: --cert-dir=""
+I1022 13:08:12.608491       1 flags.go:64] FLAG: --client-ca-file=""
+I1022 13:08:12.608499       1 flags.go:64] FLAG: --config="/etc/kubernetes/scheduler/scheduler-config.yaml"
+I1022 13:08:12.608507       1 flags.go:64] FLAG: --contention-profiling="true"
+I1022 13:08:12.608523       1 flags.go:64] FLAG: --disabled-metrics="[]"
+I1022 13:08:12.608544       1 flags.go:64] FLAG: --feature-gates=""
+I1022 13:08:12.608553       1 flags.go:64] FLAG: --help="false"
+I1022 13:08:12.608595       1 flags.go:64] FLAG: --http2-max-streams-per-connection="0"
+I1022 13:08:12.608615       1 flags.go:64] FLAG: --kube-api-burst="100"
+I1022 13:08:12.608624       1 flags.go:64] FLAG: --kube-api-content-type="application/vnd.kubernetes.protobuf"
+I1022 13:08:12.608632       1 flags.go:64] FLAG: --kube-api-qps="50"
+I1022 13:08:12.608640       1 flags.go:64] FLAG: --kubeconfig=""
+I1022 13:08:12.608647       1 flags.go:64] FLAG: --leader-elect="true"
+I1022 13:08:12.608670       1 flags.go:64] FLAG: --leader-elect-lease-duration="15s"
+I1022 13:08:12.608694       1 flags.go:64] FLAG: --leader-elect-renew-deadline="10s"
+I1022 13:08:12.608702       1 flags.go:64] FLAG: --leader-elect-resource-lock="leases"
+I1022 13:08:12.608709       1 flags.go:64] FLAG: --leader-elect-resource-name="kube-scheduler"
+I1022 13:08:12.608726       1 flags.go:64] FLAG: --leader-elect-resource-namespace="kube-system"
+I1022 13:08:12.608761       1 flags.go:64] FLAG: --leader-elect-retry-period="2s"
+I1022 13:08:12.608771       1 flags.go:64] FLAG: --log-flush-frequency="5s"
+I1022 13:08:12.608806       1 flags.go:64] FLAG: --logging-format="text"
+I1022 13:08:12.608817       1 flags.go:64] FLAG: --master=""
+I1022 13:08:12.608823       1 flags.go:64] FLAG: --permit-address-sharing="false"
+I1022 13:08:12.608830       1 flags.go:64] FLAG: --permit-port-sharing="false"
+I1022 13:08:12.608837       1 flags.go:64] FLAG: --pod-max-in-unschedulable-pods-duration="5m0s"
+I1022 13:08:12.608851       1 flags.go:64] FLAG: --profiling="true"
+I1022 13:08:12.608858       1 flags.go:64] FLAG: --requestheader-allowed-names="[]"
+I1022 13:08:12.608883       1 flags.go:64] FLAG: --requestheader-client-ca-file=""
+I1022 13:08:12.608891       1 flags.go:64] FLAG: --requestheader-extra-headers-prefix="[x-remote-extra-]"
+I1022 13:08:12.608910       1 flags.go:64] FLAG: --requestheader-group-headers="[x-remote-group]"
+I1022 13:08:12.608920       1 flags.go:64] FLAG: --requestheader-username-headers="[x-remote-user]"
+I1022 13:08:12.608936       1 flags.go:64] FLAG: --secure-port="10259"
+I1022 13:08:12.608961       1 flags.go:64] FLAG: --show-hidden-metrics-for-version=""
+I1022 13:08:12.608972       1 flags.go:64] FLAG: --tls-cert-file=""
+I1022 13:08:12.608986       1 flags.go:64] FLAG: --tls-cipher-suites="[]"
+I1022 13:08:12.609003       1 flags.go:64] FLAG: --tls-min-version=""
+I1022 13:08:12.609016       1 flags.go:64] FLAG: --tls-private-key-file=""
+I1022 13:08:12.609023       1 flags.go:64] FLAG: --tls-sni-cert-key="[]"
+I1022 13:08:12.609049       1 flags.go:64] FLAG: --v="2"
+I1022 13:08:12.609070       1 flags.go:64] FLAG: --version="false"
+I1022 13:08:12.609078       1 flags.go:64] FLAG: --vmodule=""
+I1022 13:08:12.609086       1 flags.go:64] FLAG: --write-config-to=""
+I1022 13:08:12.979408       1 serving.go:348] Generated self-signed cert in-memory
+W1022 13:08:12.980000       1 client_config.go:618] Neither --kubeconfig nor --master was specified.  Using the inClusterConfig.  This might not work.
+W1022 13:08:13.252002       1 requestheader_controller.go:193] Unable to get configmap/extension-apiserver-authentication in kube-system.  Usually fixed by 'kubectl create rolebinding -n kube-system ROLEBINDING_NAME --role=extension-apiserver-authentication-reader --serviceaccount=YOUR_NS:YOUR_SA'
+W1022 13:08:13.252025       1 authentication.go:368] Error looking up in-cluster authentication configuration: configmaps "extension-apiserver-authentication" is forbidden: User "system:serviceaccount:sentinel-system:sentinel-scheduler-sa" cannot get resource "configmaps" in API group "" in the namespace "kube-system"
+W1022 13:08:13.252030       1 authentication.go:369] Continuing without authentication configuration. This may treat all requests as anonymous.
+W1022 13:08:13.252035       1 authentication.go:370] To require authentication configuration lookup to succeed, set --authentication-tolerate-lookup-failure=false
+I1022 13:08:13.260164       1 configfile.go:101] "Using component config" config=<
+	apiVersion: kubescheduler.config.k8s.io/v1
+	clientConnection:
+	  acceptContentTypes: ""
+	  burst: 100
+	  contentType: application/vnd.kubernetes.protobuf
+	  kubeconfig: ""
+	  qps: 50
+	enableContentionProfiling: true
+	enableProfiling: true
+	kind: KubeSchedulerConfiguration
+	leaderElection:
+	  leaderElect: false
+	  leaseDuration: 15s
+	  renewDeadline: 10s
+	  resourceLock: leases
+	  resourceName: kube-scheduler
+	  resourceNamespace: kube-system
+	  retryPeriod: 2s
+	parallelism: 16
+	percentageOfNodesToScore: 0
+	podInitialBackoffSeconds: 1
+	podMaxBackoffSeconds: 10
+	profiles:
+	- pluginConfig:
+	  - args:
+	      apiVersion: kubescheduler.config.k8s.io/v1
+	      kind: DefaultPreemptionArgs
+	      minCandidateNodesAbsolute: 100
+	      minCandidateNodesPercentage: 10
+	    name: DefaultPreemption
+	  - args:
+	      apiVersion: kubescheduler.config.k8s.io/v1
+	      hardPodAffinityWeight: 1
+	      ignorePreferredTermsOfExistingPods: false
+	      kind: InterPodAffinityArgs
+	    name: InterPodAffinity
+	  - args:
+	      apiVersion: kubescheduler.config.k8s.io/v1
+	      kind: NodeAffinityArgs
+	    name: NodeAffinity
+	  - args:
+	      apiVersion: kubescheduler.config.k8s.io/v1
+	      kind: NodeResourcesBalancedAllocationArgs
+	      resources:
+	      - name: cpu
+	        weight: 1
+	      - name: memory
+	        weight: 1
+	    name: NodeResourcesBalancedAllocation
+	  - args:
+	      apiVersion: kubescheduler.config.k8s.io/v1
+	      kind: NodeResourcesFitArgs
+	      scoringStrategy:
+	        resources:
+	        - name: cpu
+	          weight: 1
+	        - name: memory
+	          weight: 1
+	        type: LeastAllocated
+	    name: NodeResourcesFit
+	  - args:
+	      apiVersion: kubescheduler.config.k8s.io/v1
+	      defaultingType: System
+	      kind: PodTopologySpreadArgs
+	    name: PodTopologySpread
+	  - args:
+	      apiVersion: kubescheduler.config.k8s.io/v1
+	      bindTimeoutSeconds: 600
+	      kind: VolumeBindingArgs
+	    name: VolumeBinding
+	  plugins:
+	    bind: {}
+	    filter:
+	      enabled:
+	      - name: SentinelScheduler
+	        weight: 0
+	    multiPoint:
+	      enabled:
+	      - name: PrioritySort
+	        weight: 0
+	      - name: NodeUnschedulable
+	        weight: 0
+	      - name: NodeName
+	        weight: 0
+	      - name: TaintToleration
+	        weight: 3
+	      - name: NodeAffinity
+	        weight: 2
+	      - name: NodePorts
+	        weight: 0
+	      - name: NodeResourcesFit
+	        weight: 1
+	      - name: VolumeRestrictions
+	        weight: 0
+	      - name: EBSLimits
+	        weight: 0
+	      - name: GCEPDLimits
+	        weight: 0
+	      - name: NodeVolumeLimits
+	        weight: 0
+	      - name: AzureDiskLimits
+	        weight: 0
+	      - name: VolumeBinding
+	        weight: 0
+	      - name: VolumeZone
+	        weight: 0
+	      - name: PodTopologySpread
+	        weight: 2
+	      - name: InterPodAffinity
+	        weight: 2
+	      - name: DefaultPreemption
+	        weight: 0
+	      - name: NodeResourcesBalancedAllocation
+	        weight: 1
+	      - name: ImageLocality
+	        weight: 1
+	      - name: DefaultBinder
+	        weight: 0
+	      - name: SchedulingGates
+	        weight: 0
+	    permit: {}
+	    postBind:
+	      enabled:
+	      - name: SentinelScheduler
+	        weight: 0
+	    postFilter: {}
+	    preBind:
+	      enabled:
+	      - name: SentinelScheduler
+	        weight: 0
+	    preEnqueue: {}
+	    preFilter:
+	      enabled:
+	      - name: SentinelScheduler
+	        weight: 0
+	    preScore:
+	      enabled:
+	      - name: SentinelScheduler
+	        weight: 0
+	    queueSort: {}
+	    reserve:
+	      enabled:
+	      - name: SentinelScheduler
+	        weight: 0
+	    score:
+	      enabled:
+	      - name: SentinelScheduler
+	        weight: 100
+	  schedulerName: kube-sentinel-scheduler
+ >
+I1022 13:08:13.260313       1 server.go:154] "Starting Kubernetes Scheduler" version="v0.0.0-master+$Format:%H$"
+I1022 13:08:13.260318       1 server.go:156] "Golang settings" GOGC="" GOMAXPROCS="" GOTRACEBACK=""
+I1022 13:08:13.261225       1 configmap_cafile_content.go:202] "Starting controller" name="client-ca::kube-system::extension-apiserver-authentication::client-ca-file"
+I1022 13:08:13.261241       1 shared_informer.go:311] Waiting for caches to sync for client-ca::kube-system::extension-apiserver-authentication::client-ca-file
+I1022 13:08:13.261326       1 tlsconfig.go:200] "Loaded serving cert" certName="Generated self signed cert" certDetail="\"localhost@1792674492\" [serving] validServingFor=[127.0.0.1,localhost,localhost] issuer=\"localhost-ca@1792674492\" (2026-10-22 12:08:12 +0000 UTC to 2027-10-22 12:08:12 +0000 UTC (now=2026-10-22 13:08:13.26130415 +0000 UTC))"
+I1022 13:08:13.261534       1 named_certificates.go:53] "Loaded SNI cert" index=0 certName="self-signed loopback" certDetail="\"apiserver-loopback-client@1792674493\" [serving] validServingFor=[apiserver-loopback-client] issuer=\"apiserver-loopback-client-ca@1792674493\" (2026-10-22 12:08:12 +0000 UTC to 2027-10-22 12:08:12 +0000 UTC (now=2026-10-22 13:08:13.261516526 +0000 UTC))"
+I1022 13:08:13.261579       1 secure_serving.go:210] Serving securely on [::]:10259
+I1022 13:08:13.261624       1 tlsconfig.go:240] "Starting DynamicServingCertificateController"
+W1022 13:08:13.265865       1 reflector.go:535] pkg/mod/k8s.io/client-go@v0.28.2/tools/cache/reflector.go:229: failed to list *v1.ConfigMap: configmaps "extension-apiserver-authentication" is forbidden: User "system:serviceaccount:sentinel-system:sentinel-scheduler-sa" cannot list resource "configmaps" in API group "" in the namespace "kube-system"
+E1022 13:08:13.265893       1 reflector.go:147] pkg/mod/k8s.io/client-go@v0.28.2/tools/cache/reflector.go:229: Failed to watch *v1.ConfigMap: failed to list *v1.ConfigMap: configmaps "extension-apiserver-authentication" is forbidden: User "system:serviceaccount:sentinel-system:sentinel-scheduler-sa" cannot list resource "configmaps" in API group "" in the namespace "kube-system"
+I1022 13:08:13.276624       1 node_tree.go:65] "Added node in listed group to NodeTree" node="sentinel-acc-26324-control-plane" zone=""
+I1022 13:08:13.276708       1 node_tree.go:65] "Added node in listed group to NodeTree" node="sentinel-acc-26324-worker" zone=""
+I1022 13:08:13.277428       1 node_tree.go:65] "Added node in listed group to NodeTree" node="sentinel-acc-26324-worker2" zone=""
+I1022 13:08:13.277468       1 node_tree.go:65] "Added node in listed group to NodeTree" node="sentinel-acc-26324-worker3" zone=""
+[Sentinel-GoPlugin] INFO: Native scoring active: scored 3 nodes for pod default/pod-l2 via daemon
+I1022 13:08:13.369163       1 schedule_one.go:286] "Successfully bound pod to node" pod="default/pod-l2" node="sentinel-acc-26324-worker2" evaluatedNodes=4 feasibleNodes=3
+W1022 13:08:14.361524       1 reflector.go:535] pkg/mod/k8s.io/client-go@v0.28.2/tools/cache/reflector.go:229: failed to list *v1.ConfigMap: configmaps "extension-apiserver-authentication" is forbidden: User "system:serviceaccount:sentinel-system:sentinel-scheduler-sa" cannot list resource "configmaps" in API group "" in the namespace "kube-system"
+E1022 13:08:14.361565       1 reflector.go:147] pkg/mod/k8s.io/client-go@v0.28.2/tools/cache/reflector.go:229: Failed to watch *v1.ConfigMap: failed to list *v1.ConfigMap: configmaps "extension-apiserver-authentication" is forbidden: User "system:serviceaccount:sentinel-system:sentinel-scheduler-sa" cannot list resource "configmaps" in API group "" in the namespace "kube-system"
+W1022 13:08:16.237243       1 reflector.go:535] pkg/mod/k8s.io/client-go@v0.28.2/tools/cache/reflector.go:229: failed to list *v1.ConfigMap: configmaps "extension-apiserver-authentication" is forbidden: User "system:serviceaccount:sentinel-system:sentinel-scheduler-sa" cannot list resource "configmaps" in API group "" in the namespace "kube-system"
+E1022 13:08:16.237326       1 reflector.go:147] pkg/mod/k8s.io/client-go@v0.28.2/tools/cache/reflector.go:229: Failed to watch *v1.ConfigMap: failed to list *v1.ConfigMap: configmaps "extension-apiserver-authentication" is forbidden: User "system:serviceaccount:sentinel-system:sentinel-scheduler-sa" cannot list resource "configmaps" in API group "" in the namespace "kube-system"
+W1022 13:08:19.624352       1 reflector.go:535] pkg/mod/k8s.io/client-go@v0.28.2/tools/cache/reflector.go:229: failed to list *v1.ConfigMap: configmaps "extension-apiserver-authentication" is forbidden: User "system:serviceaccount:sentinel-system:sentinel-scheduler-sa" cannot list resource "configmaps" in API group "" in the namespace "kube-system"
+E1022 13:08:19.624500       1 reflector.go:147] pkg/mod/k8s.io/client-go@v0.28.2/tools/cache/reflector.go:229: Failed to watch *v1.ConfigMap: failed to list *v1.ConfigMap: configmaps "extension-apiserver-authentication" is forbidden: User "system:serviceaccount:sentinel-system:sentinel-scheduler-sa" cannot list resource "configmaps" in API group "" in the namespace "kube-system"
+[Sentinel-GoPlugin] INFO: Native scoring active: scored 2 nodes for pod default/pod-l3 via daemon
+I1022 13:08:21.710198       1 schedule_one.go:286] "Successfully bound pod to node" pod="default/pod-l3" node="sentinel-acc-26324-worker2" evaluatedNodes=4 feasibleNodes=2
+I1022 13:08:25.515017       1 schedule_one.go:286] "Successfully bound pod to node" pod="default/pod-l4" node="sentinel-acc-26324-worker" evaluatedNodes=4 feasibleNodes=1
+W1022 13:08:26.758898       1 reflector.go:535] pkg/mod/k8s.io/client-go@v0.28.2/tools/cache/reflector.go:229: failed to list *v1.ConfigMap: configmaps "extension-apiserver-authentication" is forbidden: User "system:serviceaccount:sentinel-system:sentinel-scheduler-sa" cannot list resource "configmaps" in API group "" in the namespace "kube-system"
+E1022 13:08:26.759131       1 reflector.go:147] pkg/mod/k8s.io/client-go@v0.28.2/tools/cache/reflector.go:229: Failed to watch *v1.ConfigMap: failed to list *v1.ConfigMap: configmaps "extension-apiserver-authentication" is forbidden: User "system:serviceaccount:sentinel-system:sentinel-scheduler-sa" cannot list resource "configmaps" in API group "" in the namespace "kube-system"
+I1022 13:08:27.588259       1 schedule_one.go:286] "Successfully bound pod to node" pod="default/pod-l5" node="sentinel-acc-26324-worker" evaluatedNodes=4 feasibleNodes=1
+I1022 13:08:34.720518       1 schedule_one.go:286] "Successfully bound pod to node" pod="default/pod-l6" node="sentinel-acc-26324-worker" evaluatedNodes=4 feasibleNodes=1
+I1022 13:08:38.540286       1 schedule_one.go:973] "Unable to schedule pod; no fit; waiting" pod="default/pod-l7" err="0/4 nodes are available: 1 Node cost $0.15/hr exceeds pod ceiling $0.05/hr, 1 Node cost $0.40/hr exceeds pod ceiling $0.05/hr, 1 Node cost $2.50/hr exceeds pod ceiling $0.05/hr, 1 node(s) had untolerated taint {node-role.kubernetes.io/control-plane: }. preemption: 0/4 nodes are available: 1 Preemption is not helpful for scheduling, 3 No preemption victims found for incoming pod.."
+[Sentinel-ConfigWatcher] Config reloaded successfully from /etc/sentinel/config.yaml
+W1022 13:08:48.614090       1 logging.go:55] [core] [Channel #1 SubChannel #2]grpc: addrConn.createTransport failed to connect to {Addr: "127.0.0.1:50051", ServerName: "127.0.0.1:50051", }. Err: connection error: desc = "transport: Error while dialing: dial tcp 127.0.0.1:50051: connect: connection refused"
+[Sentinel-GoPlugin] WARNING: Fallback scoring active: rpc error: code = Unavailable desc = connection error: desc = "transport: Error while dialing: dial tcp 127.0.0.1:50051: connect: connection refused"
+[Sentinel-GoPlugin] WARNING: gRPC PlacementCommitted commit failed: rpc error: code = Unavailable desc = connection error: desc = "transport: Error while dialing: dial tcp 127.0.0.1:50051: connect: connection refused"
+I1022 13:08:48.622963       1 schedule_one.go:286] "Successfully bound pod to node" pod="default/pod-l8-outage" node="sentinel-acc-26324-worker2" evaluatedNodes=4 feasibleNodes=2
+W1022 13:08:50.077423       1 reflector.go:535] pkg/mod/k8s.io/client-go@v0.28.2/tools/cache/reflector.go:229: failed to list *v1.ConfigMap: configmaps "extension-apiserver-authentication" is forbidden: User "system:serviceaccount:sentinel-system:sentinel-scheduler-sa" cannot list resource "configmaps" in API group "" in the namespace "kube-system"
+E1022 13:08:50.077490       1 reflector.go:147] pkg/mod/k8s.io/client-go@v0.28.2/tools/cache/reflector.go:229: Failed to watch *v1.ConfigMap: failed to list *v1.ConfigMap: configmaps "extension-apiserver-authentication" is forbidden: User "system:serviceaccount:sentinel-system:sentinel-scheduler-sa" cannot list resource "configmaps" in API group "" in the namespace "kube-system"
+[Sentinel-GoPlugin] INFO: Native scoring active: scored 3 nodes for pod default/pod-l8-recovered via daemon
+I1022 13:08:56.299149       1 schedule_one.go:286] "Successfully bound pod to node" pod="default/pod-l8-recovered" node="sentinel-acc-26324-worker2" evaluatedNodes=4 feasibleNodes=3

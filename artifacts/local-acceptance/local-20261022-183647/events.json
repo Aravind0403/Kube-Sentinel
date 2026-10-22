@@ -1,0 +1,4414 @@
+{
+    "apiVersion": "v1",
+    "items": [
+        {
+            "action": "Binding",
+            "apiVersion": "v1",
+            "eventTime": "2026-10-22T13:08:13.369108Z",
+            "firstTimestamp": null,
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Pod",
+                "name": "pod-l2",
+                "namespace": "default",
+                "resourceVersion": "734",
+                "uid": "cfbe2446-1f6a-418b-94e7-4e07f07e9f63"
+            },
+            "kind": "Event",
+            "lastTimestamp": null,
+            "message": "Successfully assigned default/pod-l2 to sentinel-acc-26324-worker2",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:08:13Z",
+                "name": "pod-l2.18e0dbf4272b6193",
+                "namespace": "default",
+                "resourceVersion": "736",
+                "uid": "77cce551-a55b-44e7-bf3d-b7daf83a1476"
+            },
+            "reason": "Scheduled",
+            "reportingComponent": "kube-sentinel-scheduler",
+            "reportingInstance": "kube-sentinel-scheduler-kube-sentinel-scheduler-964d76744-mhmgz",
+            "source": {},
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:08:13Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{worker}",
+                "kind": "Pod",
+                "name": "pod-l2",
+                "namespace": "default",
+                "resourceVersion": "735",
+                "uid": "cfbe2446-1f6a-418b-94e7-4e07f07e9f63"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:08:13Z",
+            "message": "Pulling image \"alpine:3.19\"",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:08:13Z",
+                "name": "pod-l2.18e0dbf441c7f3b8",
+                "namespace": "default",
+                "resourceVersion": "739",
+                "uid": "5c7493d6-3515-44df-a561-5f7d75737ed1"
+            },
+            "reason": "Pulling",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-worker2",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-worker2"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:08:18Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{worker}",
+                "kind": "Pod",
+                "name": "pod-l2",
+                "namespace": "default",
+                "resourceVersion": "735",
+                "uid": "cfbe2446-1f6a-418b-94e7-4e07f07e9f63"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:08:18Z",
+            "message": "Successfully pulled image \"alpine:3.19\" in 4.489s (4.489s including waiting). Image size: 3369000 bytes.",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:08:18Z",
+                "name": "pod-l2.18e0dbf54d5deedd",
+                "namespace": "default",
+                "resourceVersion": "755",
+                "uid": "6d52b4df-18fa-49c5-a5a1-8c5b6b838677"
+            },
+            "reason": "Pulled",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-worker2",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-worker2"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:08:18Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{worker}",
+                "kind": "Pod",
+                "name": "pod-l2",
+                "namespace": "default",
+                "resourceVersion": "735",
+                "uid": "cfbe2446-1f6a-418b-94e7-4e07f07e9f63"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:08:18Z",
+            "message": "Container created",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:08:18Z",
+                "name": "pod-l2.18e0dbf54ef41724",
+                "namespace": "default",
+                "resourceVersion": "757",
+                "uid": "96bcc36c-ab7e-4930-9383-8acbd23bd2d0"
+            },
+            "reason": "Created",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-worker2",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-worker2"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:08:18Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{worker}",
+                "kind": "Pod",
+                "name": "pod-l2",
+                "namespace": "default",
+                "resourceVersion": "735",
+                "uid": "cfbe2446-1f6a-418b-94e7-4e07f07e9f63"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:08:18Z",
+            "message": "Container started",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:08:18Z",
+                "name": "pod-l2.18e0dbf557168691",
+                "namespace": "default",
+                "resourceVersion": "758",
+                "uid": "d166cc07-fe5c-4ead-b15b-3b555bc315dd"
+            },
+            "reason": "Started",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-worker2",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-worker2"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:08:18Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{worker}",
+                "kind": "Pod",
+                "name": "pod-l2",
+                "namespace": "default",
+                "resourceVersion": "735",
+                "uid": "cfbe2446-1f6a-418b-94e7-4e07f07e9f63"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:08:18Z",
+            "message": "Stopping container worker",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:08:18Z",
+                "name": "pod-l2.18e0dbf5575cb97f",
+                "namespace": "default",
+                "resourceVersion": "759",
+                "uid": "7234b644-9ea1-42aa-bae9-f44c60309e9c"
+            },
+            "reason": "Killing",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-worker2",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-worker2"
+            },
+            "type": "Normal"
+        },
+        {
+            "action": "Binding",
+            "apiVersion": "v1",
+            "eventTime": "2026-10-22T13:08:21.710028Z",
+            "firstTimestamp": null,
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Pod",
+                "name": "pod-l3",
+                "namespace": "default",
+                "resourceVersion": "769",
+                "uid": "63e3632d-316c-4427-aba5-b93b00da7347"
+            },
+            "kind": "Event",
+            "lastTimestamp": null,
+            "message": "Successfully assigned default/pod-l3 to sentinel-acc-26324-worker2",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:08:21Z",
+                "name": "pod-l3.18e0dbf6185428ac",
+                "namespace": "default",
+                "resourceVersion": "771",
+                "uid": "d55ccacf-9883-407b-828a-0c6fd8cf7d6c"
+            },
+            "reason": "Scheduled",
+            "reportingComponent": "kube-sentinel-scheduler",
+            "reportingInstance": "kube-sentinel-scheduler-kube-sentinel-scheduler-964d76744-mhmgz",
+            "source": {},
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:08:22Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{worker}",
+                "kind": "Pod",
+                "name": "pod-l3",
+                "namespace": "default",
+                "resourceVersion": "770",
+                "uid": "63e3632d-316c-4427-aba5-b93b00da7347"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:08:22Z",
+            "message": "Container image \"alpine:3.19\" already present on machine and can be accessed by the pod",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:08:22Z",
+                "name": "pod-l3.18e0dbf633688256",
+                "namespace": "default",
+                "resourceVersion": "775",
+                "uid": "41f37e91-d42a-434e-8b32-14575e293465"
+            },
+            "reason": "Pulled",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-worker2",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-worker2"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:08:22Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{worker}",
+                "kind": "Pod",
+                "name": "pod-l3",
+                "namespace": "default",
+                "resourceVersion": "770",
+                "uid": "63e3632d-316c-4427-aba5-b93b00da7347"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:08:22Z",
+            "message": "Container created",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:08:22Z",
+                "name": "pod-l3.18e0dbf635795fa5",
+                "namespace": "default",
+                "resourceVersion": "777",
+                "uid": "8dc27d93-fb3d-4e87-ad48-42411ec3fc72"
+            },
+            "reason": "Created",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-worker2",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-worker2"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:08:22Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{worker}",
+                "kind": "Pod",
+                "name": "pod-l3",
+                "namespace": "default",
+                "resourceVersion": "770",
+                "uid": "63e3632d-316c-4427-aba5-b93b00da7347"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:08:22Z",
+            "message": "Container started",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:08:22Z",
+                "name": "pod-l3.18e0dbf639bf0eb8",
+                "namespace": "default",
+                "resourceVersion": "778",
+                "uid": "aab130ac-2982-4cad-817b-16341d5606b4"
+            },
+            "reason": "Started",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-worker2",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-worker2"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:08:22Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{worker}",
+                "kind": "Pod",
+                "name": "pod-l3",
+                "namespace": "default",
+                "resourceVersion": "770",
+                "uid": "63e3632d-316c-4427-aba5-b93b00da7347"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:08:22Z",
+            "message": "Stopping container worker",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:08:22Z",
+                "name": "pod-l3.18e0dbf639ebd09b",
+                "namespace": "default",
+                "resourceVersion": "779",
+                "uid": "3cdf9e4b-e7dc-46e6-b493-c1dc18d89d16"
+            },
+            "reason": "Killing",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-worker2",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-worker2"
+            },
+            "type": "Normal"
+        },
+        {
+            "action": "Binding",
+            "apiVersion": "v1",
+            "eventTime": "2026-10-22T13:08:25.513945Z",
+            "firstTimestamp": null,
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Pod",
+                "name": "pod-l4",
+                "namespace": "default",
+                "resourceVersion": "792",
+                "uid": "dfb3938b-591a-49bd-b81e-bdb03fdcceda"
+            },
+            "kind": "Event",
+            "lastTimestamp": null,
+            "message": "Successfully assigned default/pod-l4 to sentinel-acc-26324-worker",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:08:25Z",
+                "name": "pod-l4.18e0dbf6fb112049",
+                "namespace": "default",
+                "resourceVersion": "794",
+                "uid": "47bedf18-52f3-49ec-8c15-88f9b6c6f1b9"
+            },
+            "reason": "Scheduled",
+            "reportingComponent": "kube-sentinel-scheduler",
+            "reportingInstance": "kube-sentinel-scheduler-kube-sentinel-scheduler-964d76744-mhmgz",
+            "source": {},
+            "type": "Normal"
+        },
+        {
+            "action": "Binding",
+            "apiVersion": "v1",
+            "eventTime": "2026-10-22T13:08:27.588186Z",
+            "firstTimestamp": null,
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Pod",
+                "name": "pod-l5",
+                "namespace": "default",
+                "resourceVersion": "811",
+                "uid": "b22939a0-f2ad-45cc-833d-13d7156a0830"
+            },
+            "kind": "Event",
+            "lastTimestamp": null,
+            "message": "Successfully assigned default/pod-l5 to sentinel-acc-26324-worker",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:08:27Z",
+                "name": "pod-l5.18e0dbf776b17380",
+                "namespace": "default",
+                "resourceVersion": "813",
+                "uid": "54ee1660-defa-4806-8c0d-00dcea66191d"
+            },
+            "reason": "Scheduled",
+            "reportingComponent": "kube-sentinel-scheduler",
+            "reportingInstance": "kube-sentinel-scheduler-kube-sentinel-scheduler-964d76744-mhmgz",
+            "source": {},
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:08:27Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{worker}",
+                "kind": "Pod",
+                "name": "pod-l5",
+                "namespace": "default",
+                "resourceVersion": "812",
+                "uid": "b22939a0-f2ad-45cc-833d-13d7156a0830"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:08:27Z",
+            "message": "Pulling image \"alpine:3.19\"",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:08:27Z",
+                "name": "pod-l5.18e0dbf78cf0d18d",
+                "namespace": "default",
+                "resourceVersion": "818",
+                "uid": "9625b6f6-dd3f-4fca-87c6-de25297fb976"
+            },
+            "reason": "Pulling",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-worker",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-worker"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:08:31Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{worker}",
+                "kind": "Pod",
+                "name": "pod-l5",
+                "namespace": "default",
+                "resourceVersion": "812",
+                "uid": "b22939a0-f2ad-45cc-833d-13d7156a0830"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:08:31Z",
+            "message": "Successfully pulled image \"alpine:3.19\" in 3.79s (3.79s including waiting). Image size: 3369000 bytes.",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:08:31Z",
+                "name": "pod-l5.18e0dbf86ee1ded5",
+                "namespace": "default",
+                "resourceVersion": "830",
+                "uid": "71e6456f-f820-4482-a31d-b8b1d6ab634e"
+            },
+            "reason": "Pulled",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-worker",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-worker"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:08:31Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{worker}",
+                "kind": "Pod",
+                "name": "pod-l5",
+                "namespace": "default",
+                "resourceVersion": "812",
+                "uid": "b22939a0-f2ad-45cc-833d-13d7156a0830"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:08:31Z",
+            "message": "Container created",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:08:31Z",
+                "name": "pod-l5.18e0dbf8704bcfbc",
+                "namespace": "default",
+                "resourceVersion": "831",
+                "uid": "fea7c5e5-a5a5-4a08-a369-8213ddeba726"
+            },
+            "reason": "Created",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-worker",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-worker"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:08:31Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{worker}",
+                "kind": "Pod",
+                "name": "pod-l5",
+                "namespace": "default",
+                "resourceVersion": "812",
+                "uid": "b22939a0-f2ad-45cc-833d-13d7156a0830"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:08:31Z",
+            "message": "Container started",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:08:31Z",
+                "name": "pod-l5.18e0dbf8769fe377",
+                "namespace": "default",
+                "resourceVersion": "832",
+                "uid": "416972c6-230f-4896-bee7-87bc912dc90a"
+            },
+            "reason": "Started",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-worker",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-worker"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:08:31Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{worker}",
+                "kind": "Pod",
+                "name": "pod-l5",
+                "namespace": "default",
+                "resourceVersion": "812",
+                "uid": "b22939a0-f2ad-45cc-833d-13d7156a0830"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:08:31Z",
+            "message": "Stopping container worker",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:08:31Z",
+                "name": "pod-l5.18e0dbf876de4bec",
+                "namespace": "default",
+                "resourceVersion": "833",
+                "uid": "32d53461-d388-4f4f-b9ac-669bec7fef66"
+            },
+            "reason": "Killing",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-worker",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-worker"
+            },
+            "type": "Normal"
+        },
+        {
+            "action": "Binding",
+            "apiVersion": "v1",
+            "eventTime": "2026-10-22T13:08:34.720297Z",
+            "firstTimestamp": null,
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Pod",
+                "name": "pod-l6",
+                "namespace": "default",
+                "resourceVersion": "846",
+                "uid": "f8d0fa31-29f6-43bc-866c-5a88b415ee45"
+            },
+            "kind": "Event",
+            "lastTimestamp": null,
+            "message": "Successfully assigned default/pod-l6 to sentinel-acc-26324-worker",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:08:34Z",
+                "name": "pod-l6.18e0dbf91fcd825f",
+                "namespace": "default",
+                "resourceVersion": "848",
+                "uid": "d167572b-7076-49a0-8dc6-ef298183d62d"
+            },
+            "reason": "Scheduled",
+            "reportingComponent": "kube-sentinel-scheduler",
+            "reportingInstance": "kube-sentinel-scheduler-kube-sentinel-scheduler-964d76744-mhmgz",
+            "source": {},
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:08:35Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{worker}",
+                "kind": "Pod",
+                "name": "pod-l6",
+                "namespace": "default",
+                "resourceVersion": "847",
+                "uid": "f8d0fa31-29f6-43bc-866c-5a88b415ee45"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:08:35Z",
+            "message": "Container image \"alpine:3.19\" already present on machine and can be accessed by the pod",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:08:35Z",
+                "name": "pod-l6.18e0dbf937494c73",
+                "namespace": "default",
+                "resourceVersion": "852",
+                "uid": "986b28f3-7b03-4a73-9330-bcca399bed2d"
+            },
+            "reason": "Pulled",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-worker",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-worker"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:08:35Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{worker}",
+                "kind": "Pod",
+                "name": "pod-l6",
+                "namespace": "default",
+                "resourceVersion": "847",
+                "uid": "f8d0fa31-29f6-43bc-866c-5a88b415ee45"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:08:35Z",
+            "message": "Container created",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:08:35Z",
+                "name": "pod-l6.18e0dbf93839d265",
+                "namespace": "default",
+                "resourceVersion": "854",
+                "uid": "997621a4-ec10-41ba-9730-bb9b909a8186"
+            },
+            "reason": "Created",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-worker",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-worker"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:08:35Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{worker}",
+                "kind": "Pod",
+                "name": "pod-l6",
+                "namespace": "default",
+                "resourceVersion": "847",
+                "uid": "f8d0fa31-29f6-43bc-866c-5a88b415ee45"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:08:35Z",
+            "message": "Container started",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:08:35Z",
+                "name": "pod-l6.18e0dbf93bbf71a8",
+                "namespace": "default",
+                "resourceVersion": "855",
+                "uid": "639fa3d7-c931-43f0-b7ef-74428fdff489"
+            },
+            "reason": "Started",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-worker",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-worker"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:08:35Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{worker}",
+                "kind": "Pod",
+                "name": "pod-l6",
+                "namespace": "default",
+                "resourceVersion": "847",
+                "uid": "f8d0fa31-29f6-43bc-866c-5a88b415ee45"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:08:35Z",
+            "message": "Stopping container worker",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:08:35Z",
+                "name": "pod-l6.18e0dbf93be582cf",
+                "namespace": "default",
+                "resourceVersion": "856",
+                "uid": "541729a2-ed75-49d2-b14e-74e4ee0e584a"
+            },
+            "reason": "Killing",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-worker",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-worker"
+            },
+            "type": "Normal"
+        },
+        {
+            "action": "Scheduling",
+            "apiVersion": "v1",
+            "eventTime": "2026-10-22T13:08:38.540500Z",
+            "firstTimestamp": null,
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Pod",
+                "name": "pod-l7",
+                "namespace": "default",
+                "resourceVersion": "873",
+                "uid": "81711189-7437-4783-b36e-f65ae5a555ad"
+            },
+            "kind": "Event",
+            "lastTimestamp": null,
+            "message": "0/4 nodes are available: 1 Node cost $0.15/hr exceeds pod ceiling $0.05/hr, 1 Node cost $0.40/hr exceeds pod ceiling $0.05/hr, 1 Node cost $2.50/hr exceeds pod ceiling $0.05/hr, 1 node(s) had untolerated taint {node-role.kubernetes.io/control-plane: }. preemption: 0/4 nodes are available: 1 Preemption is not helpful for scheduling, 3 No preemption victims found for incoming pod..",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:08:38Z",
+                "name": "pod-l7.18e0dbfa038094f9",
+                "namespace": "default",
+                "resourceVersion": "874",
+                "uid": "72bd62cd-947e-49d2-8c91-fb90f43c03bb"
+            },
+            "reason": "FailedScheduling",
+            "reportingComponent": "kube-sentinel-scheduler",
+            "reportingInstance": "kube-sentinel-scheduler-kube-sentinel-scheduler-964d76744-mhmgz",
+            "source": {},
+            "type": "Warning"
+        },
+        {
+            "action": "Scheduling",
+            "apiVersion": "v1",
+            "eventTime": "2026-10-22T13:08:46.924083Z",
+            "firstTimestamp": null,
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Pod",
+                "name": "pod-l7",
+                "namespace": "default",
+                "resourceVersion": "890",
+                "uid": "81711189-7437-4783-b36e-f65ae5a555ad"
+            },
+            "kind": "Event",
+            "lastTimestamp": null,
+            "message": "skip schedule deleting pod: default/pod-l7",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:08:46Z",
+                "name": "pod-l7.18e0dbfbf735ceb2",
+                "namespace": "default",
+                "resourceVersion": "892",
+                "uid": "54337286-d513-4a8b-9e18-d79f62aeda24"
+            },
+            "reason": "FailedScheduling",
+            "reportingComponent": "kube-sentinel-scheduler",
+            "reportingInstance": "kube-sentinel-scheduler-kube-sentinel-scheduler-964d76744-mhmgz",
+            "source": {},
+            "type": "Warning"
+        },
+        {
+            "action": "Binding",
+            "apiVersion": "v1",
+            "eventTime": "2026-10-22T13:08:48.622889Z",
+            "firstTimestamp": null,
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Pod",
+                "name": "pod-l8-outage",
+                "namespace": "default",
+                "resourceVersion": "909",
+                "uid": "47000e26-9bcd-44f1-8afa-1c7b7fae789e"
+            },
+            "kind": "Event",
+            "lastTimestamp": null,
+            "message": "Successfully assigned default/pod-l8-outage to sentinel-acc-26324-worker2",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:08:48Z",
+                "name": "pod-l8-outage.18e0dbfc5c756294",
+                "namespace": "default",
+                "resourceVersion": "911",
+                "uid": "d4ee84b4-e902-4fb0-9381-b8052082275c"
+            },
+            "reason": "Scheduled",
+            "reportingComponent": "kube-sentinel-scheduler",
+            "reportingInstance": "kube-sentinel-scheduler-kube-sentinel-scheduler-964d76744-mhmgz",
+            "source": {},
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:08:48Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{worker}",
+                "kind": "Pod",
+                "name": "pod-l8-outage",
+                "namespace": "default",
+                "resourceVersion": "910",
+                "uid": "47000e26-9bcd-44f1-8afa-1c7b7fae789e"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:08:48Z",
+            "message": "Container image \"alpine:3.19\" already present on machine and can be accessed by the pod",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:08:48Z",
+                "name": "pod-l8-outage.18e0dbfc70048cd0",
+                "namespace": "default",
+                "resourceVersion": "916",
+                "uid": "8aa7b1cf-8ff6-4049-b43d-e044f475bda0"
+            },
+            "reason": "Pulled",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-worker2",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-worker2"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:08:48Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{worker}",
+                "kind": "Pod",
+                "name": "pod-l8-outage",
+                "namespace": "default",
+                "resourceVersion": "910",
+                "uid": "47000e26-9bcd-44f1-8afa-1c7b7fae789e"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:08:48Z",
+            "message": "Container created",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:08:48Z",
+                "name": "pod-l8-outage.18e0dbfc7129868a",
+                "namespace": "default",
+                "resourceVersion": "918",
+                "uid": "f30d6627-f026-4d45-911b-1c312127395c"
+            },
+            "reason": "Created",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-worker2",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-worker2"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:08:49Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{worker}",
+                "kind": "Pod",
+                "name": "pod-l8-outage",
+                "namespace": "default",
+                "resourceVersion": "910",
+                "uid": "47000e26-9bcd-44f1-8afa-1c7b7fae789e"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:08:49Z",
+            "message": "Container started",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:08:49Z",
+                "name": "pod-l8-outage.18e0dbfc757af5c4",
+                "namespace": "default",
+                "resourceVersion": "919",
+                "uid": "f76d821b-f0b1-4b7f-8c1c-130a2d92b75f"
+            },
+            "reason": "Started",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-worker2",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-worker2"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:08:49Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{worker}",
+                "kind": "Pod",
+                "name": "pod-l8-outage",
+                "namespace": "default",
+                "resourceVersion": "910",
+                "uid": "47000e26-9bcd-44f1-8afa-1c7b7fae789e"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:08:49Z",
+            "message": "Stopping container worker",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:08:49Z",
+                "name": "pod-l8-outage.18e0dbfc75abd316",
+                "namespace": "default",
+                "resourceVersion": "920",
+                "uid": "ca718530-2591-4fa8-81a1-22392005fe9d"
+            },
+            "reason": "Killing",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-worker2",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-worker2"
+            },
+            "type": "Normal"
+        },
+        {
+            "action": "Binding",
+            "apiVersion": "v1",
+            "eventTime": "2026-10-22T13:08:56.298691Z",
+            "firstTimestamp": null,
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Pod",
+                "name": "pod-l8-recovered",
+                "namespace": "default",
+                "resourceVersion": "939",
+                "uid": "c13d40e4-f942-4291-9a71-b64567e615d8"
+            },
+            "kind": "Event",
+            "lastTimestamp": null,
+            "message": "Successfully assigned default/pod-l8-recovered to sentinel-acc-26324-worker2",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:08:56Z",
+                "name": "pod-l8-recovered.18e0dbfe25f9ce88",
+                "namespace": "default",
+                "resourceVersion": "942",
+                "uid": "9f310b4a-e21d-4acc-b06a-23ca11c43872"
+            },
+            "reason": "Scheduled",
+            "reportingComponent": "kube-sentinel-scheduler",
+            "reportingInstance": "kube-sentinel-scheduler-kube-sentinel-scheduler-964d76744-mhmgz",
+            "source": {},
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:08:56Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{worker}",
+                "kind": "Pod",
+                "name": "pod-l8-recovered",
+                "namespace": "default",
+                "resourceVersion": "940",
+                "uid": "c13d40e4-f942-4291-9a71-b64567e615d8"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:08:56Z",
+            "message": "Container image \"alpine:3.19\" already present on machine and can be accessed by the pod",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:08:56Z",
+                "name": "pod-l8-recovered.18e0dbfe43a08eea",
+                "namespace": "default",
+                "resourceVersion": "945",
+                "uid": "5e7b5256-7438-4603-9045-403ab1399cbc"
+            },
+            "reason": "Pulled",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-worker2",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-worker2"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:08:56Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{worker}",
+                "kind": "Pod",
+                "name": "pod-l8-recovered",
+                "namespace": "default",
+                "resourceVersion": "940",
+                "uid": "c13d40e4-f942-4291-9a71-b64567e615d8"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:08:56Z",
+            "message": "Container created",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:08:56Z",
+                "name": "pod-l8-recovered.18e0dbfe4519d6ea",
+                "namespace": "default",
+                "resourceVersion": "947",
+                "uid": "4f466341-c6a4-40fb-baac-e28936e06e19"
+            },
+            "reason": "Created",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-worker2",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-worker2"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:08:56Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{worker}",
+                "kind": "Pod",
+                "name": "pod-l8-recovered",
+                "namespace": "default",
+                "resourceVersion": "940",
+                "uid": "c13d40e4-f942-4291-9a71-b64567e615d8"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:08:56Z",
+            "message": "Container started",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:08:56Z",
+                "name": "pod-l8-recovered.18e0dbfe49c5b2a8",
+                "namespace": "default",
+                "resourceVersion": "949",
+                "uid": "ab8e3de1-5d4b-45d0-a5ee-05a30e08920f"
+            },
+            "reason": "Started",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-worker2",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-worker2"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:08:57Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{worker}",
+                "kind": "Pod",
+                "name": "pod-l8-recovered",
+                "namespace": "default",
+                "resourceVersion": "940",
+                "uid": "c13d40e4-f942-4291-9a71-b64567e615d8"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:08:57Z",
+            "message": "Stopping container worker",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:08:57Z",
+                "name": "pod-l8-recovered.18e0dbfe75d5ebcf",
+                "namespace": "default",
+                "resourceVersion": "952",
+                "uid": "d8c6cfe1-bcb0-4547-97a2-8bd4e4c42af1"
+            },
+            "reason": "Killing",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-worker2",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-worker2"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:16Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Node",
+                "name": "sentinel-acc-26324-control-plane"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:16Z",
+            "message": "Starting kubelet.",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:16Z",
+                "name": "sentinel-acc-26324-control-plane.18e0dbe6d8ba33bc",
+                "namespace": "default",
+                "resourceVersion": "238",
+                "uid": "0792efd1-af36-4a4e-b50a-28d16e179c6f"
+            },
+            "reason": "Starting",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-control-plane",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-control-plane"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 2,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:16Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Node",
+                "name": "sentinel-acc-26324-control-plane"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:08:16Z",
+            "message": "Failed to update Node Allocatable Limits [\"kubelet\" \"kubepods\"]: openat2 /sys/fs/cgroup/kubelet.slice/kubelet-kubepods.slice/cpuset.cpus: no such file or directory",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:16Z",
+                "name": "sentinel-acc-26324-control-plane.18e0dbe6dbe884a8",
+                "namespace": "default",
+                "resourceVersion": "748",
+                "uid": "8cd51e19-a492-4096-921b-600034390a3c"
+            },
+            "reason": "FailedNodeAllocatableEnforcement",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-control-plane",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-control-plane"
+            },
+            "type": "Warning"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:16Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Node",
+                "name": "sentinel-acc-26324-control-plane"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:16Z",
+            "message": "Node sentinel-acc-26324-control-plane status is now: NodeHasSufficientMemory",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:16Z",
+                "name": "sentinel-acc-26324-control-plane.18e0dbe6e21867df",
+                "namespace": "default",
+                "resourceVersion": "245",
+                "uid": "1ce08fea-13ad-48ee-9bb7-8f6fe73fcfbb"
+            },
+            "reason": "NodeHasSufficientMemory",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-control-plane",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-control-plane"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:16Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Node",
+                "name": "sentinel-acc-26324-control-plane"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:16Z",
+            "message": "Node sentinel-acc-26324-control-plane status is now: NodeHasNoDiskPressure",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:16Z",
+                "name": "sentinel-acc-26324-control-plane.18e0dbe6e2192841",
+                "namespace": "default",
+                "resourceVersion": "246",
+                "uid": "277ff373-41a5-4343-9c73-a625e816a80c"
+            },
+            "reason": "NodeHasNoDiskPressure",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-control-plane",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-control-plane"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:16Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Node",
+                "name": "sentinel-acc-26324-control-plane"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:16Z",
+            "message": "Node sentinel-acc-26324-control-plane status is now: NodeHasSufficientPID",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:16Z",
+                "name": "sentinel-acc-26324-control-plane.18e0dbe6e21934f3",
+                "namespace": "default",
+                "resourceVersion": "247",
+                "uid": "8ec2b52c-408c-49fc-8c91-64616aceff98"
+            },
+            "reason": "NodeHasSufficientPID",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-control-plane",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-control-plane"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:21Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Node",
+                "name": "sentinel-acc-26324-control-plane",
+                "uid": "b388a29a-0b94-4335-9354-2c0ca85ff83f"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:21Z",
+            "message": "Node sentinel-acc-26324-control-plane event: Registered Node sentinel-acc-26324-control-plane in Controller",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:21Z",
+                "name": "sentinel-acc-26324-control-plane.18e0dbe82619bd4d",
+                "namespace": "default",
+                "resourceVersion": "322",
+                "uid": "e01f12ad-2b6c-476b-bfac-d54ea117fed6"
+            },
+            "reason": "RegisteredNode",
+            "reportingComponent": "node-controller",
+            "reportingInstance": "",
+            "source": {
+                "component": "node-controller"
+            },
+            "type": "Normal"
+        },
+        {
+            "action": "StartKubeProxy",
+            "apiVersion": "v1",
+            "eventTime": "2026-10-22T13:07:24.702806Z",
+            "firstTimestamp": null,
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Node",
+                "name": "sentinel-acc-26324-control-plane"
+            },
+            "kind": "Event",
+            "lastTimestamp": null,
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:24Z",
+                "name": "sentinel-acc-26324-control-plane.18e0dbe8d26e73d6",
+                "namespace": "default",
+                "resourceVersion": "406",
+                "uid": "5f69ff24-2d17-419a-adf0-726662385223"
+            },
+            "reason": "Starting",
+            "reportingComponent": "kube-proxy",
+            "reportingInstance": "kube-proxy-sentinel-acc-26324-control-plane",
+            "source": {},
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:35Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Node",
+                "name": "sentinel-acc-26324-control-plane"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:35Z",
+            "message": "Node sentinel-acc-26324-control-plane status is now: NodeReady",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:35Z",
+                "name": "sentinel-acc-26324-control-plane.18e0dbeb3f082fa3",
+                "namespace": "default",
+                "resourceVersion": "566",
+                "uid": "4ad365cd-0c7e-4e08-b504-b99a27e23f9d"
+            },
+            "reason": "NodeReady",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-control-plane",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-control-plane"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:26Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Node",
+                "name": "sentinel-acc-26324-worker"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:26Z",
+            "message": "Starting kubelet.",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:26Z",
+                "name": "sentinel-acc-26324-worker.18e0dbe94a48f771",
+                "namespace": "default",
+                "resourceVersion": "424",
+                "uid": "932aeaf9-1b8e-4199-9ea1-86fd6e93d201"
+            },
+            "reason": "Starting",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-worker",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-worker"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 3,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:26Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Node",
+                "name": "sentinel-acc-26324-worker"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:26Z",
+            "message": "Node sentinel-acc-26324-worker status is now: NodeHasSufficientMemory",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:26Z",
+                "name": "sentinel-acc-26324-worker.18e0dbe94b4af227",
+                "namespace": "default",
+                "resourceVersion": "448",
+                "uid": "0c40a2d8-d106-4801-80e2-db44b6f584be"
+            },
+            "reason": "NodeHasSufficientMemory",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-worker",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-worker"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 3,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:26Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Node",
+                "name": "sentinel-acc-26324-worker"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:26Z",
+            "message": "Node sentinel-acc-26324-worker status is now: NodeHasNoDiskPressure",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:26Z",
+                "name": "sentinel-acc-26324-worker.18e0dbe94b4b0dd2",
+                "namespace": "default",
+                "resourceVersion": "450",
+                "uid": "9dca06b8-5c85-429b-b15d-5181543ddd92"
+            },
+            "reason": "NodeHasNoDiskPressure",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-worker",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-worker"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 3,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:26Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Node",
+                "name": "sentinel-acc-26324-worker"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:26Z",
+            "message": "Node sentinel-acc-26324-worker status is now: NodeHasSufficientPID",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:26Z",
+                "name": "sentinel-acc-26324-worker.18e0dbe94b4b1890",
+                "namespace": "default",
+                "resourceVersion": "452",
+                "uid": "30231b39-0e0c-481b-9a5a-322c645429f8"
+            },
+            "reason": "NodeHasSufficientPID",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-worker",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-worker"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 2,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:26Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Node",
+                "name": "sentinel-acc-26324-worker"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:08:26Z",
+            "message": "Failed to update Node Allocatable Limits [\"kubelet\" \"kubepods\"]: openat2 /sys/fs/cgroup/kubelet.slice/kubelet-kubepods.slice/cpuset.cpus: no such file or directory",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:26Z",
+                "name": "sentinel-acc-26324-worker.18e0dbe95106d5c9",
+                "namespace": "default",
+                "resourceVersion": "801",
+                "uid": "04c058f3-fc9b-4189-a75b-bb4eeb972ae1"
+            },
+            "reason": "FailedNodeAllocatableEnforcement",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-worker",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-worker"
+            },
+            "type": "Warning"
+        },
+        {
+            "action": "StartKubeProxy",
+            "apiVersion": "v1",
+            "eventTime": "2026-10-22T13:07:31.296578Z",
+            "firstTimestamp": null,
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Node",
+                "name": "sentinel-acc-26324-worker"
+            },
+            "kind": "Event",
+            "lastTimestamp": null,
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:31Z",
+                "name": "sentinel-acc-26324-worker.18e0dbea5b736ec8",
+                "namespace": "default",
+                "resourceVersion": "543",
+                "uid": "a7ecc84d-8808-4e48-8da4-fa21c29b3c03"
+            },
+            "reason": "Starting",
+            "reportingComponent": "kube-proxy",
+            "reportingInstance": "kube-proxy-sentinel-acc-26324-worker",
+            "source": {},
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:31Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Node",
+                "name": "sentinel-acc-26324-worker",
+                "uid": "056c2e00-4d4b-40eb-b7c7-33f55db4f468"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:31Z",
+            "message": "Node sentinel-acc-26324-worker event: Registered Node sentinel-acc-26324-worker in Controller",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:31Z",
+                "name": "sentinel-acc-26324-worker.18e0dbea7c69d28e",
+                "namespace": "default",
+                "resourceVersion": "556",
+                "uid": "674664fd-2b73-464b-85bc-825f94b517e0"
+            },
+            "reason": "RegisteredNode",
+            "reportingComponent": "node-controller",
+            "reportingInstance": "",
+            "source": {
+                "component": "node-controller"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:41Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Node",
+                "name": "sentinel-acc-26324-worker"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:41Z",
+            "message": "Node sentinel-acc-26324-worker status is now: NodeReady",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:41Z",
+                "name": "sentinel-acc-26324-worker.18e0dbecbd9589c3",
+                "namespace": "default",
+                "resourceVersion": "630",
+                "uid": "cb2d300b-ee7c-4a11-affc-e5390e28bbf8"
+            },
+            "reason": "NodeReady",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-worker",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-worker"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:26Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Node",
+                "name": "sentinel-acc-26324-worker2"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:26Z",
+            "message": "Starting kubelet.",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:26Z",
+                "name": "sentinel-acc-26324-worker2.18e0dbe94b5c9b00",
+                "namespace": "default",
+                "resourceVersion": "426",
+                "uid": "71883404-c38e-4403-9e8e-dae550dbe5bf"
+            },
+            "reason": "Starting",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-worker2",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-worker2"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 3,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:26Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Node",
+                "name": "sentinel-acc-26324-worker2"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:26Z",
+            "message": "Node sentinel-acc-26324-worker2 status is now: NodeHasSufficientMemory",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:26Z",
+                "name": "sentinel-acc-26324-worker2.18e0dbe94d674493",
+                "namespace": "default",
+                "resourceVersion": "466",
+                "uid": "379d9cb4-a00d-47fd-b325-e2c50b0ac7ed"
+            },
+            "reason": "NodeHasSufficientMemory",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-worker2",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-worker2"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 3,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:26Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Node",
+                "name": "sentinel-acc-26324-worker2"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:26Z",
+            "message": "Node sentinel-acc-26324-worker2 status is now: NodeHasNoDiskPressure",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:26Z",
+                "name": "sentinel-acc-26324-worker2.18e0dbe94d6792b3",
+                "namespace": "default",
+                "resourceVersion": "470",
+                "uid": "376e505b-2677-4a3d-9023-70ba9494bb3d"
+            },
+            "reason": "NodeHasNoDiskPressure",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-worker2",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-worker2"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 3,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:26Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Node",
+                "name": "sentinel-acc-26324-worker2"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:26Z",
+            "message": "Node sentinel-acc-26324-worker2 status is now: NodeHasSufficientPID",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:26Z",
+                "name": "sentinel-acc-26324-worker2.18e0dbe94d67bae7",
+                "namespace": "default",
+                "resourceVersion": "480",
+                "uid": "cfd1dd2d-73a4-4898-b9b8-930e363751f9"
+            },
+            "reason": "NodeHasSufficientPID",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-worker2",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-worker2"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 2,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:26Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Node",
+                "name": "sentinel-acc-26324-worker2"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:08:26Z",
+            "message": "Failed to update Node Allocatable Limits [\"kubelet\" \"kubepods\"]: openat2 /sys/fs/cgroup/kubelet.slice/kubelet-kubepods.slice/cpuset.cpus: no such file or directory",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:26Z",
+                "name": "sentinel-acc-26324-worker2.18e0dbe95531d06a",
+                "namespace": "default",
+                "resourceVersion": "802",
+                "uid": "af9968ca-77e5-47cf-8259-90afb7e274cc"
+            },
+            "reason": "FailedNodeAllocatableEnforcement",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-worker2",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-worker2"
+            },
+            "type": "Warning"
+        },
+        {
+            "action": "StartKubeProxy",
+            "apiVersion": "v1",
+            "eventTime": "2026-10-22T13:07:31.396962Z",
+            "firstTimestamp": null,
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Node",
+                "name": "sentinel-acc-26324-worker2"
+            },
+            "kind": "Event",
+            "lastTimestamp": null,
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:31Z",
+                "name": "sentinel-acc-26324-worker2.18e0dbea616f2c81",
+                "namespace": "default",
+                "resourceVersion": "546",
+                "uid": "9394083b-605b-444d-ba82-8d47a2e1ec0c"
+            },
+            "reason": "Starting",
+            "reportingComponent": "kube-proxy",
+            "reportingInstance": "kube-proxy-sentinel-acc-26324-worker2",
+            "source": {},
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:31Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Node",
+                "name": "sentinel-acc-26324-worker2",
+                "uid": "2d115489-43c1-4a86-be7f-c65b844f653e"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:31Z",
+            "message": "Node sentinel-acc-26324-worker2 event: Registered Node sentinel-acc-26324-worker2 in Controller",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:31Z",
+                "name": "sentinel-acc-26324-worker2.18e0dbea7c6ae381",
+                "namespace": "default",
+                "resourceVersion": "557",
+                "uid": "18f62996-293d-43cd-9db3-f182e88bd2b8"
+            },
+            "reason": "RegisteredNode",
+            "reportingComponent": "node-controller",
+            "reportingInstance": "",
+            "source": {
+                "component": "node-controller"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:42Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Node",
+                "name": "sentinel-acc-26324-worker2"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:42Z",
+            "message": "Node sentinel-acc-26324-worker2 status is now: NodeReady",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:42Z",
+                "name": "sentinel-acc-26324-worker2.18e0dbecfb50d813",
+                "namespace": "default",
+                "resourceVersion": "636",
+                "uid": "8bb27ad8-68bf-4105-8db8-6b4ef337be09"
+            },
+            "reason": "NodeReady",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-worker2",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-worker2"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:26Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Node",
+                "name": "sentinel-acc-26324-worker3"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:26Z",
+            "message": "Starting kubelet.",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:26Z",
+                "name": "sentinel-acc-26324-worker3.18e0dbe949b4db4b",
+                "namespace": "default",
+                "resourceVersion": "423",
+                "uid": "2cba343f-db7a-407a-b4fe-e5729b90983e"
+            },
+            "reason": "Starting",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-worker3",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-worker3"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 3,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:26Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Node",
+                "name": "sentinel-acc-26324-worker3"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:27Z",
+            "message": "Node sentinel-acc-26324-worker3 status is now: NodeHasSufficientMemory",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:26Z",
+                "name": "sentinel-acc-26324-worker3.18e0dbe9536a1b09",
+                "namespace": "default",
+                "resourceVersion": "481",
+                "uid": "7bcab9b2-6468-4824-b411-575f7129c434"
+            },
+            "reason": "NodeHasSufficientMemory",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-worker3",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-worker3"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 3,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:26Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Node",
+                "name": "sentinel-acc-26324-worker3"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:27Z",
+            "message": "Node sentinel-acc-26324-worker3 status is now: NodeHasNoDiskPressure",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:26Z",
+                "name": "sentinel-acc-26324-worker3.18e0dbe9536a3f54",
+                "namespace": "default",
+                "resourceVersion": "484",
+                "uid": "84f0db05-000e-4db3-93ce-1ae41e085a27"
+            },
+            "reason": "NodeHasNoDiskPressure",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-worker3",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-worker3"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 3,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:26Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Node",
+                "name": "sentinel-acc-26324-worker3"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:27Z",
+            "message": "Node sentinel-acc-26324-worker3 status is now: NodeHasSufficientPID",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:26Z",
+                "name": "sentinel-acc-26324-worker3.18e0dbe9536a4c30",
+                "namespace": "default",
+                "resourceVersion": "490",
+                "uid": "415d08eb-1309-4963-967d-06fed39f9645"
+            },
+            "reason": "NodeHasSufficientPID",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-worker3",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-worker3"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 2,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:26Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Node",
+                "name": "sentinel-acc-26324-worker3"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:08:26Z",
+            "message": "Failed to update Node Allocatable Limits [\"kubelet\" \"kubepods\"]: openat2 /sys/fs/cgroup/kubelet.slice/kubelet-kubepods.slice/cpuset.cpus: no such file or directory",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:26Z",
+                "name": "sentinel-acc-26324-worker3.18e0dbe955aacd2d",
+                "namespace": "default",
+                "resourceVersion": "803",
+                "uid": "951ea98a-00ae-41ad-a732-2a02c964cb18"
+            },
+            "reason": "FailedNodeAllocatableEnforcement",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-worker3",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-worker3"
+            },
+            "type": "Warning"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:27Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Node",
+                "name": "sentinel-acc-26324-worker3",
+                "uid": "74a4fc77-dfe7-43c2-9f00-5eac2d5ccafa"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:27Z",
+            "message": "Node sentinel-acc-26324-worker3 status is now: CIDRAssignmentFailed",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:27Z",
+                "name": "sentinel-acc-26324-worker3.18e0dbe95dda4d2e",
+                "namespace": "default",
+                "resourceVersion": "499",
+                "uid": "454adcb1-469e-4b2c-bd21-e08ac7c3ebd8"
+            },
+            "reason": "CIDRAssignmentFailed",
+            "reportingComponent": "cidrAllocator",
+            "reportingInstance": "",
+            "source": {
+                "component": "cidrAllocator"
+            },
+            "type": "Normal"
+        },
+        {
+            "action": "StartKubeProxy",
+            "apiVersion": "v1",
+            "eventTime": "2026-10-22T13:07:31.342799Z",
+            "firstTimestamp": null,
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Node",
+                "name": "sentinel-acc-26324-worker3"
+            },
+            "kind": "Event",
+            "lastTimestamp": null,
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:31Z",
+                "name": "sentinel-acc-26324-worker3.18e0dbea5e34b7d2",
+                "namespace": "default",
+                "resourceVersion": "544",
+                "uid": "2cb49dc8-2773-48b9-8855-9b6c835524f0"
+            },
+            "reason": "Starting",
+            "reportingComponent": "kube-proxy",
+            "reportingInstance": "kube-proxy-sentinel-acc-26324-worker3",
+            "source": {},
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:31Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Node",
+                "name": "sentinel-acc-26324-worker3",
+                "uid": "74a4fc77-dfe7-43c2-9f00-5eac2d5ccafa"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:31Z",
+            "message": "Node sentinel-acc-26324-worker3 event: Registered Node sentinel-acc-26324-worker3 in Controller",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:31Z",
+                "name": "sentinel-acc-26324-worker3.18e0dbea7c6b0d55",
+                "namespace": "default",
+                "resourceVersion": "558",
+                "uid": "a331a48e-d6a0-4b9c-9929-e312b761d514"
+            },
+            "reason": "RegisteredNode",
+            "reportingComponent": "node-controller",
+            "reportingInstance": "",
+            "source": {
+                "component": "node-controller"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:42Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Node",
+                "name": "sentinel-acc-26324-worker3"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:42Z",
+            "message": "Node sentinel-acc-26324-worker3 status is now: NodeReady",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:42Z",
+                "name": "sentinel-acc-26324-worker3.18e0dbece31839a8",
+                "namespace": "default",
+                "resourceVersion": "633",
+                "uid": "0c012ba6-275c-493e-8325-2f0be037ef32"
+            },
+            "reason": "NodeReady",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-worker3",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-worker3"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:23Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Pod",
+                "name": "coredns-589f44dc88-5k5x2",
+                "namespace": "kube-system",
+                "resourceVersion": "374",
+                "uid": "efde4b41-0112-4d04-80d4-7197d299dbee"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:23Z",
+            "message": "0/1 nodes are available: 1 node(s) had untolerated taint(s). no new claims to deallocate, preemption: 0/1 nodes are available: 1 Preemption is not helpful for scheduling.",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:23Z",
+                "name": "coredns-589f44dc88-5k5x2.18e0dbe873ba24ce",
+                "namespace": "kube-system",
+                "resourceVersion": "378",
+                "uid": "37d229f6-0b78-4024-ac68-ee4739f7e208"
+            },
+            "reason": "FailedScheduling",
+            "reportingComponent": "default-scheduler",
+            "reportingInstance": "",
+            "source": {
+                "component": "default-scheduler"
+            },
+            "type": "Warning"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:35Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Pod",
+                "name": "coredns-589f44dc88-5k5x2",
+                "namespace": "kube-system",
+                "resourceVersion": "381",
+                "uid": "efde4b41-0112-4d04-80d4-7197d299dbee"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:35Z",
+            "message": "Successfully assigned kube-system/coredns-589f44dc88-5k5x2 to sentinel-acc-26324-control-plane",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:35Z",
+                "name": "coredns-589f44dc88-5k5x2.18e0dbeb482626e4",
+                "namespace": "kube-system",
+                "resourceVersion": "575",
+                "uid": "8d979525-a1aa-4f1a-9a46-6ccb6d8895a2"
+            },
+            "reason": "Scheduled",
+            "reportingComponent": "default-scheduler",
+            "reportingInstance": "",
+            "source": {
+                "component": "default-scheduler"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:35Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{coredns}",
+                "kind": "Pod",
+                "name": "coredns-589f44dc88-5k5x2",
+                "namespace": "kube-system",
+                "resourceVersion": "572",
+                "uid": "efde4b41-0112-4d04-80d4-7197d299dbee"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:35Z",
+            "message": "Container image \"registry.k8s.io/coredns/coredns:v1.14.2\" already present on machine and can be accessed by the pod",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:35Z",
+                "name": "coredns-589f44dc88-5k5x2.18e0dbeb6fe60583",
+                "namespace": "kube-system",
+                "resourceVersion": "583",
+                "uid": "c8869663-13fb-46de-b184-f29df3504573"
+            },
+            "reason": "Pulled",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-control-plane",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-control-plane"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:37Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{coredns}",
+                "kind": "Pod",
+                "name": "coredns-589f44dc88-5k5x2",
+                "namespace": "kube-system",
+                "resourceVersion": "572",
+                "uid": "efde4b41-0112-4d04-80d4-7197d299dbee"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:37Z",
+            "message": "Container created",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:37Z",
+                "name": "coredns-589f44dc88-5k5x2.18e0dbebd0ecfe7a",
+                "namespace": "kube-system",
+                "resourceVersion": "597",
+                "uid": "b3522fc8-5f58-4f79-a98b-e0c31f7481ee"
+            },
+            "reason": "Created",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-control-plane",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-control-plane"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:37Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{coredns}",
+                "kind": "Pod",
+                "name": "coredns-589f44dc88-5k5x2",
+                "namespace": "kube-system",
+                "resourceVersion": "572",
+                "uid": "efde4b41-0112-4d04-80d4-7197d299dbee"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:37Z",
+            "message": "Container started",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:37Z",
+                "name": "coredns-589f44dc88-5k5x2.18e0dbebdfa40d22",
+                "namespace": "kube-system",
+                "resourceVersion": "600",
+                "uid": "72fa9183-ceec-4863-808c-2052d159efed"
+            },
+            "reason": "Started",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-control-plane",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-control-plane"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:37Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{coredns}",
+                "kind": "Pod",
+                "name": "coredns-589f44dc88-5k5x2",
+                "namespace": "kube-system",
+                "resourceVersion": "572",
+                "uid": "efde4b41-0112-4d04-80d4-7197d299dbee"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:37Z",
+            "message": "Readiness probe failed: Get \"http://10.244.0.2:8181/ready\": dial tcp 10.244.0.2:8181: connect: connection refused",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:37Z",
+                "name": "coredns-589f44dc88-5k5x2.18e0dbebe1bf4407",
+                "namespace": "kube-system",
+                "resourceVersion": "603",
+                "uid": "d3d0d9f5-a857-4043-8057-fe3bcafad712"
+            },
+            "reason": "Unhealthy",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-control-plane",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-control-plane"
+            },
+            "type": "Warning"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:23Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Pod",
+                "name": "coredns-589f44dc88-wksrz",
+                "namespace": "kube-system",
+                "resourceVersion": "376",
+                "uid": "beef2cd0-a6da-49cd-85ea-5b8019e6de0d"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:23Z",
+            "message": "0/1 nodes are available: 1 node(s) had untolerated taint(s). no new claims to deallocate, preemption: 0/1 nodes are available: 1 Preemption is not helpful for scheduling.",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:23Z",
+                "name": "coredns-589f44dc88-wksrz.18e0dbe874673194",
+                "namespace": "kube-system",
+                "resourceVersion": "385",
+                "uid": "1f429cdd-3218-4758-9094-4786b7c99c32"
+            },
+            "reason": "FailedScheduling",
+            "reportingComponent": "default-scheduler",
+            "reportingInstance": "",
+            "source": {
+                "component": "default-scheduler"
+            },
+            "type": "Warning"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:35Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Pod",
+                "name": "coredns-589f44dc88-wksrz",
+                "namespace": "kube-system",
+                "resourceVersion": "387",
+                "uid": "beef2cd0-a6da-49cd-85ea-5b8019e6de0d"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:35Z",
+            "message": "Successfully assigned kube-system/coredns-589f44dc88-wksrz to sentinel-acc-26324-control-plane",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:35Z",
+                "name": "coredns-589f44dc88-wksrz.18e0dbeb495395d4",
+                "namespace": "kube-system",
+                "resourceVersion": "576",
+                "uid": "be357d87-cb60-4b52-9f20-10834086014b"
+            },
+            "reason": "Scheduled",
+            "reportingComponent": "default-scheduler",
+            "reportingInstance": "",
+            "source": {
+                "component": "default-scheduler"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:35Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{coredns}",
+                "kind": "Pod",
+                "name": "coredns-589f44dc88-wksrz",
+                "namespace": "kube-system",
+                "resourceVersion": "573",
+                "uid": "beef2cd0-a6da-49cd-85ea-5b8019e6de0d"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:35Z",
+            "message": "Container image \"registry.k8s.io/coredns/coredns:v1.14.2\" already present on machine and can be accessed by the pod",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:35Z",
+                "name": "coredns-589f44dc88-wksrz.18e0dbeb7236d6a0",
+                "namespace": "kube-system",
+                "resourceVersion": "585",
+                "uid": "705a3dd7-c7a6-486b-8e3a-b457f1c65795"
+            },
+            "reason": "Pulled",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-control-plane",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-control-plane"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:37Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{coredns}",
+                "kind": "Pod",
+                "name": "coredns-589f44dc88-wksrz",
+                "namespace": "kube-system",
+                "resourceVersion": "573",
+                "uid": "beef2cd0-a6da-49cd-85ea-5b8019e6de0d"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:37Z",
+            "message": "Container created",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:37Z",
+                "name": "coredns-589f44dc88-wksrz.18e0dbebd122346f",
+                "namespace": "kube-system",
+                "resourceVersion": "598",
+                "uid": "a1a74cf5-1217-48ef-9a8c-0f51bfd80a55"
+            },
+            "reason": "Created",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-control-plane",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-control-plane"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:37Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{coredns}",
+                "kind": "Pod",
+                "name": "coredns-589f44dc88-wksrz",
+                "namespace": "kube-system",
+                "resourceVersion": "573",
+                "uid": "beef2cd0-a6da-49cd-85ea-5b8019e6de0d"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:37Z",
+            "message": "Container started",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:37Z",
+                "name": "coredns-589f44dc88-wksrz.18e0dbebdef7d7db",
+                "namespace": "kube-system",
+                "resourceVersion": "599",
+                "uid": "1b91be20-b54f-472b-b0ae-90c9b064ea60"
+            },
+            "reason": "Started",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-control-plane",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-control-plane"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:37Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{coredns}",
+                "kind": "Pod",
+                "name": "coredns-589f44dc88-wksrz",
+                "namespace": "kube-system",
+                "resourceVersion": "573",
+                "uid": "beef2cd0-a6da-49cd-85ea-5b8019e6de0d"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:37Z",
+            "message": "Readiness probe failed: Get \"http://10.244.0.4:8181/ready\": dial tcp 10.244.0.4:8181: connect: connection refused",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:37Z",
+                "name": "coredns-589f44dc88-wksrz.18e0dbebe058a60a",
+                "namespace": "kube-system",
+                "resourceVersion": "601",
+                "uid": "be9bc471-c990-4e0c-b80d-ebf3ed397d50"
+            },
+            "reason": "Unhealthy",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-control-plane",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-control-plane"
+            },
+            "type": "Warning"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:23Z",
+            "involvedObject": {
+                "apiVersion": "apps/v1",
+                "kind": "ReplicaSet",
+                "name": "coredns-589f44dc88",
+                "namespace": "kube-system",
+                "resourceVersion": "329",
+                "uid": "d3308915-ca1b-4e52-a86a-485d0d1633ff"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:23Z",
+            "message": "Created pod: coredns-589f44dc88-5k5x2",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:23Z",
+                "name": "coredns-589f44dc88.18e0dbe87384683f",
+                "namespace": "kube-system",
+                "resourceVersion": "377",
+                "uid": "de95f207-cc4e-477b-9fe4-2ac376fd8771"
+            },
+            "reason": "SuccessfulCreate",
+            "reportingComponent": "replicaset-controller",
+            "reportingInstance": "",
+            "source": {
+                "component": "replicaset-controller"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:23Z",
+            "involvedObject": {
+                "apiVersion": "apps/v1",
+                "kind": "ReplicaSet",
+                "name": "coredns-589f44dc88",
+                "namespace": "kube-system",
+                "resourceVersion": "329",
+                "uid": "d3308915-ca1b-4e52-a86a-485d0d1633ff"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:23Z",
+            "message": "Created pod: coredns-589f44dc88-wksrz",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:23Z",
+                "name": "coredns-589f44dc88.18e0dbe87426cfea",
+                "namespace": "kube-system",
+                "resourceVersion": "382",
+                "uid": "108c65ff-5ffd-478c-a8ba-1ce48d114cfd"
+            },
+            "reason": "SuccessfulCreate",
+            "reportingComponent": "replicaset-controller",
+            "reportingInstance": "",
+            "source": {
+                "component": "replicaset-controller"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:22Z",
+            "involvedObject": {
+                "apiVersion": "apps/v1",
+                "kind": "Deployment",
+                "name": "coredns",
+                "namespace": "kube-system",
+                "resourceVersion": "232",
+                "uid": "321ac0a1-861b-4e0a-aec8-33af8e17538c"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:22Z",
+            "message": "Scaled up replica set coredns-589f44dc88 from 0 to 2",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:22Z",
+                "name": "coredns.18e0dbe84fcc1aca",
+                "namespace": "kube-system",
+                "resourceVersion": "331",
+                "uid": "215dbbf0-6da6-4c8d-8e83-00228f71a208"
+            },
+            "reason": "ScalingReplicaSet",
+            "reportingComponent": "deployment-controller",
+            "reportingInstance": "",
+            "source": {
+                "component": "deployment-controller"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:27Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Pod",
+                "name": "kindnet-fc9gl",
+                "namespace": "kube-system",
+                "resourceVersion": "468",
+                "uid": "f41f3489-93fe-4954-9dbb-3ddeccd9cf6b"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:27Z",
+            "message": "Successfully assigned kube-system/kindnet-fc9gl to sentinel-acc-26324-worker2",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:27Z",
+                "name": "kindnet-fc9gl.18e0dbe95c7e9180",
+                "namespace": "kube-system",
+                "resourceVersion": "487",
+                "uid": "7d2850fd-ce1e-444e-bed0-a124b5729280"
+            },
+            "reason": "Scheduled",
+            "reportingComponent": "default-scheduler",
+            "reportingInstance": "",
+            "source": {
+                "component": "default-scheduler"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:28Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{kindnet-cni}",
+                "kind": "Pod",
+                "name": "kindnet-fc9gl",
+                "namespace": "kube-system",
+                "resourceVersion": "477",
+                "uid": "f41f3489-93fe-4954-9dbb-3ddeccd9cf6b"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:28Z",
+            "message": "Container image \"docker.io/kindest/kindnetd:v20260528-9350166c\" already present on machine and can be accessed by the pod",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:28Z",
+                "name": "kindnet-fc9gl.18e0dbe9b56873b1",
+                "namespace": "kube-system",
+                "resourceVersion": "518",
+                "uid": "984f3f30-0f01-4ea8-a125-55b5a82b963c"
+            },
+            "reason": "Pulled",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-worker2",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-worker2"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:31Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{kindnet-cni}",
+                "kind": "Pod",
+                "name": "kindnet-fc9gl",
+                "namespace": "kube-system",
+                "resourceVersion": "477",
+                "uid": "f41f3489-93fe-4954-9dbb-3ddeccd9cf6b"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:31Z",
+            "message": "Container created",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:31Z",
+                "name": "kindnet-fc9gl.18e0dbea65547f33",
+                "namespace": "kube-system",
+                "resourceVersion": "547",
+                "uid": "13eee133-61b2-49f7-8240-8203584c92e0"
+            },
+            "reason": "Created",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-worker2",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-worker2"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:31Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{kindnet-cni}",
+                "kind": "Pod",
+                "name": "kindnet-fc9gl",
+                "namespace": "kube-system",
+                "resourceVersion": "477",
+                "uid": "f41f3489-93fe-4954-9dbb-3ddeccd9cf6b"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:31Z",
+            "message": "Container started",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:31Z",
+                "name": "kindnet-fc9gl.18e0dbea7182a28d",
+                "namespace": "kube-system",
+                "resourceVersion": "553",
+                "uid": "a88515f5-bd22-49e1-b24f-86cb228211cb"
+            },
+            "reason": "Started",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-worker2",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-worker2"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:26Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Pod",
+                "name": "kindnet-fktk5",
+                "namespace": "kube-system",
+                "resourceVersion": "453",
+                "uid": "ca9d212a-e4ed-445c-9d6f-b6c454f5d965"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:26Z",
+            "message": "Successfully assigned kube-system/kindnet-fktk5 to sentinel-acc-26324-worker",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:26Z",
+                "name": "kindnet-fktk5.18e0dbe959cde46d",
+                "namespace": "kube-system",
+                "resourceVersion": "462",
+                "uid": "9f8b04d8-a6e5-48f0-a441-a8df3ec856e7"
+            },
+            "reason": "Scheduled",
+            "reportingComponent": "default-scheduler",
+            "reportingInstance": "",
+            "source": {
+                "component": "default-scheduler"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:28Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{kindnet-cni}",
+                "kind": "Pod",
+                "name": "kindnet-fktk5",
+                "namespace": "kube-system",
+                "resourceVersion": "458",
+                "uid": "ca9d212a-e4ed-445c-9d6f-b6c454f5d965"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:28Z",
+            "message": "Container image \"docker.io/kindest/kindnetd:v20260528-9350166c\" already present on machine and can be accessed by the pod",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:28Z",
+                "name": "kindnet-fktk5.18e0dbe9a74f0371",
+                "namespace": "kube-system",
+                "resourceVersion": "516",
+                "uid": "07ef4ed2-1d6b-4ae7-8772-7d26d46403ff"
+            },
+            "reason": "Pulled",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-worker",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-worker"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:30Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{kindnet-cni}",
+                "kind": "Pod",
+                "name": "kindnet-fktk5",
+                "namespace": "kube-system",
+                "resourceVersion": "458",
+                "uid": "ca9d212a-e4ed-445c-9d6f-b6c454f5d965"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:30Z",
+            "message": "Container created",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:30Z",
+                "name": "kindnet-fktk5.18e0dbea4061fa55",
+                "namespace": "kube-system",
+                "resourceVersion": "536",
+                "uid": "c761d0fb-6bc6-41d1-a1b2-1551b46f0811"
+            },
+            "reason": "Created",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-worker",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-worker"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:31Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{kindnet-cni}",
+                "kind": "Pod",
+                "name": "kindnet-fktk5",
+                "namespace": "kube-system",
+                "resourceVersion": "458",
+                "uid": "ca9d212a-e4ed-445c-9d6f-b6c454f5d965"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:31Z",
+            "message": "Container started",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:31Z",
+                "name": "kindnet-fktk5.18e0dbea56a9414b",
+                "namespace": "kube-system",
+                "resourceVersion": "540",
+                "uid": "bdfc23a3-ad80-437e-aea3-93ca4d525d81"
+            },
+            "reason": "Started",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-worker",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-worker"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:22Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Pod",
+                "name": "kindnet-rshbz",
+                "namespace": "kube-system",
+                "resourceVersion": "355",
+                "uid": "abf6563f-a951-4ced-b717-823af66ecbe1"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:22Z",
+            "message": "Successfully assigned kube-system/kindnet-rshbz to sentinel-acc-26324-control-plane",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:22Z",
+                "name": "kindnet-rshbz.18e0dbe8653cf1e3",
+                "namespace": "kube-system",
+                "resourceVersion": "365",
+                "uid": "a9366895-72a8-4cfa-b2c9-d9528c38cc33"
+            },
+            "reason": "Scheduled",
+            "reportingComponent": "default-scheduler",
+            "reportingInstance": "",
+            "source": {
+                "component": "default-scheduler"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:23Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{kindnet-cni}",
+                "kind": "Pod",
+                "name": "kindnet-rshbz",
+                "namespace": "kube-system",
+                "resourceVersion": "362",
+                "uid": "abf6563f-a951-4ced-b717-823af66ecbe1"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:23Z",
+            "message": "Container image \"docker.io/kindest/kindnetd:v20260528-9350166c\" already present on machine and can be accessed by the pod",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:23Z",
+                "name": "kindnet-rshbz.18e0dbe88885e057",
+                "namespace": "kube-system",
+                "resourceVersion": "394",
+                "uid": "5e2c7672-394c-42a0-aefe-a1dc328984e8"
+            },
+            "reason": "Pulled",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-control-plane",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-control-plane"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:24Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{kindnet-cni}",
+                "kind": "Pod",
+                "name": "kindnet-rshbz",
+                "namespace": "kube-system",
+                "resourceVersion": "362",
+                "uid": "abf6563f-a951-4ced-b717-823af66ecbe1"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:24Z",
+            "message": "Container created",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:24Z",
+                "name": "kindnet-rshbz.18e0dbe8c9bbb9f8",
+                "namespace": "kube-system",
+                "resourceVersion": "402",
+                "uid": "91c401b1-9f36-4ecc-8452-9bc7b5deb04a"
+            },
+            "reason": "Created",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-control-plane",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-control-plane"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:24Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{kindnet-cni}",
+                "kind": "Pod",
+                "name": "kindnet-rshbz",
+                "namespace": "kube-system",
+                "resourceVersion": "362",
+                "uid": "abf6563f-a951-4ced-b717-823af66ecbe1"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:24Z",
+            "message": "Container started",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:24Z",
+                "name": "kindnet-rshbz.18e0dbe8d01d742d",
+                "namespace": "kube-system",
+                "resourceVersion": "403",
+                "uid": "0593da00-db58-4877-99c9-f2851e2615bd"
+            },
+            "reason": "Started",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-control-plane",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-control-plane"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:27Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Pod",
+                "name": "kindnet-szplg",
+                "namespace": "kube-system",
+                "resourceVersion": "494",
+                "uid": "04d96f00-5d07-41d2-9689-e10ff160a840"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:27Z",
+            "message": "Successfully assigned kube-system/kindnet-szplg to sentinel-acc-26324-worker3",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:27Z",
+                "name": "kindnet-szplg.18e0dbe95dbbc800",
+                "namespace": "kube-system",
+                "resourceVersion": "498",
+                "uid": "f1ca9217-9f41-48ed-ae57-f7657ff88b5a"
+            },
+            "reason": "Scheduled",
+            "reportingComponent": "default-scheduler",
+            "reportingInstance": "",
+            "source": {
+                "component": "default-scheduler"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:28Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{kindnet-cni}",
+                "kind": "Pod",
+                "name": "kindnet-szplg",
+                "namespace": "kube-system",
+                "resourceVersion": "496",
+                "uid": "04d96f00-5d07-41d2-9689-e10ff160a840"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:28Z",
+            "message": "Container image \"docker.io/kindest/kindnetd:v20260528-9350166c\" already present on machine and can be accessed by the pod",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:28Z",
+                "name": "kindnet-szplg.18e0dbe9aa6e40f9",
+                "namespace": "kube-system",
+                "resourceVersion": "517",
+                "uid": "23c43a7b-733b-4899-b050-41d00f3c6580"
+            },
+            "reason": "Pulled",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-worker3",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-worker3"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:31Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{kindnet-cni}",
+                "kind": "Pod",
+                "name": "kindnet-szplg",
+                "namespace": "kube-system",
+                "resourceVersion": "496",
+                "uid": "04d96f00-5d07-41d2-9689-e10ff160a840"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:31Z",
+            "message": "Container created",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:31Z",
+                "name": "kindnet-szplg.18e0dbea5c69fef5",
+                "namespace": "kube-system",
+                "resourceVersion": "545",
+                "uid": "f1e1e7ef-47a3-4c42-882a-ba66f36b973b"
+            },
+            "reason": "Created",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-worker3",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-worker3"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:31Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{kindnet-cni}",
+                "kind": "Pod",
+                "name": "kindnet-szplg",
+                "namespace": "kube-system",
+                "resourceVersion": "496",
+                "uid": "04d96f00-5d07-41d2-9689-e10ff160a840"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:31Z",
+            "message": "Container started",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:31Z",
+                "name": "kindnet-szplg.18e0dbea67f0694f",
+                "namespace": "kube-system",
+                "resourceVersion": "548",
+                "uid": "903b3365-5fd6-4244-a1b1-e639857df79a"
+            },
+            "reason": "Started",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-worker3",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-worker3"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:22Z",
+            "involvedObject": {
+                "apiVersion": "apps/v1",
+                "kind": "DaemonSet",
+                "name": "kindnet",
+                "namespace": "kube-system",
+                "resourceVersion": "289",
+                "uid": "00a7a964-6a8d-4cfd-8971-bf6bdbb0b389"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:22Z",
+            "message": "Created pod: kindnet-rshbz",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:22Z",
+                "name": "kindnet.18e0dbe864aede81",
+                "namespace": "kube-system",
+                "resourceVersion": "358",
+                "uid": "81d19466-f308-48b7-a270-4974dfef0dc0"
+            },
+            "reason": "SuccessfulCreate",
+            "reportingComponent": "daemonset-controller",
+            "reportingInstance": "",
+            "source": {
+                "component": "daemonset-controller"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:26Z",
+            "involvedObject": {
+                "apiVersion": "apps/v1",
+                "kind": "DaemonSet",
+                "name": "kindnet",
+                "namespace": "kube-system",
+                "resourceVersion": "405",
+                "uid": "00a7a964-6a8d-4cfd-8971-bf6bdbb0b389"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:26Z",
+            "message": "Created pod: kindnet-fktk5",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:26Z",
+                "name": "kindnet.18e0dbe958a271f5",
+                "namespace": "kube-system",
+                "resourceVersion": "456",
+                "uid": "dfb783f7-80fa-4ea7-acc4-5e3309cf24d5"
+            },
+            "reason": "SuccessfulCreate",
+            "reportingComponent": "daemonset-controller",
+            "reportingInstance": "",
+            "source": {
+                "component": "daemonset-controller"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:27Z",
+            "involvedObject": {
+                "apiVersion": "apps/v1",
+                "kind": "DaemonSet",
+                "name": "kindnet",
+                "namespace": "kube-system",
+                "resourceVersion": "463",
+                "uid": "00a7a964-6a8d-4cfd-8971-bf6bdbb0b389"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:27Z",
+            "message": "Created pod: kindnet-fc9gl",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:27Z",
+                "name": "kindnet.18e0dbe95b7f27db",
+                "namespace": "kube-system",
+                "resourceVersion": "479",
+                "uid": "0abf65ce-2fd1-4ea1-9b0e-d89e00fb3a19"
+            },
+            "reason": "SuccessfulCreate",
+            "reportingComponent": "daemonset-controller",
+            "reportingInstance": "",
+            "source": {
+                "component": "daemonset-controller"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:27Z",
+            "involvedObject": {
+                "apiVersion": "apps/v1",
+                "kind": "DaemonSet",
+                "name": "kindnet",
+                "namespace": "kube-system",
+                "resourceVersion": "485",
+                "uid": "00a7a964-6a8d-4cfd-8971-bf6bdbb0b389"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:27Z",
+            "message": "Created pod: kindnet-szplg",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:27Z",
+                "name": "kindnet.18e0dbe95d7c92f5",
+                "namespace": "kube-system",
+                "resourceVersion": "495",
+                "uid": "c6965cc0-b5c1-4fee-916e-202b65323b51"
+            },
+            "reason": "SuccessfulCreate",
+            "reportingComponent": "daemonset-controller",
+            "reportingInstance": "",
+            "source": {
+                "component": "daemonset-controller"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:16Z",
+            "involvedObject": {
+                "apiVersion": "coordination.k8s.io/v1",
+                "kind": "Lease",
+                "name": "kube-controller-manager",
+                "namespace": "kube-system",
+                "resourceVersion": "251",
+                "uid": "1c9b9e0c-9600-4cb5-8e13-8268d6e8a266"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:16Z",
+            "message": "sentinel-acc-26324-control-plane_29a74ef4-6ada-49eb-823f-b4f2fdb3619d became leader",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:16Z",
+                "name": "kube-controller-manager.18e0dbe6fb30d4ec",
+                "namespace": "kube-system",
+                "resourceVersion": "253",
+                "uid": "f83fd031-d879-4ef0-80e7-85001801c92e"
+            },
+            "reason": "LeaderElection",
+            "reportingComponent": "kube-controller-manager",
+            "reportingInstance": "",
+            "source": {
+                "component": "kube-controller-manager"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:27Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Pod",
+                "name": "kube-proxy-gkn2w",
+                "namespace": "kube-system",
+                "resourceVersion": "467",
+                "uid": "b57fa3e3-8693-4a7b-8f5f-19864bd590c1"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:27Z",
+            "message": "Successfully assigned kube-system/kube-proxy-gkn2w to sentinel-acc-26324-worker2",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:27Z",
+                "name": "kube-proxy-gkn2w.18e0dbe95bd2dbd4",
+                "namespace": "kube-system",
+                "resourceVersion": "478",
+                "uid": "aabe13d6-20af-4992-94c8-a02b9d889fdd"
+            },
+            "reason": "Scheduled",
+            "reportingComponent": "default-scheduler",
+            "reportingInstance": "",
+            "source": {
+                "component": "default-scheduler"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:28Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{kube-proxy}",
+                "kind": "Pod",
+                "name": "kube-proxy-gkn2w",
+                "namespace": "kube-system",
+                "resourceVersion": "473",
+                "uid": "b57fa3e3-8693-4a7b-8f5f-19864bd590c1"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:28Z",
+            "message": "Container image \"registry.k8s.io/kube-proxy:v1.36.1\" already present on machine and can be accessed by the pod",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:28Z",
+                "name": "kube-proxy-gkn2w.18e0dbe9a6994a48",
+                "namespace": "kube-system",
+                "resourceVersion": "511",
+                "uid": "11bc665b-0a84-4cb1-ac83-cfedbd4000bb"
+            },
+            "reason": "Pulled",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-worker2",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-worker2"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:29Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{kube-proxy}",
+                "kind": "Pod",
+                "name": "kube-proxy-gkn2w",
+                "namespace": "kube-system",
+                "resourceVersion": "473",
+                "uid": "b57fa3e3-8693-4a7b-8f5f-19864bd590c1"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:29Z",
+            "message": "Container created",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:29Z",
+                "name": "kube-proxy-gkn2w.18e0dbea0c370c9a",
+                "namespace": "kube-system",
+                "resourceVersion": "525",
+                "uid": "a5841937-e150-4d9b-83ff-5cfec4e6d049"
+            },
+            "reason": "Created",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-worker2",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-worker2"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:30Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{kube-proxy}",
+                "kind": "Pod",
+                "name": "kube-proxy-gkn2w",
+                "namespace": "kube-system",
+                "resourceVersion": "473",
+                "uid": "b57fa3e3-8693-4a7b-8f5f-19864bd590c1"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:30Z",
+            "message": "Container started",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:30Z",
+                "name": "kube-proxy-gkn2w.18e0dbea373ce575",
+                "namespace": "kube-system",
+                "resourceVersion": "532",
+                "uid": "9373f69a-ff22-4b17-8b9b-77c52d967704"
+            },
+            "reason": "Started",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-worker2",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-worker2"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:26Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Pod",
+                "name": "kube-proxy-hgl78",
+                "namespace": "kube-system",
+                "resourceVersion": "454",
+                "uid": "518e58f4-4fe5-484b-9721-ef69597455e7"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:26Z",
+            "message": "Successfully assigned kube-system/kube-proxy-hgl78 to sentinel-acc-26324-worker",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:26Z",
+                "name": "kube-proxy-hgl78.18e0dbe959f9a526",
+                "namespace": "kube-system",
+                "resourceVersion": "464",
+                "uid": "b5f6cb5c-d012-4100-85ac-fec6d4a25855"
+            },
+            "reason": "Scheduled",
+            "reportingComponent": "default-scheduler",
+            "reportingInstance": "",
+            "source": {
+                "component": "default-scheduler"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:28Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{kube-proxy}",
+                "kind": "Pod",
+                "name": "kube-proxy-hgl78",
+                "namespace": "kube-system",
+                "resourceVersion": "461",
+                "uid": "518e58f4-4fe5-484b-9721-ef69597455e7"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:28Z",
+            "message": "Container image \"registry.k8s.io/kube-proxy:v1.36.1\" already present on machine and can be accessed by the pod",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:28Z",
+                "name": "kube-proxy-hgl78.18e0dbe9a69a8b15",
+                "namespace": "kube-system",
+                "resourceVersion": "512",
+                "uid": "849d4a9e-112e-48ad-89f3-9a11f61efe5f"
+            },
+            "reason": "Pulled",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-worker",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-worker"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:30Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{kube-proxy}",
+                "kind": "Pod",
+                "name": "kube-proxy-hgl78",
+                "namespace": "kube-system",
+                "resourceVersion": "461",
+                "uid": "518e58f4-4fe5-484b-9721-ef69597455e7"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:30Z",
+            "message": "Container created",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:30Z",
+                "name": "kube-proxy-hgl78.18e0dbea0f09b157",
+                "namespace": "kube-system",
+                "resourceVersion": "526",
+                "uid": "9f19c4fd-e669-4754-9c6f-368f562d840d"
+            },
+            "reason": "Created",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-worker",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-worker"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:30Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{kube-proxy}",
+                "kind": "Pod",
+                "name": "kube-proxy-hgl78",
+                "namespace": "kube-system",
+                "resourceVersion": "461",
+                "uid": "518e58f4-4fe5-484b-9721-ef69597455e7"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:30Z",
+            "message": "Container started",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:30Z",
+                "name": "kube-proxy-hgl78.18e0dbea229d1931",
+                "namespace": "kube-system",
+                "resourceVersion": "528",
+                "uid": "b5155864-5933-48c4-96fa-b98ce423ade6"
+            },
+            "reason": "Started",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-worker",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-worker"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:22Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Pod",
+                "name": "kube-proxy-n987s",
+                "namespace": "kube-system",
+                "resourceVersion": "356",
+                "uid": "df34e691-fafa-4ed3-bc36-13b434094025"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:22Z",
+            "message": "Successfully assigned kube-system/kube-proxy-n987s to sentinel-acc-26324-control-plane",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:22Z",
+                "name": "kube-proxy-n987s.18e0dbe86550f85f",
+                "namespace": "kube-system",
+                "resourceVersion": "366",
+                "uid": "e449310c-44f1-4143-ab5e-9f1b5f6cdd1a"
+            },
+            "reason": "Scheduled",
+            "reportingComponent": "default-scheduler",
+            "reportingInstance": "",
+            "source": {
+                "component": "default-scheduler"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:23Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{kube-proxy}",
+                "kind": "Pod",
+                "name": "kube-proxy-n987s",
+                "namespace": "kube-system",
+                "resourceVersion": "361",
+                "uid": "df34e691-fafa-4ed3-bc36-13b434094025"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:23Z",
+            "message": "Container image \"registry.k8s.io/kube-proxy:v1.36.1\" already present on machine and can be accessed by the pod",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:23Z",
+                "name": "kube-proxy-n987s.18e0dbe882ac408a",
+                "namespace": "kube-system",
+                "resourceVersion": "392",
+                "uid": "a14eedcb-08c8-4021-835c-6f2b27c2419a"
+            },
+            "reason": "Pulled",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-control-plane",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-control-plane"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:24Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{kube-proxy}",
+                "kind": "Pod",
+                "name": "kube-proxy-n987s",
+                "namespace": "kube-system",
+                "resourceVersion": "361",
+                "uid": "df34e691-fafa-4ed3-bc36-13b434094025"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:24Z",
+            "message": "Container created",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:24Z",
+                "name": "kube-proxy-n987s.18e0dbe8b145f462",
+                "namespace": "kube-system",
+                "resourceVersion": "397",
+                "uid": "4bfcb93f-7ba5-470d-a2b2-0903e71282c5"
+            },
+            "reason": "Created",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-control-plane",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-control-plane"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:24Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{kube-proxy}",
+                "kind": "Pod",
+                "name": "kube-proxy-n987s",
+                "namespace": "kube-system",
+                "resourceVersion": "361",
+                "uid": "df34e691-fafa-4ed3-bc36-13b434094025"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:24Z",
+            "message": "Container started",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:24Z",
+                "name": "kube-proxy-n987s.18e0dbe8b91eae9b",
+                "namespace": "kube-system",
+                "resourceVersion": "398",
+                "uid": "44ee2bbd-7f4a-4599-b75d-c5aa69f62113"
+            },
+            "reason": "Started",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-control-plane",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-control-plane"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:27Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Pod",
+                "name": "kube-proxy-xgf26",
+                "namespace": "kube-system",
+                "resourceVersion": "483",
+                "uid": "92a96caf-5635-4bfa-a3e3-20e803ec431e"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:27Z",
+            "message": "Successfully assigned kube-system/kube-proxy-xgf26 to sentinel-acc-26324-worker3",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:27Z",
+                "name": "kube-proxy-xgf26.18e0dbe95d2d69e9",
+                "namespace": "kube-system",
+                "resourceVersion": "493",
+                "uid": "21c3f7f5-2d52-4193-acdc-9be6bf7545c3"
+            },
+            "reason": "Scheduled",
+            "reportingComponent": "default-scheduler",
+            "reportingInstance": "",
+            "source": {
+                "component": "default-scheduler"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:28Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{kube-proxy}",
+                "kind": "Pod",
+                "name": "kube-proxy-xgf26",
+                "namespace": "kube-system",
+                "resourceVersion": "489",
+                "uid": "92a96caf-5635-4bfa-a3e3-20e803ec431e"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:28Z",
+            "message": "Container image \"registry.k8s.io/kube-proxy:v1.36.1\" already present on machine and can be accessed by the pod",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:28Z",
+                "name": "kube-proxy-xgf26.18e0dbe9a6ecb914",
+                "namespace": "kube-system",
+                "resourceVersion": "513",
+                "uid": "9dc32992-e95e-49f0-b10b-e2871e773ae9"
+            },
+            "reason": "Pulled",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-worker3",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-worker3"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:30Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{kube-proxy}",
+                "kind": "Pod",
+                "name": "kube-proxy-xgf26",
+                "namespace": "kube-system",
+                "resourceVersion": "489",
+                "uid": "92a96caf-5635-4bfa-a3e3-20e803ec431e"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:30Z",
+            "message": "Container created",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:30Z",
+                "name": "kube-proxy-xgf26.18e0dbea111b1eb1",
+                "namespace": "kube-system",
+                "resourceVersion": "527",
+                "uid": "3e5cd5f0-bed0-4303-81b0-7d281f85e366"
+            },
+            "reason": "Created",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-worker3",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-worker3"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:30Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{kube-proxy}",
+                "kind": "Pod",
+                "name": "kube-proxy-xgf26",
+                "namespace": "kube-system",
+                "resourceVersion": "489",
+                "uid": "92a96caf-5635-4bfa-a3e3-20e803ec431e"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:30Z",
+            "message": "Container started",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:30Z",
+                "name": "kube-proxy-xgf26.18e0dbea374ec57b",
+                "namespace": "kube-system",
+                "resourceVersion": "531",
+                "uid": "5fbe9167-efc3-4b94-bc29-dafcda62c0cb"
+            },
+            "reason": "Started",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-worker3",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-worker3"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:22Z",
+            "involvedObject": {
+                "apiVersion": "apps/v1",
+                "kind": "DaemonSet",
+                "name": "kube-proxy",
+                "namespace": "kube-system",
+                "resourceVersion": "236",
+                "uid": "460d2a8e-54a1-4c1e-84da-83d301f6d517"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:22Z",
+            "message": "Created pod: kube-proxy-n987s",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:22Z",
+                "name": "kube-proxy.18e0dbe864b4a4dd",
+                "namespace": "kube-system",
+                "resourceVersion": "360",
+                "uid": "9c8d37ca-cb77-4595-a391-bb1a2baec2fd"
+            },
+            "reason": "SuccessfulCreate",
+            "reportingComponent": "daemonset-controller",
+            "reportingInstance": "",
+            "source": {
+                "component": "daemonset-controller"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:26Z",
+            "involvedObject": {
+                "apiVersion": "apps/v1",
+                "kind": "DaemonSet",
+                "name": "kube-proxy",
+                "namespace": "kube-system",
+                "resourceVersion": "400",
+                "uid": "460d2a8e-54a1-4c1e-84da-83d301f6d517"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:26Z",
+            "message": "Created pod: kube-proxy-hgl78",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:26Z",
+                "name": "kube-proxy.18e0dbe9592a022e",
+                "namespace": "kube-system",
+                "resourceVersion": "459",
+                "uid": "7959e41a-63e3-4a15-a094-b6d808db57ae"
+            },
+            "reason": "SuccessfulCreate",
+            "reportingComponent": "daemonset-controller",
+            "reportingInstance": "",
+            "source": {
+                "component": "daemonset-controller"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:27Z",
+            "involvedObject": {
+                "apiVersion": "apps/v1",
+                "kind": "DaemonSet",
+                "name": "kube-proxy",
+                "namespace": "kube-system",
+                "resourceVersion": "460",
+                "uid": "460d2a8e-54a1-4c1e-84da-83d301f6d517"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:27Z",
+            "message": "Created pod: kube-proxy-gkn2w",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:27Z",
+                "name": "kube-proxy.18e0dbe95b5de93f",
+                "namespace": "kube-system",
+                "resourceVersion": "471",
+                "uid": "ecd16c41-c8a7-4934-8370-9a3fabd04bee"
+            },
+            "reason": "SuccessfulCreate",
+            "reportingComponent": "daemonset-controller",
+            "reportingInstance": "",
+            "source": {
+                "component": "daemonset-controller"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:27Z",
+            "involvedObject": {
+                "apiVersion": "apps/v1",
+                "kind": "DaemonSet",
+                "name": "kube-proxy",
+                "namespace": "kube-system",
+                "resourceVersion": "472",
+                "uid": "460d2a8e-54a1-4c1e-84da-83d301f6d517"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:27Z",
+            "message": "Created pod: kube-proxy-xgf26",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:27Z",
+                "name": "kube-proxy.18e0dbe95ccf12f2",
+                "namespace": "kube-system",
+                "resourceVersion": "491",
+                "uid": "ebaa8205-f885-4dac-b7f4-646f45d69d50"
+            },
+            "reason": "SuccessfulCreate",
+            "reportingComponent": "daemonset-controller",
+            "reportingInstance": "",
+            "source": {
+                "component": "daemonset-controller"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:16Z",
+            "involvedObject": {
+                "apiVersion": "coordination.k8s.io/v1",
+                "kind": "Lease",
+                "name": "kube-scheduler",
+                "namespace": "kube-system",
+                "resourceVersion": "263",
+                "uid": "211517ea-e6bd-406a-beb3-4fdab4f1ac9f"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:16Z",
+            "message": "sentinel-acc-26324-control-plane_7ffef526-cdea-4d28-8b1d-4519acdabc2f became leader",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:16Z",
+                "name": "kube-scheduler.18e0dbe707039ab5",
+                "namespace": "kube-system",
+                "resourceVersion": "264",
+                "uid": "1a7117bc-7f87-46fe-8b84-bc23935f9d3d"
+            },
+            "reason": "LeaderElection",
+            "reportingComponent": "default-scheduler",
+            "reportingInstance": "",
+            "source": {
+                "component": "default-scheduler"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:23Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Pod",
+                "name": "local-path-provisioner-855c7b7774-dmstj",
+                "namespace": "local-path-storage",
+                "resourceVersion": "375",
+                "uid": "d50dc9c6-5a76-49e1-bfb0-ef918152c3ca"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:23Z",
+            "message": "0/1 nodes are available: 1 node(s) had untolerated taint(s). no new claims to deallocate, preemption: 0/1 nodes are available: 1 Preemption is not helpful for scheduling.",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:23Z",
+                "name": "local-path-provisioner-855c7b7774-dmstj.18e0dbe874bc035c",
+                "namespace": "local-path-storage",
+                "resourceVersion": "390",
+                "uid": "90734547-4d3f-45dd-ab02-980d2eeb9699"
+            },
+            "reason": "FailedScheduling",
+            "reportingComponent": "default-scheduler",
+            "reportingInstance": "",
+            "source": {
+                "component": "default-scheduler"
+            },
+            "type": "Warning"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:35Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Pod",
+                "name": "local-path-provisioner-855c7b7774-dmstj",
+                "namespace": "local-path-storage",
+                "resourceVersion": "389",
+                "uid": "d50dc9c6-5a76-49e1-bfb0-ef918152c3ca"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:35Z",
+            "message": "Successfully assigned local-path-storage/local-path-provisioner-855c7b7774-dmstj to sentinel-acc-26324-control-plane",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:35Z",
+                "name": "local-path-provisioner-855c7b7774-dmstj.18e0dbeb473be284",
+                "namespace": "local-path-storage",
+                "resourceVersion": "574",
+                "uid": "f11914d1-0114-4a19-9d4b-7b95b7204da7"
+            },
+            "reason": "Scheduled",
+            "reportingComponent": "default-scheduler",
+            "reportingInstance": "",
+            "source": {
+                "component": "default-scheduler"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:35Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{local-path-provisioner}",
+                "kind": "Pod",
+                "name": "local-path-provisioner-855c7b7774-dmstj",
+                "namespace": "local-path-storage",
+                "resourceVersion": "571",
+                "uid": "d50dc9c6-5a76-49e1-bfb0-ef918152c3ca"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:35Z",
+            "message": "Container image \"docker.io/kindest/local-path-provisioner:v20260521-9fb22683\" already present on machine and can be accessed by the pod",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:35Z",
+                "name": "local-path-provisioner-855c7b7774-dmstj.18e0dbeb6fd07eea",
+                "namespace": "local-path-storage",
+                "resourceVersion": "582",
+                "uid": "903cd130-ed3e-4d43-8f5e-3fccf2817164"
+            },
+            "reason": "Pulled",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-control-plane",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-control-plane"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:38Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{local-path-provisioner}",
+                "kind": "Pod",
+                "name": "local-path-provisioner-855c7b7774-dmstj",
+                "namespace": "local-path-storage",
+                "resourceVersion": "571",
+                "uid": "d50dc9c6-5a76-49e1-bfb0-ef918152c3ca"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:38Z",
+            "message": "Container created",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:38Z",
+                "name": "local-path-provisioner-855c7b7774-dmstj.18e0dbec116b28aa",
+                "namespace": "local-path-storage",
+                "resourceVersion": "619",
+                "uid": "fb6fef54-5eef-4ed6-89ad-b3f79b1f3b65"
+            },
+            "reason": "Created",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-control-plane",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-control-plane"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:38Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{local-path-provisioner}",
+                "kind": "Pod",
+                "name": "local-path-provisioner-855c7b7774-dmstj",
+                "namespace": "local-path-storage",
+                "resourceVersion": "571",
+                "uid": "d50dc9c6-5a76-49e1-bfb0-ef918152c3ca"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:38Z",
+            "message": "Container started",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:38Z",
+                "name": "local-path-provisioner-855c7b7774-dmstj.18e0dbec1ea0c3ae",
+                "namespace": "local-path-storage",
+                "resourceVersion": "620",
+                "uid": "d975b64a-ead9-4571-831c-52dd1f5f8c48"
+            },
+            "reason": "Started",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-control-plane",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-control-plane"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:23Z",
+            "involvedObject": {
+                "apiVersion": "apps/v1",
+                "kind": "ReplicaSet",
+                "name": "local-path-provisioner-855c7b7774",
+                "namespace": "local-path-storage",
+                "resourceVersion": "330",
+                "uid": "cf5f913f-1ce7-435a-ba2b-bb452e51e3e4"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:23Z",
+            "message": "Created pod: local-path-provisioner-855c7b7774-dmstj",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:23Z",
+                "name": "local-path-provisioner-855c7b7774.18e0dbe873896763",
+                "namespace": "local-path-storage",
+                "resourceVersion": "380",
+                "uid": "fb2a6e4e-e97d-4c97-b737-aa80f6abda59"
+            },
+            "reason": "SuccessfulCreate",
+            "reportingComponent": "replicaset-controller",
+            "reportingInstance": "",
+            "source": {
+                "component": "replicaset-controller"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:07:22Z",
+            "involvedObject": {
+                "apiVersion": "apps/v1",
+                "kind": "Deployment",
+                "name": "local-path-provisioner",
+                "namespace": "local-path-storage",
+                "resourceVersion": "304",
+                "uid": "1aa793ff-8af7-4212-bab2-49d358645eea"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:07:22Z",
+            "message": "Scaled up replica set local-path-provisioner-855c7b7774 from 0 to 1",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:07:22Z",
+                "name": "local-path-provisioner.18e0dbe84fd5decc",
+                "namespace": "local-path-storage",
+                "resourceVersion": "334",
+                "uid": "6ba418fc-9e2c-4949-821f-81678ea66ea1"
+            },
+            "reason": "ScalingReplicaSet",
+            "reportingComponent": "deployment-controller",
+            "reportingInstance": "",
+            "source": {
+                "component": "deployment-controller"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:08:11Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Pod",
+                "name": "kube-sentinel-scheduler-964d76744-mhmgz",
+                "namespace": "sentinel-system",
+                "resourceVersion": "710",
+                "uid": "d59185e2-6075-4b67-9d24-6a3582c4788a"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:08:11Z",
+            "message": "Successfully assigned sentinel-system/kube-sentinel-scheduler-964d76744-mhmgz to sentinel-acc-26324-worker",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:08:11Z",
+                "name": "kube-sentinel-scheduler-964d76744-mhmgz.18e0dbf3bd8d72d7",
+                "namespace": "sentinel-system",
+                "resourceVersion": "716",
+                "uid": "7568b0e1-1a8e-4216-afdd-7afd589ffa07"
+            },
+            "reason": "Scheduled",
+            "reportingComponent": "default-scheduler",
+            "reportingInstance": "",
+            "source": {
+                "component": "default-scheduler"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:08:12Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{scheduler}",
+                "kind": "Pod",
+                "name": "kube-sentinel-scheduler-964d76744-mhmgz",
+                "namespace": "sentinel-system",
+                "resourceVersion": "715",
+                "uid": "d59185e2-6075-4b67-9d24-6a3582c4788a"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:08:12Z",
+            "message": "Container image \"localhost/kube-sentinel-scheduler:local\" already present on machine and can be accessed by the pod",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:08:12Z",
+                "name": "kube-sentinel-scheduler-964d76744-mhmgz.18e0dbf3e21fff6c",
+                "namespace": "sentinel-system",
+                "resourceVersion": "720",
+                "uid": "e130a5d0-84b4-4ba1-8be8-74347d25606d"
+            },
+            "reason": "Pulled",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-worker",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-worker"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:08:12Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{scheduler}",
+                "kind": "Pod",
+                "name": "kube-sentinel-scheduler-964d76744-mhmgz",
+                "namespace": "sentinel-system",
+                "resourceVersion": "715",
+                "uid": "d59185e2-6075-4b67-9d24-6a3582c4788a"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:08:12Z",
+            "message": "Container created",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:08:12Z",
+                "name": "kube-sentinel-scheduler-964d76744-mhmgz.18e0dbf3e37b04d0",
+                "namespace": "sentinel-system",
+                "resourceVersion": "722",
+                "uid": "a7d38afe-ed95-4451-98f8-596e69c08f57"
+            },
+            "reason": "Created",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-worker",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-worker"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:08:12Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{scheduler}",
+                "kind": "Pod",
+                "name": "kube-sentinel-scheduler-964d76744-mhmgz",
+                "namespace": "sentinel-system",
+                "resourceVersion": "715",
+                "uid": "d59185e2-6075-4b67-9d24-6a3582c4788a"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:08:12Z",
+            "message": "Container started",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:08:12Z",
+                "name": "kube-sentinel-scheduler-964d76744-mhmgz.18e0dbf3e84c22d6",
+                "namespace": "sentinel-system",
+                "resourceVersion": "724",
+                "uid": "b657ce47-9e23-4ba9-9585-305570925f26"
+            },
+            "reason": "Started",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-worker",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-worker"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 2,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:08:12Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{sidecar}",
+                "kind": "Pod",
+                "name": "kube-sentinel-scheduler-964d76744-mhmgz",
+                "namespace": "sentinel-system",
+                "resourceVersion": "715",
+                "uid": "d59185e2-6075-4b67-9d24-6a3582c4788a"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:08:48Z",
+            "message": "Container image \"localhost/kube-sentinel-sidecar:local\" already present on machine and can be accessed by the pod",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:08:12Z",
+                "name": "kube-sentinel-scheduler-964d76744-mhmgz.18e0dbf3e8a74528",
+                "namespace": "sentinel-system",
+                "resourceVersion": "897",
+                "uid": "a6503b67-2c42-4fe6-84c9-d490c83a8591"
+            },
+            "reason": "Pulled",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-worker",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-worker"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 2,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:08:12Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{sidecar}",
+                "kind": "Pod",
+                "name": "kube-sentinel-scheduler-964d76744-mhmgz",
+                "namespace": "sentinel-system",
+                "resourceVersion": "715",
+                "uid": "d59185e2-6075-4b67-9d24-6a3582c4788a"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:08:48Z",
+            "message": "Container created",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:08:12Z",
+                "name": "kube-sentinel-scheduler-964d76744-mhmgz.18e0dbf3eb28d76f",
+                "namespace": "sentinel-system",
+                "resourceVersion": "900",
+                "uid": "10b9834a-0580-4b87-ba79-81870c577ccd"
+            },
+            "reason": "Created",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-worker",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-worker"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 2,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:08:12Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{sidecar}",
+                "kind": "Pod",
+                "name": "kube-sentinel-scheduler-964d76744-mhmgz",
+                "namespace": "sentinel-system",
+                "resourceVersion": "715",
+                "uid": "d59185e2-6075-4b67-9d24-6a3582c4788a"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:08:48Z",
+            "message": "Container started",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:08:12Z",
+                "name": "kube-sentinel-scheduler-964d76744-mhmgz.18e0dbf3f812b4bb",
+                "namespace": "sentinel-system",
+                "resourceVersion": "902",
+                "uid": "056e99cf-1b04-4ff3-a7c6-0591c7d3f744"
+            },
+            "reason": "Started",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "sentinel-acc-26324-worker",
+            "source": {
+                "component": "kubelet",
+                "host": "sentinel-acc-26324-worker"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:08:11Z",
+            "involvedObject": {
+                "apiVersion": "apps/v1",
+                "kind": "ReplicaSet",
+                "name": "kube-sentinel-scheduler-964d76744",
+                "namespace": "sentinel-system",
+                "resourceVersion": "707",
+                "uid": "c4c2f38b-56e2-46e1-9d56-f4d43379a71c"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:08:11Z",
+            "message": "Created pod: kube-sentinel-scheduler-964d76744-mhmgz",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:08:11Z",
+                "name": "kube-sentinel-scheduler-964d76744.18e0dbf3bcca4338",
+                "namespace": "sentinel-system",
+                "resourceVersion": "711",
+                "uid": "1e44a8ec-5b46-4575-9e7d-f5e62b11a358"
+            },
+            "reason": "SuccessfulCreate",
+            "reportingComponent": "replicaset-controller",
+            "reportingInstance": "",
+            "source": {
+                "component": "replicaset-controller"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-10-22T13:08:11Z",
+            "involvedObject": {
+                "apiVersion": "apps/v1",
+                "kind": "Deployment",
+                "name": "kube-sentinel-scheduler",
+                "namespace": "sentinel-system",
+                "resourceVersion": "706",
+                "uid": "a496af15-8da0-4efd-804e-0300331f7359"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-10-22T13:08:11Z",
+            "message": "Scaled up replica set kube-sentinel-scheduler-964d76744 from 0 to 1",
+            "metadata": {
+                "creationTimestamp": "2026-10-22T13:08:11Z",
+                "name": "kube-sentinel-scheduler.18e0dbf3bc2f74df",
+                "namespace": "sentinel-system",
+                "resourceVersion": "708",
+                "uid": "b8a4e9c6-cc9f-4ede-a744-749c2a805673"
+            },
+            "reason": "ScalingReplicaSet",
+            "reportingComponent": "deployment-controller",
+            "reportingInstance": "",
+            "source": {
+                "component": "deployment-controller"
+            },
+            "type": "Normal"
+        }
+    ],
+    "kind": "List",
+    "metadata": {
+        "resourceVersion": ""
+    }
+}

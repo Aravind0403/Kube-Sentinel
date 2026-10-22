@@ -1,0 +1,33 @@
+{
+  "run_id": "local-20261022-183647",
+  "timestamp": "2026-10-22T13:09:00Z",
+  "git_commit": "4f9ef4f49eeb6f7ceab20b6d616241f04b779161",
+  "images": {
+    "scheduler": "localhost/kube-sentinel-scheduler:local",
+    "sidecar": "localhost/kube-sentinel-sidecar:local"
+  },
+  "versions": {
+    "kubernetes": "v1.36.1",
+    "go": "go1.26.4",
+    "python": "3.12.8"
+  },
+  "config": {
+    "cluster_name": "sentinel-acc-26324",
+    "nodes": {
+      "control_plane": 1,
+      "workers": 3,
+      "roles": {
+        "cheap_on_demand": "sentinel-acc-26324-worker ($0.40/hr)",
+        "expensive_on_demand": "sentinel-acc-26324-worker2 ($2.50/hr)",
+        "spot": "sentinel-acc-26324-worker3 ($0.15/hr, cloud.google.com/gke-spot=true)"
+      }
+    },
+    "circuit_breaker": {
+      "failure_threshold": 2,
+      "timeout_seconds": 2
+    }
+  },
+  "total_scenarios": 8,
+  "passed_scenarios": 8,
+  "overall_outcome": "PASS"
+}

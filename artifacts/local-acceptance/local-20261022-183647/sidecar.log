@@ -1,0 +1,18 @@
+[Sentinel-ConfigWatcher] Configuration loaded from v2/sentinel-config.yaml
+[Sentinel-FederationServer] Serving metrics on port 8083...
+[Sentinel-Server] Listening on port 50051...
+[Sentinel-Server] SCORE: Evaluated 3 candidate nodes for pod default/pod-l8-recovered (c13d40e4-f942-4291-9a71-b64567e615d8)
+[Sentinel-Server] COMMIT: Placement confirmed on node sentinel-acc-26324-worker2 for pod c13d40e4-f942-4291-9a71-b64567e615d8.
+[Sentinel-ConfigWatcher] Configuration loaded from v2/sentinel-config.yaml
+[Sentinel-FederationServer] Serving metrics on port 8083...
+[Sentinel-Server] Listening on port 50051...
+[Sentinel-Server] SCORE: Evaluated 3 candidate nodes for pod default/pod-l2 (cfbe2446-1f6a-418b-94e7-4e07f07e9f63)
+[Sentinel-Server] COMMIT: Placement confirmed on node sentinel-acc-26324-worker2 for pod cfbe2446-1f6a-418b-94e7-4e07f07e9f63.
+[Sentinel-Server] SCORE: Evaluated 2 candidate nodes for pod default/pod-l3 (63e3632d-316c-4427-aba5-b93b00da7347)
+[Sentinel-Server] COMMIT: Placement confirmed on node sentinel-acc-26324-worker2 for pod 63e3632d-316c-4427-aba5-b93b00da7347.
+[Sentinel-Server] COMMIT: Placement confirmed on node sentinel-acc-26324-worker for pod dfb3938b-591a-49bd-b81e-bdb03fdcceda.
+[Sentinel-Server] COMMIT: Placement confirmed on node sentinel-acc-26324-worker for pod b22939a0-f2ad-45cc-833d-13d7156a0830.
+[Sentinel-Server] COMMIT: Placement confirmed on node sentinel-acc-26324-worker for pod f8d0fa31-29f6-43bc-866c-5a88b415ee45.
+[Sentinel-ConfigWatcher] Configuration loaded from v2/sentinel-config.yaml
+[Sentinel-Server] Received signal 15, persisting state and exiting immediately...
+[Sentinel-Persistence] State flushed atomically to v2/sentinel_state.json

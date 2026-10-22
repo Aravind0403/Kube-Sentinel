@@ -476,10 +476,14 @@ kubectl delete pod pod-l7 --now >/dev/null 2>&1
 # L8: Sidecar failure and recovery across new submissions
 echo "Running L8: Daemon failure and recovery across workload submissions..."
 refresh_heartbeats
-# Kill python daemon inside sidecar container
+
 SCHED_POD=$(kubectl get pods -n sentinel-system -l app=kube-sentinel-scheduler -o jsonpath='{.items[0].metadata.name}')
-echo "Injecting fault: killing sidecar process in ${SCHED_POD}..."
-kubectl exec -n sentinel-system "${SCHED_POD}" -c sidecar -- pkill -9 -f "v2/grpc_server.py" || true
+LOG_START_OUTAGE=$(kubectl logs -n sentinel-system "${SCHED_POD}" -c scheduler 2>/dev/null | wc -l | tr -d ' ')
+RESTART_COUNT_BEFORE=$(kubectl get pod "${SCHED_POD}" -n sentinel-system -o jsonpath='{.status.containerStatuses[?(@.name=="sidecar")].restartCount}')
+
+echo "Injecting fault: sending SIGTERM to sidecar daemon (PID 1) in ${SCHED_POD}..."
+kubectl exec -n sentinel-system "${SCHED_POD}" -c sidecar -- kill -TERM 1 || true
+sleep 1
 
 # Submit protected workload during outage
 kubectl apply -f - <<EOF
@@ -504,12 +508,22 @@ EOF
 
 if BOUND_NODE=$(wait_for_pod_scheduled "pod-l8-outage" 30); then
     archive_pod "pod-l8-outage"
-    if [[ "${BOUND_NODE}" != "${W_SPOT}" ]]; then
-        echo "Protected pod safely bound during daemon outage to on-demand node ${BOUND_NODE}"
-    else
+    if [[ "${BOUND_NODE}" == "${W_SPOT}" ]]; then
         record_scenario "L8" "Sidecar failure & recovery" "Fault: sidecar kill; workload: latency-critical" "Preserve on-demand placement during outage" "VIOLATION: Bound to Spot node during outage" "FAIL"
         exit 1
     fi
+    echo "Protected pod safely bound during daemon outage to on-demand node ${BOUND_NODE}"
+    
+    # PROVE DAEMON UNAVAILABILITY: Assert fallback scoring / open breaker was logged during this binding
+    OUTAGE_LOGS=$(kubectl logs -n sentinel-system "${SCHED_POD}" -c scheduler 2>/dev/null | tail -n +"$((LOG_START_OUTAGE + 1))")
+    if ! echo "${OUTAGE_LOGS}" | grep -q -E "(Fallback scoring active|circuit breaker open)"; then
+        echo "ERROR: Scheduler logs did not record fallback scoring during pod-l8-outage binding!"
+        echo "Logs during outage window:"
+        echo "${OUTAGE_LOGS}"
+        record_scenario "L8" "Sidecar failure & recovery" "Fault: sidecar kill; workload: latency-critical" "Prove daemon unavailability (fallback active) during binding" "FAIL: Fallback scoring not recorded in scheduler logs" "FAIL"
+        exit 1
+    fi
+    echo "  [PROVEN] Scheduler entered fallback scoring during daemon outage."
 else
     archive_pod "pod-l8-outage"
     record_scenario "L8" "Sidecar failure & recovery" "Fault: sidecar kill; workload: latency-critical" "Preserve on-demand placement during outage" "Failed to bind during outage fallback" "FAIL"
@@ -518,10 +532,20 @@ fi
 kubectl delete pod pod-l8-outage --now >/dev/null 2>&1
 
 # Wait for sidecar process to respawn / container restart
-echo "Waiting for sidecar process recovery..."
-sleep 5
-# Check if sidecar is responsive again
-kubectl rollout status deployment/kube-sentinel-scheduler -n sentinel-system --timeout=60s
+echo "Waiting for sidecar container restart and readiness..."
+kubectl wait --for=condition=Ready pod/"${SCHED_POD}" -n sentinel-system --timeout=60s
+
+# Verify restartCount has advanced (proving container was actually terminated and recreated)
+RESTART_COUNT_AFTER=$(kubectl get pod "${SCHED_POD}" -n sentinel-system -o jsonpath='{.status.containerStatuses[?(@.name=="sidecar")].restartCount}')
+if [[ "${RESTART_COUNT_AFTER}" -le "${RESTART_COUNT_BEFORE}" ]]; then
+    echo "WARNING: Sidecar restartCount did not advance (before=${RESTART_COUNT_BEFORE}, after=${RESTART_COUNT_AFTER})"
+fi
+
+# Allow circuit breaker backoff duration (2s configured) to expire so it can transition HalfOpen -> Closed
+sleep 4
+
+LOG_START_RECOVERY=$(kubectl logs -n sentinel-system "${SCHED_POD}" -c scheduler 2>/dev/null | wc -l | tr -d ' ')
+SIDECAR_START_RECOVERY=$(kubectl logs -n sentinel-system "${SCHED_POD}" -c sidecar 2>/dev/null | wc -l | tr -d ' ')
 
 # Submit post-recovery workload
 refresh_heartbeats
@@ -545,7 +569,35 @@ EOF
 
 if BOUND_NODE=$(wait_for_pod_scheduled "pod-l8-recovered" 30); then
     archive_pod "pod-l8-recovered"
-    record_scenario "L8" "Sidecar failure & recovery" "Fault: sidecar killed & recovered; post-recovery pod" "Fallback active during outage, normal scheduling resumes post-recovery" "Outage preserved on-demand; post-recovery bound to ${BOUND_NODE}" "PASS"
+    
+    # PROVE SUCCESSFUL NATIVE SCORING AFTER RESTART
+    RECOVERY_SCHED_LOGS=$(kubectl logs -n sentinel-system "${SCHED_POD}" -c scheduler 2>/dev/null | tail -n +"$((LOG_START_RECOVERY + 1))")
+    RECOVERY_SIDECAR_LOGS=$(kubectl logs -n sentinel-system "${SCHED_POD}" -c sidecar 2>/dev/null | tail -n +"$((SIDECAR_START_RECOVERY + 1))")
+    
+    if ! echo "${RECOVERY_SCHED_LOGS}" | grep -q "Native scoring active"; then
+        echo "ERROR: Scheduler did not perform native scoring for pod-l8-recovered after restart!"
+        echo "Scheduler logs:"
+        echo "${RECOVERY_SCHED_LOGS}"
+        record_scenario "L8" "Sidecar failure & recovery" "Fault: sidecar killed & recovered; post-recovery pod" "Prove native scoring active after restart" "FAIL: Native scoring not recorded after restart" "FAIL"
+        exit 1
+    fi
+    
+    if echo "${RECOVERY_SCHED_LOGS}" | grep -q "Fallback scoring active"; then
+        echo "ERROR: Fallback scoring was still active for pod-l8-recovered!"
+        record_scenario "L8" "Sidecar failure & recovery" "Fault: sidecar killed & recovered; post-recovery pod" "Prove native scoring active after restart" "FAIL: Fallback scoring still active after recovery" "FAIL"
+        exit 1
+    fi
+    
+    if ! echo "${RECOVERY_SIDECAR_LOGS}" | grep -q "pod-l8-recovered"; then
+        echo "ERROR: Sidecar daemon logs do not record evaluation of pod-l8-recovered!"
+        echo "Sidecar logs:"
+        echo "${RECOVERY_SIDECAR_LOGS}"
+        record_scenario "L8" "Sidecar failure & recovery" "Fault: sidecar killed & recovered; post-recovery pod" "Prove sidecar daemon evaluated pod-l8-recovered" "FAIL: Sidecar logs lack pod-l8-recovered evaluation" "FAIL"
+        exit 1
+    fi
+    
+    echo "  [PROVEN] Native gRPC scoring successfully resumed after daemon restart."
+    record_scenario "L8" "Sidecar failure & recovery" "Fault: sidecar killed & recovered; post-recovery pod" "Prove fallback during outage; prove native scoring after restart" "Outage preserved on-demand with proven fallback; restart resumed proven native scoring on ${BOUND_NODE}" "PASS"
 else
     archive_pod "pod-l8-recovered"
     record_scenario "L8" "Sidecar failure & recovery" "Fault: sidecar killed & recovered; post-recovery pod" "Normal scheduling resumes" "Failed to schedule after recovery" "FAIL"

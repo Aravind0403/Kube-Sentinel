@@ -1188,6 +1188,7 @@ func (p *SentinelPlugin) PreScore(ctx context.Context, state *framework.CycleSta
 		}
 	}
 
+	fmt.Printf("[Sentinel-GoPlugin] INFO: Native scoring active: scored %d nodes for pod %s/%s via daemon\n", len(resp.Scores), pod.Namespace, pod.Name)
 	state.Write(StateKey, &stateData{
 		scores: nodeScores,
 	})

@@ -478,6 +478,7 @@ class SentinelSchedulerServicer(sentinel_pb2_grpc.SentinelSchedulerServicer):
                 )
             )
 
+        print(f"[Sentinel-Server] SCORE: Evaluated {len(request.nodes)} candidate nodes for pod {request.pod.namespace}/{request.pod.name} ({request.pod.uid})", flush=True)
         return sentinel_pb2.ScoreResponse(scores=scores)
 
     def PlacementCommitted(
@@ -534,20 +535,16 @@ if __name__ == "__main__":
     server, servicer = serve(port=args.port)
 
     def shutdown_handler(signum, frame) -> None:
-        print(f"[Sentinel-Server] Received signal {signum}, persisting state and shutting down...")
-        servicer.persistence.save()
-        servicer.persistence.stop()
-        servicer.config_watcher.stop()
-        servicer.fed_server.stop()
-        server.stop(0)
-        sys.exit(0)
+        print(f"[Sentinel-Server] Received signal {signum}, persisting state and exiting immediately...", flush=True)
+        try:
+            servicer.persistence.save()
+        except Exception as e:
+            print(f"[Sentinel-Server] Error saving state during shutdown: {e}", flush=True)
+        os._exit(0)
 
     signal.signal(signal.SIGINT, shutdown_handler)
     signal.signal(signal.SIGTERM, shutdown_handler)
 
-    try:
-        while True:
-            time.sleep(86400)
-    except SystemExit:
-        pass
+    while True:
+        time.sleep(86400)
 
