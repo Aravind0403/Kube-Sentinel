@@ -29,6 +29,11 @@ type PodSpec struct {
 	CpuCoresRequested float64                `protobuf:"fixed64,4,opt,name=cpu_cores_requested,json=cpuCoresRequested,proto3" json:"cpu_cores_requested,omitempty"`
 	MemoryGbRequested float64                `protobuf:"fixed64,5,opt,name=memory_gb_requested,json=memoryGbRequested,proto3" json:"memory_gb_requested,omitempty"`
 	WorkloadType      string                 `protobuf:"bytes,6,opt,name=workload_type,json=workloadType,proto3" json:"workload_type,omitempty"` // e.g. BATCH, GPU_INFERENCE, LATENCY_CRITICAL
+	GpuRequested      float64                `protobuf:"fixed64,7,opt,name=gpu_requested,json=gpuRequested,proto3" json:"gpu_requested,omitempty"`
+	GpuTypeRequired   string                 `protobuf:"bytes,8,opt,name=gpu_type_required,json=gpuTypeRequired,proto3" json:"gpu_type_required,omitempty"`
+	MinGpuMemoryGb    float64                `protobuf:"fixed64,9,opt,name=min_gpu_memory_gb,json=minGpuMemoryGb,proto3" json:"min_gpu_memory_gb,omitempty"`
+	RequiredArch      string                 `protobuf:"bytes,10,opt,name=required_arch,json=requiredArch,proto3" json:"required_arch,omitempty"` // e.g. x86_64, arm64
+	CostCeilingUsd    float64                `protobuf:"fixed64,11,opt,name=cost_ceiling_usd,json=costCeilingUsd,proto3" json:"cost_ceiling_usd,omitempty"`
 	unknownFields     protoimpl.UnknownFields
 	sizeCache         protoimpl.SizeCache
 }
@@ -105,6 +110,41 @@ func (x *PodSpec) GetWorkloadType() string {
 	return ""
 }
 
+func (x *PodSpec) GetGpuRequested() float64 {
+	if x != nil {
+		return x.GpuRequested
+	}
+	return 0
+}
+
+func (x *PodSpec) GetGpuTypeRequired() string {
+	if x != nil {
+		return x.GpuTypeRequired
+	}
+	return ""
+}
+
+func (x *PodSpec) GetMinGpuMemoryGb() float64 {
+	if x != nil {
+		return x.MinGpuMemoryGb
+	}
+	return 0
+}
+
+func (x *PodSpec) GetRequiredArch() string {
+	if x != nil {
+		return x.RequiredArch
+	}
+	return ""
+}
+
+func (x *PodSpec) GetCostCeilingUsd() float64 {
+	if x != nil {
+		return x.CostCeilingUsd
+	}
+	return 0
+}
+
 type NodeCandidate struct {
 	state  protoimpl.MessageState `protogen:"open.v1"`
 	NodeId string                 `protobuf:"bytes,1,opt,name=node_id,json=nodeId,proto3" json:"node_id,omitempty"`
@@ -123,8 +163,17 @@ type NodeCandidate struct {
 	// Telemetry timing tracking for freshness and CV consistency checks
 	LastHeartbeatTimestamp   float64   `protobuf:"fixed64,12,opt,name=last_heartbeat_timestamp,json=lastHeartbeatTimestamp,proto3" json:"last_heartbeat_timestamp,omitempty"`              // Unix epoch in seconds
 	RecentHeartbeatIntervals []float64 `protobuf:"fixed64,13,rep,packed,name=recent_heartbeat_intervals,json=recentHeartbeatIntervals,proto3" json:"recent_heartbeat_intervals,omitempty"` // History of durations in seconds
-	unknownFields            protoimpl.UnknownFields
-	sizeCache                protoimpl.SizeCache
+	// Cloud economics & hardware attributes (from K8s annotations / node labels)
+	HourlyCostUsd        float64 `protobuf:"fixed64,14,opt,name=hourly_cost_usd,json=hourlyCostUsd,proto3" json:"hourly_cost_usd,omitempty"`
+	IsSpot               bool    `protobuf:"varint,15,opt,name=is_spot,json=isSpot,proto3" json:"is_spot,omitempty"`
+	SpotInterruptionProb float64 `protobuf:"fixed64,16,opt,name=spot_interruption_prob,json=spotInterruptionProb,proto3" json:"spot_interruption_prob,omitempty"`
+	GpuType              string  `protobuf:"bytes,17,opt,name=gpu_type,json=gpuType,proto3" json:"gpu_type,omitempty"`
+	GpuCount             int32   `protobuf:"varint,18,opt,name=gpu_count,json=gpuCount,proto3" json:"gpu_count,omitempty"`
+	GpuMemoryGb          float64 `protobuf:"fixed64,19,opt,name=gpu_memory_gb,json=gpuMemoryGb,proto3" json:"gpu_memory_gb,omitempty"`
+	Arch                 string  `protobuf:"bytes,20,opt,name=arch,proto3" json:"arch,omitempty"`
+	Zone                 string  `protobuf:"bytes,21,opt,name=zone,proto3" json:"zone,omitempty"`
+	unknownFields        protoimpl.UnknownFields
+	sizeCache            protoimpl.SizeCache
 }
 
 func (x *NodeCandidate) Reset() {
@@ -248,6 +297,62 @@ func (x *NodeCandidate) GetRecentHeartbeatIntervals() []float64 {
 	return nil
 }
 
+func (x *NodeCandidate) GetHourlyCostUsd() float64 {
+	if x != nil {
+		return x.HourlyCostUsd
+	}
+	return 0
+}
+
+func (x *NodeCandidate) GetIsSpot() bool {
+	if x != nil {
+		return x.IsSpot
+	}
+	return false
+}
+
+func (x *NodeCandidate) GetSpotInterruptionProb() float64 {
+	if x != nil {
+		return x.SpotInterruptionProb
+	}
+	return 0
+}
+
+func (x *NodeCandidate) GetGpuType() string {
+	if x != nil {
+		return x.GpuType
+	}
+	return ""
+}
+
+func (x *NodeCandidate) GetGpuCount() int32 {
+	if x != nil {
+		return x.GpuCount
+	}
+	return 0
+}
+
+func (x *NodeCandidate) GetGpuMemoryGb() float64 {
+	if x != nil {
+		return x.GpuMemoryGb
+	}
+	return 0
+}
+
+func (x *NodeCandidate) GetArch() string {
+	if x != nil {
+		return x.Arch
+	}
+	return ""
+}
+
+func (x *NodeCandidate) GetZone() string {
+	if x != nil {
+		return x.Zone
+	}
+	return ""
+}
+
 type ScoreRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Pod           *PodSpec               `protobuf:"bytes,1,opt,name=pod,proto3" json:"pod,omitempty"`
@@ -311,9 +416,11 @@ func (x *ScoreRequest) GetGamma() float64 {
 type NodeScore struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	NodeId        string                 `protobuf:"bytes,1,opt,name=node_id,json=nodeId,proto3" json:"node_id,omitempty"`
-	Eta           float64                `protobuf:"fixed64,2,opt,name=eta,proto3" json:"eta,omitempty"`                                 // Heuristic optimization score (from CostEngine)
-	Confidence    float64                `protobuf:"fixed64,3,opt,name=confidence,proto3" json:"confidence,omitempty"`                   // Composite trust rating (kappa_i)
-	FinalScore    float64                `protobuf:"fixed64,4,opt,name=final_score,json=finalScore,proto3" json:"final_score,omitempty"` // eta * (kappa_i ^ gamma)
+	Eta           float64                `protobuf:"fixed64,2,opt,name=eta,proto3" json:"eta,omitempty"`                                     // Heuristic optimization score (from CostEngine)
+	Confidence    float64                `protobuf:"fixed64,3,opt,name=confidence,proto3" json:"confidence,omitempty"`                       // Composite trust rating (kappa_i)
+	FinalScore    float64                `protobuf:"fixed64,4,opt,name=final_score,json=finalScore,proto3" json:"final_score,omitempty"`     // eta * (kappa_i ^ gamma)
+	IsEligible    bool                   `protobuf:"varint,5,opt,name=is_eligible,json=isEligible,proto3" json:"is_eligible,omitempty"`      // True if node passed hard constraints (for Filter hook)
+	FilterReason  string                 `protobuf:"bytes,6,opt,name=filter_reason,json=filterReason,proto3" json:"filter_reason,omitempty"` // Reason if filtered out (e.g. INSUFFICIENT_GPU, UNTRUSTED)
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -374,6 +481,20 @@ func (x *NodeScore) GetFinalScore() float64 {
 		return x.FinalScore
 	}
 	return 0
+}
+
+func (x *NodeScore) GetIsEligible() bool {
+	if x != nil {
+		return x.IsEligible
+	}
+	return false
+}
+
+func (x *NodeScore) GetFilterReason() string {
+	if x != nil {
+		return x.FilterReason
+	}
+	return ""
 }
 
 type ScoreResponse struct {
@@ -528,14 +649,20 @@ var File_sentinel_proto protoreflect.FileDescriptor
 
 const file_sentinel_proto_rawDesc = "" +
 	"\n" +
-	"\x0esentinel.proto\x12\bsentinel\"\xd2\x01\n" +
+	"\x0esentinel.proto\x12\bsentinel\"\x9d\x03\n" +
 	"\aPodSpec\x12\x10\n" +
 	"\x03uid\x18\x01 \x01(\tR\x03uid\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x1c\n" +
 	"\tnamespace\x18\x03 \x01(\tR\tnamespace\x12.\n" +
 	"\x13cpu_cores_requested\x18\x04 \x01(\x01R\x11cpuCoresRequested\x12.\n" +
 	"\x13memory_gb_requested\x18\x05 \x01(\x01R\x11memoryGbRequested\x12#\n" +
-	"\rworkload_type\x18\x06 \x01(\tR\fworkloadType\"\xcb\x05\n" +
+	"\rworkload_type\x18\x06 \x01(\tR\fworkloadType\x12#\n" +
+	"\rgpu_requested\x18\a \x01(\x01R\fgpuRequested\x12*\n" +
+	"\x11gpu_type_required\x18\b \x01(\tR\x0fgpuTypeRequired\x12)\n" +
+	"\x11min_gpu_memory_gb\x18\t \x01(\x01R\x0eminGpuMemoryGb\x12#\n" +
+	"\rrequired_arch\x18\n" +
+	" \x01(\tR\frequiredArch\x12(\n" +
+	"\x10cost_ceiling_usd\x18\v \x01(\x01R\x0ecostCeilingUsd\"\xc6\a\n" +
 	"\rNodeCandidate\x12\x17\n" +
 	"\anode_id\x18\x01 \x01(\tR\x06nodeId\x12'\n" +
 	"\x0fallocatable_cpu\x18\x02 \x01(\x01R\x0eallocatableCpu\x122\n" +
@@ -550,11 +677,19 @@ const file_sentinel_proto_rawDesc = "" +
 	" \x01(\x01R\x14reportedUsedMemoryGb\x125\n" +
 	"\x17reported_free_memory_gb\x18\v \x01(\x01R\x14reportedFreeMemoryGb\x128\n" +
 	"\x18last_heartbeat_timestamp\x18\f \x01(\x01R\x16lastHeartbeatTimestamp\x12<\n" +
-	"\x1arecent_heartbeat_intervals\x18\r \x03(\x01R\x18recentHeartbeatIntervals\"x\n" +
+	"\x1arecent_heartbeat_intervals\x18\r \x03(\x01R\x18recentHeartbeatIntervals\x12&\n" +
+	"\x0fhourly_cost_usd\x18\x0e \x01(\x01R\rhourlyCostUsd\x12\x17\n" +
+	"\ais_spot\x18\x0f \x01(\bR\x06isSpot\x124\n" +
+	"\x16spot_interruption_prob\x18\x10 \x01(\x01R\x14spotInterruptionProb\x12\x19\n" +
+	"\bgpu_type\x18\x11 \x01(\tR\agpuType\x12\x1b\n" +
+	"\tgpu_count\x18\x12 \x01(\x05R\bgpuCount\x12\"\n" +
+	"\rgpu_memory_gb\x18\x13 \x01(\x01R\vgpuMemoryGb\x12\x12\n" +
+	"\x04arch\x18\x14 \x01(\tR\x04arch\x12\x12\n" +
+	"\x04zone\x18\x15 \x01(\tR\x04zone\"x\n" +
 	"\fScoreRequest\x12#\n" +
 	"\x03pod\x18\x01 \x01(\v2\x11.sentinel.PodSpecR\x03pod\x12-\n" +
 	"\x05nodes\x18\x02 \x03(\v2\x17.sentinel.NodeCandidateR\x05nodes\x12\x14\n" +
-	"\x05gamma\x18\x03 \x01(\x01R\x05gamma\"w\n" +
+	"\x05gamma\x18\x03 \x01(\x01R\x05gamma\"\xbd\x01\n" +
 	"\tNodeScore\x12\x17\n" +
 	"\anode_id\x18\x01 \x01(\tR\x06nodeId\x12\x10\n" +
 	"\x03eta\x18\x02 \x01(\x01R\x03eta\x12\x1e\n" +
@@ -562,7 +697,10 @@ const file_sentinel_proto_rawDesc = "" +
 	"confidence\x18\x03 \x01(\x01R\n" +
 	"confidence\x12\x1f\n" +
 	"\vfinal_score\x18\x04 \x01(\x01R\n" +
-	"finalScore\"<\n" +
+	"finalScore\x12\x1f\n" +
+	"\vis_eligible\x18\x05 \x01(\bR\n" +
+	"isEligible\x12#\n" +
+	"\rfilter_reason\x18\x06 \x01(\tR\ffilterReason\"<\n" +
 	"\rScoreResponse\x12+\n" +
 	"\x06scores\x18\x01 \x03(\v2\x13.sentinel.NodeScoreR\x06scores\"g\n" +
 	"\x19PlacementCommittedRequest\x12\x17\n" +

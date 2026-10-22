@@ -20,6 +20,11 @@ message PodSpec {
   double cpu_cores_requested = 4;
   double memory_gb_requested = 5;
   string workload_type = 6;  // e.g. BATCH, GPU_INFERENCE, LATENCY_CRITICAL
+  double gpu_requested = 7;
+  string gpu_type_required = 8;
+  double min_gpu_memory_gb = 9;
+  string required_arch = 10; // e.g. x86_64, arm64
+  double cost_ceiling_usd = 11;
 }
 
 message NodeCandidate {
@@ -42,6 +47,16 @@ message NodeCandidate {
   // Telemetry timing tracking for freshness and CV consistency checks
   double last_heartbeat_timestamp = 12;            // Unix epoch in seconds
   repeated double recent_heartbeat_intervals = 13; // History of durations in seconds
+
+  // Cloud economics & hardware attributes (from K8s annotations / node labels)
+  double hourly_cost_usd = 14;
+  bool is_spot = 15;
+  double spot_interruption_prob = 16;
+  string gpu_type = 17;
+  int32 gpu_count = 18;
+  double gpu_memory_gb = 19;
+  string arch = 20;
+  string zone = 21;
 }
 
 message ScoreRequest {
@@ -55,6 +70,8 @@ message NodeScore {
   double eta = 2;            // Heuristic optimization score (from CostEngine)
   double confidence = 3;     // Composite trust rating (kappa_i)
   double final_score = 4;    // eta * (kappa_i ^ gamma)
+  bool is_eligible = 5;      // True if node passed hard constraints (for Filter hook)
+  string filter_reason = 6;  // Reason if filtered out (e.g. INSUFFICIENT_GPU, UNTRUSTED)
 }
 
 message ScoreResponse {

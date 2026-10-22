@@ -28,6 +28,7 @@ func (m *mockClient) ScoreNodes(ctx context.Context, in *pb.ScoreRequest, opts .
 		scores = append(scores, &pb.NodeScore{
 			NodeId:     n.NodeId,
 			FinalScore: 0.85,
+			IsEligible: true,
 		})
 	}
 	return &pb.ScoreResponse{Scores: scores}, nil
@@ -112,6 +113,12 @@ func TestPlugin(t *testing.T) {
 		t.Errorf("Expected PreScore to call ScoreNodes gRPC endpoint")
 	}
 
+	// Test Filter Hook
+	filterStatus := plugin.Filter(context.Background(), state, pod, nodeInfo)
+	if filterStatus != nil && !filterStatus.IsSuccess() {
+		t.Errorf("Filter failed for eligible node: %v", filterStatus)
+	}
+
 	score, scoreStatus := plugin.Score(context.Background(), state, pod, "node-1")
 	if scoreStatus != nil && !scoreStatus.IsSuccess() {
 		t.Errorf("Score failed: %v", scoreStatus)
@@ -134,5 +141,35 @@ func TestPlugin(t *testing.T) {
 	plugin.Unreserve(context.Background(), state, pod, "node-1")
 	if mock.lastSuccess {
 		t.Errorf("Expected Unreserve to call PlacementCommitted with success=false")
+	}
+}
+
+func TestCircuitBreaker(t *testing.T) {
+	cb := NewCircuitBreaker(3, 1) // 3 failures threshold, 1s timeout
+	if cb.GetState() != Closed {
+		t.Errorf("Expected initially Closed state")
+	}
+
+	// Test backoff calculation
+	bo0 := cb.calculateBackoff(0)
+	if bo0 <= 0 {
+		t.Errorf("Expected non-zero backoff for attempt 0, got %v", bo0)
+	}
+
+	// Record failures to open breaker
+	cb.recordFailure()
+	cb.recordFailure()
+	cb.recordFailure()
+
+	if cb.GetState() != Open {
+		t.Errorf("Expected Open state after 3 failures, got %v", cb.GetState())
+	}
+
+	// Manually set half-open
+	cb.state = int32(HalfOpen)
+	// Failed probe in HalfOpen should transition back to Open
+	cb.recordFailure()
+	if cb.GetState() != Open {
+		t.Errorf("Expected failed probe in HalfOpen to return to Open, got %v", cb.GetState())
 	}
 }

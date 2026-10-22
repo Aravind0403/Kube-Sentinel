@@ -1,8 +1,14 @@
 {
-  "total_pods": 500,
+  "total_requests": 100,
   "failed_bindings": 0,
   "availability_pct": 100.0,
-  "circuit_breaker_transitions": ["CLOSED", "OPEN", "HALF-OPEN", "CLOSED"],
-  "max_latency_ms": 50.15,
+  "circuit_breaker_transitions": [
+    "CLOSED",
+    "OPEN",
+    "HALF_OPEN",
+    "CLOSED"
+  ],
+  "mean_grpc_latency_ms": 0.659,
+  "mean_fallback_latency_ms": 0.018,
   "status": "PASSED"
 }

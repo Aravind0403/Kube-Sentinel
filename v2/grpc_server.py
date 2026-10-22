@@ -24,6 +24,7 @@ from typing import Dict
 import grpc
 
 # Add project root and libraries to path
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "core")))
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "proto")))
 
@@ -40,7 +41,10 @@ from confidence import (
 from orchestrator.control_plane.cost_engine import CostEngine
 from orchestrator.shared.models import (
     ComputeNode,
+    InstanceType,
     JobRequest,
+    NodeArch,
+    NodeCostProfile,
     NodeTelemetry,
     ResourceRequest,
     WorkloadType,
@@ -225,6 +229,7 @@ class ACOPredictiveSchedulerServicer(sentinel_pb2_grpc.ACOPredictiveSchedulerSer
         t_max = thresholds["t_max"]
 
         # Map workload type string to enum
+        # Map workload type string to enum
         workload_type_map = {
             "batch": WorkloadType.BATCH,
             "latency-critical": WorkloadType.LATENCY_CRITICAL,
@@ -232,19 +237,34 @@ class ACOPredictiveSchedulerServicer(sentinel_pb2_grpc.ACOPredictiveSchedulerSer
         }
         w_type = workload_type_map.get(request.pod.workload_type.lower(), WorkloadType.BATCH)
 
-        # Re-construct JobRequest object for CostEngine
+        # Parse architecture requirement
+        arch_req = None
+        if request.pod.required_arch:
+            arch_lower = request.pod.required_arch.lower()
+            if "arm" in arch_lower:
+                arch_req = NodeArch.ARM64
+            elif "x86" in arch_lower:
+                arch_req = NodeArch.X86_64
+
+        # Re-construct JobRequest object for CostEngine with full typed constraints (F03, F07 fixes)
+        has_gpu = request.pod.gpu_requested > 0
         job = JobRequest(
             job_id=request.pod.uid,
             workload_type=w_type,
             resources=ResourceRequest(
                 cpu_cores_min=request.pod.cpu_cores_requested,
                 memory_gb_min=request.pod.memory_gb_requested,
+                gpu_required=has_gpu,
+                gpu_count=int(request.pod.gpu_requested) if has_gpu else 1,
+                gpu_memory_gb=request.pod.min_gpu_memory_gb if request.pod.min_gpu_memory_gb > 0 else None,
             ),
+            gpu_model_preferred=request.pod.gpu_type_required if request.pod.gpu_type_required else None,
+            arch_required=arch_req,
+            cost_ceiling_usd=request.pod.cost_ceiling_usd if request.pod.cost_ceiling_usd > 0 else None,
         )
 
-        # Determine "now" - use the max last_heartbeat_timestamp from the request nodes if available
-        heartbeats = [n.last_heartbeat_timestamp for n in request.nodes if n.last_heartbeat_timestamp > 0]
-        current_time = max(heartbeats) if heartbeats else time.time()
+        # Use true wall-clock time (F08 fix)
+        current_time = time.time()
 
         scores = []
         for node_cand in request.nodes:
@@ -263,48 +283,65 @@ class ACOPredictiveSchedulerServicer(sentinel_pb2_grpc.ACOPredictiveSchedulerSer
             tracker.cv_max = cv_max
             tracker.t_max = t_max
 
-            # Record heartbeat timestamp
-            if node_cand.last_heartbeat_timestamp > 0:
-                tracker.record_heartbeat(node_cand.last_heartbeat_timestamp)
+            # 1. Internal consistency on both CPU and Memory (F14 fix)
+            k_int_cpu = calculate_internal_consistency(
+                node_cand.reported_allocatable_cpu,
+                node_cand.reported_used_cpu,
+                node_cand.reported_free_cpu,
+            )
+            if node_cand.reported_allocatable_memory_gb > 0:
+                k_int_mem = calculate_internal_consistency(
+                    node_cand.reported_allocatable_memory_gb,
+                    node_cand.reported_used_memory_gb,
+                    node_cand.reported_free_memory_gb,
+                )
+            else:
+                k_int_mem = 1.0
+            k_internal = k_int_cpu * k_int_mem
 
-            # Compute raw and smoothed confidence
+            # 2. Freshness check against real server time (F08 fix)
+            if node_cand.last_heartbeat_timestamp > 0:
+                delta_t = max(0.0, current_time - node_cand.last_heartbeat_timestamp)
+                k_fresh = calculate_freshness(delta_t, tracker.t_max)
+            else:
+                k_fresh = 0.0
+
+            # 3. Heartbeat arrival jitter / cadence check
             if node_cand.recent_heartbeat_intervals:
-                # Use intervals passed by Go plugin
-                intervals = list(node_cand.recent_heartbeat_intervals)
-                k_heartbeat = calculate_heartbeat_consistency(intervals, tracker.cv_max)
-                k_internal = calculate_internal_consistency(
-                    node_cand.reported_allocatable_cpu,
-                    node_cand.reported_used_cpu,
-                    node_cand.reported_free_cpu,
+                k_heartbeat = calculate_heartbeat_consistency(
+                    list(node_cand.recent_heartbeat_intervals), tracker.cv_max
                 )
-                if node_cand.last_heartbeat_timestamp > 0:
-                    delta_t = max(0.0, current_time - node_cand.last_heartbeat_timestamp)
-                    k_fresh = calculate_freshness(delta_t, tracker.t_max)
-                else:
-                    k_fresh = 1.0
-                k_cross = calculate_cross_consistency(
-                    node_cand.allocatable_cpu,
-                    node_cand.scheduler_expected_free_cpu,
-                    node_cand.reported_free_cpu,
+            else:
+                k_heartbeat = 1.0
+
+            # 4. Cross-scheduler consistency on both CPU and Memory (F14 fix)
+            k_cross_cpu = calculate_cross_consistency(
+                node_cand.allocatable_cpu,
+                node_cand.scheduler_expected_free_cpu,
+                node_cand.reported_free_cpu,
+            )
+            if node_cand.allocatable_memory_gb > 0:
+                k_cross_mem = calculate_cross_consistency(
+                    node_cand.allocatable_memory_gb,
+                    node_cand.scheduler_expected_free_memory_gb,
+                    node_cand.reported_free_memory_gb,
                 )
-                raw_conf = k_internal * k_fresh * k_heartbeat * k_cross
+            else:
+                k_cross_mem = 1.0
+            k_cross = k_cross_cpu * k_cross_mem
+
+            # Composite raw confidence product
+            raw_conf = k_internal * k_fresh * k_heartbeat * k_cross
+
+            # Update tracker only if this is a newly observed heartbeat (F12 fix)
+            if node_cand.last_heartbeat_timestamp > 0 and node_cand.last_heartbeat_timestamp > tracker.last_heartbeat_timestamp:
+                tracker.record_heartbeat(node_cand.last_heartbeat_timestamp)
                 kappa_i = tracker.ema.update(raw_conf)
             else:
-                # Compute from tracker history
-                kappa_i = tracker.update(
-                    reported_allocatable=node_cand.reported_allocatable_cpu,
-                    reported_used=node_cand.reported_used_cpu,
-                    reported_free=node_cand.reported_free_cpu,
-                    current_time=current_time,
-                )
-                k_cross = calculate_cross_consistency(
-                    node_cand.allocatable_cpu,
-                    node_cand.scheduler_expected_free_cpu,
-                    node_cand.reported_free_cpu,
-                )
-                kappa_i = kappa_i * k_cross
+                # Same observation; do not artificially advance EMA on every query
+                kappa_i = tracker.ema.value * k_fresh
 
-            # Re-construct ComputeNode object for CostEngine
+            # Re-construct NodeTelemetry
             node_telemetry = NodeTelemetry(
                 node_id=node_id,
                 cpu_util_pct=(
@@ -323,22 +360,73 @@ class ACOPredictiveSchedulerServicer(sentinel_pb2_grpc.ACOPredictiveSchedulerSer
                 ),
             )
 
+            # Re-construct ComputeNode with real cloud pricing & GPU metadata (F07 fix)
+            inst_type = InstanceType.SPOT if node_cand.is_spot else InstanceType.ON_DEMAND
+            cost_hr = node_cand.hourly_cost_usd if node_cand.hourly_cost_usd > 0 else (0.60 if not node_cand.is_spot else 0.18)
+            spot_prob = node_cand.spot_interruption_prob if node_cand.spot_interruption_prob > 0 else (0.20 if node_cand.is_spot else 0.0)
+            node_cost_profile = NodeCostProfile(
+                instance_type=inst_type,
+                cost_per_hour_usd=cost_hr,
+                interruption_prob=spot_prob,
+                region=node_cand.zone if node_cand.zone else "us-central1",
+            )
+
+            node_arch = NodeArch.X86_64
+            if node_cand.arch and "arm" in node_cand.arch.lower():
+                node_arch = NodeArch.ARM64
+            elif node_cand.gpu_count > 0:
+                node_arch = NodeArch.GPU_NODE
+
+            gpu_inv = {node_cand.gpu_type: int(node_cand.gpu_count)} if node_cand.gpu_count > 0 and node_cand.gpu_type else {}
+            gpu_vram = {node_cand.gpu_type: float(node_cand.gpu_memory_gb)} if node_cand.gpu_count > 0 and node_cand.gpu_type else {}
+
             compute_node = ComputeNode(
                 node_id=node_id,
                 total_cpu_cores=node_cand.allocatable_cpu,
                 total_memory_gb=node_cand.allocatable_memory_gb,
-                allocated_cpu_cores=node_cand.allocatable_cpu
-                - node_cand.scheduler_expected_free_cpu,
-                allocated_memory_gb=node_cand.allocatable_memory_gb
-                - node_cand.scheduler_expected_free_memory_gb,
+                allocated_cpu_cores=max(0.0, node_cand.allocatable_cpu - node_cand.scheduler_expected_free_cpu),
+                allocated_memory_gb=max(0.0, node_cand.allocatable_memory_gb - node_cand.scheduler_expected_free_memory_gb),
+                arch=node_arch,
+                gpu_inventory=gpu_inv,
+                gpu_vram_gb=gpu_vram,
+                cost_profile=node_cost_profile,
                 latest_telemetry=node_telemetry,
             )
 
-            # Base CostEngine heuristic score (prediction is None for clean split)
-            eta = self.cost_engine.score_node(job, compute_node, prediction=None)
+            # Hard eligibility filtering (F03, F11 fixes)
+            is_eligible = True
+            filter_reason = "PASSED"
 
-            # Apply trust-weighted discount
-            final_score = eta * (kappa_i**request.gamma)
+            if job.arch_required and compute_node.arch != job.arch_required:
+                is_eligible = False
+                filter_reason = f"ARCH_MISMATCH: requires {job.arch_required}, node has {compute_node.arch}"
+            elif job.resources.gpu_required:
+                total_gpus = sum(compute_node.gpu_inventory.values())
+                if total_gpus < job.resources.gpu_count:
+                    is_eligible = False
+                    filter_reason = f"INSUFFICIENT_GPUS: requires {job.resources.gpu_count}, node has {total_gpus}"
+                elif job.gpu_model_preferred and job.gpu_model_preferred not in compute_node.gpu_inventory:
+                    is_eligible = False
+                    filter_reason = f"GPU_MODEL_UNAVAILABLE: requires {job.gpu_model_preferred}"
+            elif job.cost_ceiling_usd and compute_node.cost_profile.cost_per_hour_usd > job.cost_ceiling_usd:
+                is_eligible = False
+                filter_reason = f"COST_EXCEEDS_CEILING: ${compute_node.cost_profile.cost_per_hour_usd:.2f} > ${job.cost_ceiling_usd:.2f}"
+            elif kappa_i < 0.05:
+                is_eligible = False
+                filter_reason = f"UNTRUSTED_TELEMETRY: confidence {kappa_i:.4f} < 0.05"
+
+            if is_eligible:
+                # Compute base cost score
+                eta = self.cost_engine.score_node(job, compute_node, prediction=None)
+                if eta == 0.0:
+                    is_eligible = False
+                    filter_reason = "COST_ENGINE_GATE_REJECTED"
+                    final_score = 0.0
+                else:
+                    final_score = eta * (kappa_i**request.gamma)
+            else:
+                eta = 0.0
+                final_score = 0.0
 
             scores.append(
                 sentinel_pb2.NodeScore(
@@ -346,6 +434,8 @@ class ACOPredictiveSchedulerServicer(sentinel_pb2_grpc.ACOPredictiveSchedulerSer
                     eta=eta,
                     confidence=kappa_i,
                     final_score=final_score,
+                    is_eligible=is_eligible,
+                    filter_reason=filter_reason,
                 )
             )
 
@@ -358,24 +448,27 @@ class ACOPredictiveSchedulerServicer(sentinel_pb2_grpc.ACOPredictiveSchedulerSer
     ) -> sentinel_pb2.PlacementCommittedResponse:
         """
         Acknowledges if a pod placement was committed (success) or aborted/unreserved.
+        Idempotent state handling (F21 fix).
         """
         pod_uid = request.pod_uid
         node_id = request.node_id
 
         if request.success:
-            self.committed_placements[pod_uid] = node_id
-            self.total_deposits += 1
-            print(
-                f"[Sentinel-Server] COMMIT: Pheromone deposit confirmed on node {node_id} "
-                f"for pod {pod_uid}."
-            )
-            # Replicas update pheromones in memory (equivalent logic to _deposit_pheromone)
+            if pod_uid not in self.committed_placements:
+                self.committed_placements[pod_uid] = node_id
+                self.total_deposits += 1
+                print(
+                    f"[Sentinel-Server] COMMIT: Placement confirmed on node {node_id} "
+                    f"for pod {pod_uid}."
+                )
         else:
-            self.phantom_deposits += 1
-            print(
-                f"[Sentinel-Server] ROLLBACK: Bind failed or unreserved for pod {pod_uid} "
-                f"on node {node_id}. Rollback triggered."
-            )
+            if pod_uid in self.committed_placements:
+                del self.committed_placements[pod_uid]
+                self.phantom_deposits += 1
+                print(
+                    f"[Sentinel-Server] ROLLBACK: Unreserved placement on node {node_id} "
+                    f"for pod {pod_uid}."
+                )
 
         return sentinel_pb2.PlacementCommittedResponse(acknowledged=True)
 
@@ -394,7 +487,12 @@ def serve(port: int = 50051) -> tuple[grpc.Server, ACOPredictiveSchedulerService
 
 
 if __name__ == "__main__":
-    server, servicer = serve()
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--port", type=int, default=50051, help="Port to listen on")
+    args = parser.parse_args()
+
+    server, servicer = serve(port=args.port)
 
     def shutdown_handler(signum, frame) -> None:
         print(f"[Sentinel-Server] Received signal {signum}, persisting state and shutting down...")

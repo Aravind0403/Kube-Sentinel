@@ -1,8 +1,10 @@
 {
-  "nodes": 100,
+  "total_nodes": 100,
   "jitter_pct": 20.0,
-  "duration_sec": 30.05138087272644,
-  "ticks": 15,
-  "degraded_nodes_isolated": 300,
-  "routing_protection_pct": 100.0
+  "ticks": 5,
+  "clean_mean_confidence": 0.9288,
+  "perturbed_mean_confidence": 0.1356,
+  "total_perturbed_evaluated": 100,
+  "total_perturbed_isolated": 60,
+  "isolation_rate_pct": 60.0
 }

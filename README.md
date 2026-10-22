@@ -230,23 +230,49 @@ Sweeping the trust sensitivity exponent $\gamma \in \{0, 0.5, 1.0, 2.0, 4.0\}$ o
 
 ---
 
-## Quick Start & Verification
+---
 
-### Running the Go Simulation Sweeps
-Automates the startup of the Python gRPC daemon, compilation and execution of the Go sweep simulation, and generation of the plots:
-```bash
-chmod +x scripts/run_all.sh
-./scripts/run_all.sh
-```
-Results and charts are saved to `docs/experiment_results.json` and `docs/v2-experiments.png`.
+## Local Verification & Test Suite
 
-### Running Real-Time K8s (KWOK) Validation
-Spins up a local KWOK cluster, applies nodes, telemetry annotations, resource quotas, schedules pods, forces a rollback, and parses the gRPC server logs:
+Kube-Sentinel provides fully automated, authentic test suites covering both the native Go scheduling framework plugin and the Python telemetry verification daemon:
+
+### 1. Go Scheduler Plugin Unit & Failure Isolation Tests
+Executes the native Go unit tests covering PreScore, Score, FilterPlugin hard-filtering (zero-trust, architecture mismatch, GPU fit, cost ceiling), optimistic reservation caching, and circuit breaker backoff state transitions:
 ```bash
-chmod +x scripts/run_kwok_validation.sh
-./scripts/run_kwok_validation.sh
+cd v2/go_plugin
+go test -v -race ./...
 ```
-This compiles validation counts and saves the chart to `docs/kwok-validation.png`.
+
+### 2. Telemetry Integrity & Confidence Math Verification
+Verifies the 4-dimensional zero-trust telemetry engine against clock skew, arithmetic discrepancy, heartbeat jitter, and cross-consistency checks:
+```bash
+python3 v2/verify_confidence.py
+```
+
+### 3. Authentic Chaos Injection & Circuit Breaker Failover
+Launches a live Sentinel daemon, transmits scoring queries, executes `SIGKILL` on the sidecar process, verifies that the circuit breaker trips from `CLOSED` $\to$ `OPEN` and activates the fallback resource-fit scorer without stalling the scheduling queue (0 failed bindings, 100% availability), restarts the daemon, and verifies recovery through `HALF-OPEN` $\to$ `CLOSED`:
+```bash
+chmod +x scripts/kwok_chaos_failover.sh
+./scripts/kwok_chaos_failover.sh
+```
+
+### 4. Alibaba GPU Cluster Trace Replayer
+Replays real cluster workload distributions across 32 heterogeneous GPU nodes (A10, T4, P100, V100, G2, G3) with per-scheduler capacity tracking and duration-weighted cost attribution:
+```bash
+python3 scripts/kwok_trace_replayer.py --jobs 100
+```
+
+### 5. Live gRPC Knee & Throughput Benchmark
+Executes live loopback RPC queries over socket `:50051` measuring actual serialization and scoring latency under burst queues up to 1,000 pods:
+```bash
+python3 scripts/kwok_grpc_knee_test.py --candidate-nodes 32 --max-burst 1000
+```
+
+### 6. Telemetry Jitter & Adversarial Isolation Benchmark
+Injects perturbed arithmetic balances and heartbeat jitter to measure real-time node confidence degradation and progressive isolation:
+```bash
+python3 scripts/kwok_scale_jitter_benchmark.py --ticks 5
+```
 
 ---
 
@@ -254,12 +280,14 @@ This compiles validation counts and saves the chart to `docs/kwok-validation.png
 
 | Directory / File | Description |
 | :--- | :--- |
-| `v2/go_plugin/plugin.go` | Go K8s Scheduling Framework plugin overriding lifecycle hooks. |
-| `v2/go_plugin/plugin_test.go` | Unit test suite for plugin translation and mocks. |
-| `v2/go_plugin/simulation/` | Simulation harness sweeping trust exponents. |
-| `v2/grpc_server.py` | Python gRPC Server processing node scoring requests and placement commits. |
-| `v2/confidence.py` | Trust math equations and Exponential Moving Average (EMA) confidence smoothing. |
-| `v2/proto/` | Protobuf contract definitions (`sentinel.proto`) and generated Go/Python stubs. |
-| `scripts/` | Shell scripts for sweeps, KWOK validation, chaos tests, and GKE benchmarks. |
-| `docs/` | Comprehensive verification reports, architecture diagrams, and benchmark plots. |
-| `learning/dossier/` | Comprehensive 22-volume engineering design dossier and architecture decision records. |
+| `v2/go_plugin/plugin.go` | Canonical Go K8s Scheduling Framework plugin (`Filter`, `PreScore`, `Score`, `Reserve`, `Unreserve`, `PostBind`). |
+| `v2/go_plugin/plugin_test.go` | Comprehensive Go test suite covering filtering, scoring, reservation cache eviction, and circuit breaker transitions. |
+| `v2/go_plugin/pb/` | Generated Go Protobuf bindings with typed economic, hardware, and filtering schemas. |
+| `v2/grpc_server.py` | Production Python gRPC server (`ACOPredictiveSchedulerServicer`) with dual-resource consistency and GPU matching. |
+| `v2/confidence.py` | 4-dimensional zero-trust telemetry engine and EMA confidence smoothing. |
+| `v2/proto/sentinel.proto` | Unified Protobuf IPC contract for pod requirements, node telemetry, economics, and scores. |
+| `scripts/` | Authentic benchmarking scripts (chaos failover, trace replayer, gRPC knee test, scale jitter benchmark). |
+| `docs/` | Measured benchmark JSON results (`kwok-chaos-results.json`, `kwok-trace-replay-results.json`, `kwok-grpc-knee-results.json`, `kwok-jitter-benchmark.json`). |
+| `.github/workflows/ci.yml` | Multi-stage GitHub Actions CI pipeline running Go tests, confidence math, and integration benchmarks. |
+| `archive/extender/` | Archived legacy HTTP extender (retired in favor of canonical native plugin architecture). |
+

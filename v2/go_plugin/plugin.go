@@ -41,7 +41,19 @@ const (
 	AnnotationLastHeartbeat      = "aco-sentinel.io/last-heartbeat-timestamp"
 	AnnotationHeartbeatIntervals = "aco-sentinel.io/recent-heartbeat-intervals"
 
-	LabelWorkloadType = "aco-sentinel.io/workload-type"
+	AnnotationHourlyCostUSD      = "sentinel.cost/hourly-usd"
+	AnnotationIsSpot             = "sentinel.cost/is-spot"
+	AnnotationSpotInterruption   = "sentinel.cost/spot-interruption-prob"
+	AnnotationGPUType            = "sentinel.gpu/type"
+	AnnotationGPUCount           = "sentinel.gpu/count"
+	AnnotationGPUMemoryGB        = "sentinel.gpu/memory-gb"
+	AnnotationArch               = "sentinel.node/arch"
+	AnnotationCostCeilingUSD     = "sentinel.cost/ceiling-usd"
+	AnnotationForceReject        = "sentinel.trust/force-reject"
+
+	LabelWorkloadType            = "aco-sentinel.io/workload-type"
+	LabelGpuRequired             = "sentinel.gpu/required"
+	LabelGpuTypeRequired         = "sentinel.gpu/type-required"
 )
 
 // SentinelConfig definitions
@@ -229,8 +241,15 @@ func (cb *CircuitBreaker) AttemptCall(ctx context.Context, fn func() error) erro
 }
 
 func (cb *CircuitBreaker) calculateBackoff(attempts int) time.Duration {
-	base := 30 * time.Second
-	backoff := base * time.Duration(math.Pow(2, float64(attempts-1)))
+	base := cb.timeout
+	if base <= 0 {
+		base = 5 * time.Second
+	}
+	if attempts <= 0 {
+		return base
+	}
+	multiplier := math.Pow(2, float64(attempts))
+	backoff := time.Duration(float64(base) * multiplier)
 	if backoff > 5*time.Minute {
 		backoff = 5 * time.Minute
 	}
@@ -241,8 +260,17 @@ func (cb *CircuitBreaker) recordFailure() {
 	cb.mu.Lock()
 	defer cb.mu.Unlock()
 	cb.lastFailure = time.Now()
+	currentState := cb.GetState()
+
+	if currentState == HalfOpen {
+		// Failed probe in half-open state immediately reopens circuit (F09 fix)
+		atomic.StoreInt32(&cb.state, int32(Open))
+		fmt.Printf("[Sentinel-CircuitBreaker] Probe call failed in HalfOpen. Reopening circuit. Next backoff: %v\n", cb.calculateBackoff(cb.recoveryAttempts))
+		return
+	}
+
 	failures := atomic.AddInt32(&cb.failureCount, 1)
-	if cb.GetState() == Closed && failures >= cb.failureThreshold {
+	if currentState == Closed && failures >= cb.failureThreshold {
 		atomic.StoreInt32(&cb.state, int32(Open))
 		fmt.Printf("[Sentinel-CircuitBreaker] Circuit breaker transitions to OPEN. Failure count reached threshold %d\n", cb.failureThreshold)
 	}
@@ -293,9 +321,35 @@ func (sc *ScoringCache) Get(podUID string, ttl time.Duration) (map[string]int64,
 func (sc *ScoringCache) Set(podUID string, scores map[string]int64) {
 	sc.mu.Lock()
 	defer sc.mu.Unlock()
+	// Bounded cache: evict oldest if exceeding 1,000 entries (F23 fix)
+	if len(sc.cache) > 1000 {
+		now := time.Now()
+		for k, v := range sc.cache {
+			if now.Sub(v.createdAt) > 5*time.Minute {
+				delete(sc.cache, k)
+			}
+		}
+	}
 	sc.cache[podUID] = &NodeScoreCached{
 		scores:    scores,
 		createdAt: time.Now(),
+	}
+}
+
+func (sc *ScoringCache) Delete(podUID string) {
+	sc.mu.Lock()
+	defer sc.mu.Unlock()
+	delete(sc.cache, podUID)
+}
+
+func (sc *ScoringCache) Prune(maxAge time.Duration) {
+	sc.mu.Lock()
+	defer sc.mu.Unlock()
+	now := time.Now()
+	for k, v := range sc.cache {
+		if now.Sub(v.createdAt) > maxAge {
+			delete(sc.cache, k)
+		}
 	}
 }
 
@@ -364,6 +418,7 @@ type SentinelPlugin struct {
 	auditLogger        *AuditLogger
 }
 
+var _ framework.FilterPlugin = &SentinelPlugin{}
 var _ framework.PreScorePlugin = &SentinelPlugin{}
 var _ framework.ScorePlugin = &SentinelPlugin{}
 var _ framework.ReservePlugin = &SentinelPlugin{}
@@ -474,16 +529,40 @@ func New(obj runtime.Object, handle framework.Handle) (framework.Plugin, error) 
 
 // extractPodSpec extracts pod telemetry requirement properties
 func extractPodSpec(pod *v1.Pod) *pb.PodSpec {
-	var cpuMin, memMin float64
+	var cpuMin, memMin, gpuMin float64
 	for _, container := range pod.Spec.Containers {
 		cpuMin += float64(container.Resources.Requests.Cpu().MilliValue()) / 1000.0
 		memMin += float64(container.Resources.Requests.Memory().Value()) / (1024.0 * 1024.0 * 1024.0)
+		if qty, ok := container.Resources.Requests["nvidia.com/gpu"]; ok {
+			gpuMin += float64(qty.Value())
+		}
 	}
 
 	wType := "batch"
+	var gpuTypeReq, archReq string
+	var costCeiling float64
+
 	if pod.Labels != nil {
 		if val, ok := pod.Labels[LabelWorkloadType]; ok {
 			wType = val
+		}
+		if val, ok := pod.Labels[LabelGpuTypeRequired]; ok {
+			gpuTypeReq = val
+		}
+	}
+
+	if pod.Spec.NodeSelector != nil {
+		if val, ok := pod.Spec.NodeSelector["kubernetes.io/arch"]; ok {
+			archReq = val
+		}
+		if val, ok := pod.Spec.NodeSelector["cloud.google.com/gke-gpu"]; ok {
+			gpuTypeReq = val
+		}
+	}
+
+	if pod.Annotations != nil {
+		if val, err := strconv.ParseFloat(pod.Annotations[AnnotationCostCeilingUSD], 64); err == nil {
+			costCeiling = val
 		}
 	}
 
@@ -494,6 +573,10 @@ func extractPodSpec(pod *v1.Pod) *pb.PodSpec {
 		CpuCoresRequested: cpuMin,
 		MemoryGbRequested: memMin,
 		WorkloadType:      wType,
+		GpuRequested:      gpuMin,
+		GpuTypeRequired:   gpuTypeReq,
+		RequiredArch:      archReq,
+		CostCeilingUsd:    costCeiling,
 	}
 }
 
@@ -525,6 +608,38 @@ func extractNodeCandidate(nodeInfo *framework.NodeInfo) *pb.NodeCandidate {
 
 	var lastHeartbeat float64
 	var recentIntervals []float64
+
+	var hourlyCost float64
+	var isSpot bool
+	var spotInterruption float64
+	var gpuType string
+	var gpuCount int32
+	var gpuMemoryGb float64
+	var arch string
+	var zone string
+
+	if node.Labels != nil {
+		if node.Labels["cloud.google.com/gke-spot"] == "true" ||
+			node.Labels["eks.amazonaws.com/capacityType"] == "SPOT" {
+			isSpot = true
+		}
+		if val, ok := node.Labels["cloud.google.com/gke-gpu"]; ok {
+			gpuType = val
+		} else if val, ok := node.Labels["accelerator"]; ok {
+			gpuType = val
+		}
+		if val, ok := node.Labels["topology.kubernetes.io/zone"]; ok {
+			zone = val
+		}
+	}
+
+	if node.Status.NodeInfo.Architecture != "" {
+		arch = node.Status.NodeInfo.Architecture
+	}
+
+	if qty, ok := node.Status.Allocatable["nvidia.com/gpu"]; ok {
+		gpuCount = int32(qty.Value())
+	}
 
 	if node.Annotations != nil {
 		if val, err := strconv.ParseFloat(node.Annotations[AnnotationReportedAllocatableCPU], 64); err == nil {
@@ -559,6 +674,28 @@ func extractNodeCandidate(nodeInfo *framework.NodeInfo) *pb.NodeCandidate {
 				}
 			}
 		}
+
+		if val, err := strconv.ParseFloat(node.Annotations[AnnotationHourlyCostUSD], 64); err == nil {
+			hourlyCost = val
+		}
+		if val, ok := node.Annotations[AnnotationIsSpot]; ok {
+			isSpot = val == "true"
+		}
+		if val, err := strconv.ParseFloat(node.Annotations[AnnotationSpotInterruption], 64); err == nil {
+			spotInterruption = val
+		}
+		if val, ok := node.Annotations[AnnotationGPUType]; ok && val != "" {
+			gpuType = val
+		}
+		if val, err := strconv.Atoi(node.Annotations[AnnotationGPUCount]); err == nil {
+			gpuCount = int32(val)
+		}
+		if val, err := strconv.ParseFloat(node.Annotations[AnnotationGPUMemoryGB], 64); err == nil {
+			gpuMemoryGb = val
+		}
+		if val, ok := node.Annotations[AnnotationArch]; ok && val != "" {
+			arch = val
+		}
 	}
 
 	return &pb.NodeCandidate{
@@ -575,11 +712,21 @@ func extractNodeCandidate(nodeInfo *framework.NodeInfo) *pb.NodeCandidate {
 		ReportedFreeMemoryGb:          repFreeMem,
 		LastHeartbeatTimestamp:        lastHeartbeat,
 		RecentHeartbeatIntervals:      recentIntervals,
+		HourlyCostUsd:                 hourlyCost,
+		IsSpot:                        isSpot,
+		SpotInterruptionProb:          spotInterruption,
+		GpuType:                       gpuType,
+		GpuCount:                      gpuCount,
+		GpuMemoryGb:                   gpuMemoryGb,
+		Arch:                          arch,
+		Zone:                          zone,
 	}
 }
 
 type stateData struct {
-	scores map[string]int64
+	scores        map[string]int64
+	eligibility   map[string]bool
+	filterReasons map[string]string
 }
 
 func (s *stateData) Clone() framework.StateData {
@@ -588,6 +735,34 @@ func (s *stateData) Clone() framework.StateData {
 
 const StateKey = framework.StateKey(Name + "State")
 
+// Filter implements framework.FilterPlugin to hard-reject nodes with untrusted telemetry or failed constraints (F11 fix)
+func (p *SentinelPlugin) Filter(ctx context.Context, state *framework.CycleState, pod *v1.Pod, nodeInfo *framework.NodeInfo) *framework.Status {
+	node := nodeInfo.Node()
+	if node == nil {
+		return framework.NewStatus(framework.Unschedulable, "Node is nil")
+	}
+
+	// 1. Explicit poison check
+	if node.Annotations != nil {
+		if val, ok := node.Annotations[AnnotationForceReject]; ok && val == "true" {
+			return framework.NewStatus(framework.Unschedulable, "Node marked as untrusted by Sentinel")
+		}
+	}
+
+	// 2. Read cycle state if pre-populated
+	data, err := state.Read(StateKey)
+	if err == nil {
+		if sd, ok := data.(*stateData); ok && sd.eligibility != nil {
+			if eligible, exists := sd.eligibility[node.Name]; exists && !eligible {
+				reason := sd.filterReasons[node.Name]
+				return framework.NewStatus(framework.Unschedulable, fmt.Sprintf("Sentinel rejected node: %s", reason))
+			}
+		}
+	}
+
+	return framework.NewStatus(framework.Success, "")
+}
+
 // PreScore batches all candidate nodes and fetches trust-weighted heuristic scores from gRPC server
 func (p *SentinelPlugin) PreScore(ctx context.Context, state *framework.CycleState, pod *v1.Pod, nodes []*v1.Node) *framework.Status {
 	if len(nodes) == 0 {
@@ -595,7 +770,7 @@ func (p *SentinelPlugin) PreScore(ctx context.Context, state *framework.CycleSta
 	}
 
 	startTime := time.Now()
-	
+
 	// Fallback to default configuration if configWatcher is nil (e.g. in tests)
 	var cfg *SentinelConfig
 	if p.configWatcher != nil {
@@ -652,6 +827,8 @@ func (p *SentinelPlugin) PreScore(ctx context.Context, state *framework.CycleSta
 	}
 
 	nodeScores := make(map[string]int64)
+	nodeEligibility := make(map[string]bool)
+	nodeFilterReasons := make(map[string]string)
 
 	// 2. Query Daemon through the Circuit Breaker
 	var resp *pb.ScoreResponse
@@ -692,11 +869,16 @@ func (p *SentinelPlugin) PreScore(ctx context.Context, state *framework.CycleSta
 		for _, n := range nodes {
 			// fallback scores (neutral cost/fit representation)
 			nodeScores[n.Name] = 100
+			nodeEligibility[n.Name] = true
 			if p.auditLogger != nil {
 				p.auditLogger.LogDecision(pod, n.Name, "fallback", 1.0, fmt.Sprintf("Circuit breaker fallback: %v", cbErr))
 			}
 		}
-		state.Write(StateKey, &stateData{scores: nodeScores})
+		state.Write(StateKey, &stateData{
+			scores:        nodeScores,
+			eligibility:   nodeEligibility,
+			filterReasons: nodeFilterReasons,
+		})
 		scoreDuration.WithLabelValues("PreScore", "fallback").Observe(time.Since(startTime).Seconds())
 		return nil
 	}
@@ -704,8 +886,10 @@ func (p *SentinelPlugin) PreScore(ctx context.Context, state *framework.CycleSta
 	// 4. Process response and record telemetry
 	for _, ns := range resp.Scores {
 		nodeScores[ns.NodeId] = int64(ns.FinalScore * 100.0)
+		nodeEligibility[ns.NodeId] = ns.IsEligible
+		nodeFilterReasons[ns.NodeId] = ns.FilterReason
 		trustFactors.WithLabelValues(ns.NodeId, "smoothed").Set(ns.Confidence)
-		p.auditLogger.LogDecision(pod, ns.NodeId, "score", ns.Confidence, fmt.Sprintf("ETA: %.2f, Confidence: %.2f", ns.Eta, ns.Confidence))
+		p.auditLogger.LogDecision(pod, ns.NodeId, "score", ns.Confidence, fmt.Sprintf("ETA: %.2f, Confidence: %.2f, Eligible: %v (%s)", ns.Eta, ns.Confidence, ns.IsEligible, ns.FilterReason))
 	}
 
 	// Save to cache
@@ -713,7 +897,11 @@ func (p *SentinelPlugin) PreScore(ctx context.Context, state *framework.CycleSta
 		p.scoringCache.Set(string(pod.UID), nodeScores)
 	}
 
-	state.Write(StateKey, &stateData{scores: nodeScores})
+	state.Write(StateKey, &stateData{
+		scores:        nodeScores,
+		eligibility:   nodeEligibility,
+		filterReasons: nodeFilterReasons,
+	})
 	scoreDuration.WithLabelValues("PreScore", "success").Observe(time.Since(startTime).Seconds())
 	return nil
 }
@@ -729,6 +917,12 @@ func (p *SentinelPlugin) Score(ctx context.Context, state *framework.CycleState,
 	sd, ok := data.(*stateData)
 	if !ok {
 		return 100, nil
+	}
+
+	if sd.eligibility != nil {
+		if eligible, exists := sd.eligibility[nodeName]; exists && !eligible {
+			return 0, framework.NewStatus(framework.Unschedulable, sd.filterReasons[nodeName])
+		}
 	}
 
 	score, exists := sd.scores[nodeName]
@@ -795,6 +989,11 @@ func (p *SentinelPlugin) Unreserve(ctx context.Context, state *framework.CycleSt
 	delete(p.reservedPlacements, string(pod.UID))
 	p.mu.Unlock()
 
+	// Clear score cache entry (F23 fix)
+	if p.scoringCache != nil {
+		p.scoringCache.Delete(string(pod.UID))
+	}
+
 	// Record rollback metric
 	schedulingDecisions.WithLabelValues(nodeName, "rollback").Inc()
 
@@ -814,6 +1013,11 @@ func (p *SentinelPlugin) PostBind(ctx context.Context, state *framework.CycleSta
 	p.mu.Lock()
 	delete(p.reservedPlacements, string(pod.UID))
 	p.mu.Unlock()
+
+	// Clear score cache entry (F23 fix)
+	if p.scoringCache != nil {
+		p.scoringCache.Delete(string(pod.UID))
+	}
 
 	// Record commit metric
 	schedulingDecisions.WithLabelValues(nodeName, "commit").Inc()

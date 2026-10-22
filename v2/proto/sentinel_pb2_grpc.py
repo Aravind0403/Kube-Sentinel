@@ -5,7 +5,7 @@ import warnings
 
 import sentinel_pb2 as sentinel__pb2
 
-GRPC_GENERATED_VERSION = '1.80.0'
+GRPC_GENERATED_VERSION = '1.82.1'
 GRPC_VERSION = grpc.__version__
 _version_not_supported = False
 
@@ -25,7 +25,7 @@ if _version_not_supported:
     )
 
 
-class ACOPredictiveSchedulerStub(object):
+class ACOPredictiveSchedulerStub:
     """Service coordinating custom scoring and placement checks between K8s and ACO
     """
 
@@ -47,7 +47,7 @@ class ACOPredictiveSchedulerStub(object):
                 _registered_method=True)
 
 
-class ACOPredictiveSchedulerServicer(object):
+class ACOPredictiveSchedulerServicer:
     """Service coordinating custom scoring and placement checks between K8s and ACO
     """
 
@@ -86,7 +86,7 @@ def add_ACOPredictiveSchedulerServicer_to_server(servicer, server):
 
 
  # This class is part of an EXPERIMENTAL API.
-class ACOPredictiveScheduler(object):
+class ACOPredictiveScheduler:
     """Service coordinating custom scoring and placement checks between K8s and ACO
     """
 

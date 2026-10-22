@@ -1,0 +1,65 @@
+name: CI - Kube-Sentinel Plugin & Sidecar Suite
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test-go-plugin:
+    name: Go Scheduler Plugin Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+          cache-dependency-path: v2/go_plugin/go.sum
+
+      - name: Run Go Plugin Unit & Integration Tests
+        run: |
+          cd v2/go_plugin
+          go test -v -race ./...
+
+  test-python-sidecar:
+    name: Python Sidecar & Integration Benchmarks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install Dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Verify Telemetry Confidence Math
+        run: |
+          python3 v2/verify_confidence.py
+
+      - name: Run Authentic Chaos Failover Integration Test
+        run: |
+          chmod +x scripts/kwok_chaos_failover.sh
+          ./scripts/kwok_chaos_failover.sh
+
+      - name: Run Alibaba GPU Trace Replayer
+        run: |
+          python3 scripts/kwok_trace_replayer.py --jobs 50
+
+      - name: Run Scale Jitter Benchmark
+        run: |
+          python3 scripts/kwok_scale_jitter_benchmark.py --ticks 3
+
+      - name: Run gRPC Latency Knee Test
+        run: |
+          python3 scripts/kwok_grpc_knee_test.py --candidate-nodes 16 --max-burst 250

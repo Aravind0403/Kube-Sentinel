@@ -271,6 +271,16 @@ class NodeConfidenceTracker:
         # Multiplicative product (any zero results in overall zero trust)
         return k_internal * k_fresh * k_heartbeat
 
+    @property
+    def last_heartbeat_timestamp(self) -> float:
+        """Return the timestamp of the latest recorded heartbeat, or 0.0 if empty."""
+        return self.heartbeat_timestamps[-1] if self.heartbeat_timestamps else 0.0
+
+    @property
+    def current_confidence(self) -> float:
+        """Return the current smoothed confidence level."""
+        return self.ema.value
+
     def update(
         self,
         reported_allocatable: float,
@@ -294,11 +304,6 @@ class NodeConfidenceTracker:
             reported_allocatable, reported_used, reported_free, current_time
         )
         return self.ema.update(raw_conf)
-
-    @property
-    def current_confidence(self) -> float:
-        """Return the current smoothed confidence level."""
-        return self.ema.value
 
 
 class AdaptiveThresholdManager:
