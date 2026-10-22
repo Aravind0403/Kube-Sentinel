@@ -1,0 +1,66 @@
+[
+    {
+        "id": "L1",
+        "name": "Healthy scheduler and sidecar",
+        "inputs": "Deployment aco-sentinel-scheduler in sentinel-system",
+        "expected": "Deployment ready within 90s",
+        "observed": "Scheduler & sidecar running and healthy",
+        "status": "PASS"
+    },
+    {
+        "id": "L2",
+        "name": "Ordinary eligible workload",
+        "inputs": "Pod pod-l2 (cpu: 50m, mem: 64Mi, schedulerName: aco-sentinel-scheduler)",
+        "expected": "Binds to any healthy worker",
+        "observed": "Bound to sentinel-acc-16339-worker",
+        "status": "PASS"
+    },
+    {
+        "id": "L3",
+        "name": "Protected latency-critical workload",
+        "inputs": "Pod pod-l3 (latency-critical)",
+        "expected": "Must bind to on-demand node",
+        "observed": "Correctly bound to on-demand node sentinel-acc-16339-worker2",
+        "status": "PASS"
+    },
+    {
+        "id": "L4",
+        "name": "Explicit cost ceiling ($1.00)",
+        "inputs": "Pod pod-l4 (latency-critical, cost ceiling $1.00)",
+        "expected": "Must bind to sentinel-acc-16339-worker ($0.40)",
+        "observed": "Bound to sentinel-acc-16339-worker",
+        "status": "PASS"
+    },
+    {
+        "id": "L5",
+        "name": "Malformed telemetry worker exclusion",
+        "inputs": "Node sentinel-acc-16339-worker2 free_mem=1000GB > allocatable=32GB",
+        "expected": "Must avoid sentinel-acc-16339-worker2 and bind to sentinel-acc-16339-worker",
+        "observed": "Bound to healthy sentinel-acc-16339-worker",
+        "status": "PASS"
+    },
+    {
+        "id": "L6",
+        "name": "Stale heartbeat worker exclusion",
+        "inputs": "Node sentinel-acc-16339-worker2 heartbeat=1792661072 (stale >30s)",
+        "expected": "Must avoid sentinel-acc-16339-worker2 and bind to sentinel-acc-16339-worker",
+        "observed": "Bound to healthy sentinel-acc-16339-worker",
+        "status": "PASS"
+    },
+    {
+        "id": "L7",
+        "name": "Mandatory constraint all-worker rejection",
+        "inputs": "Cost ceiling $0.05 (all nodes >= $0.15)",
+        "expected": "Remains unbound (Pending)",
+        "observed": "Pending without binding as expected",
+        "status": "PASS"
+    },
+    {
+        "id": "L8",
+        "name": "Sidecar failure & recovery",
+        "inputs": "Fault: sidecar killed & recovered; post-recovery pod",
+        "expected": "Fallback active during outage, normal scheduling resumes post-recovery",
+        "observed": "Outage preserved on-demand; post-recovery bound to sentinel-acc-16339-worker",
+        "status": "PASS"
+    }
+]

@@ -14,8 +14,8 @@ COPY v2/go_plugin/*.go /workspace/
 # Prefetch dependencies
 RUN go mod download
 
-# Compile custom kube-scheduler binary
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o kube-scheduler .
+# Compile custom kube-scheduler binary matching target architecture
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o kube-scheduler .
 
 # Stage 2: Packaging the final scheduler image
 FROM alpine:3.19

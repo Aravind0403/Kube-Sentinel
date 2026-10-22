@@ -34,6 +34,7 @@ Thumbs.db
 
 # Logs
 *.log
+!artifacts/**/*.log
 logs/
 
 # Tarball archives

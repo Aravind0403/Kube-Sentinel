@@ -1,0 +1,11 @@
+[Sentinel-ConfigWatcher] Configuration loaded from v2/sentinel-config.yaml
+[Sentinel-FederationServer] Serving metrics on port 8083...
+[Sentinel-Server] Listening on port 50051...
+[Sentinel-Server] COMMIT: Placement confirmed on node sentinel-acc-16339-worker2 for pod 6f4a3076-c457-4b45-98db-d0882d841b43.
+[Sentinel-Server] COMMIT: Placement confirmed on node sentinel-acc-16339-worker for pod 02797498-41ae-4e8b-83dc-fee8023264cf.
+[Sentinel-Server] COMMIT: Placement confirmed on node sentinel-acc-16339-worker for pod 25590ea8-70b3-42e1-8da5-4b24db4c5082.
+[Sentinel-Server] COMMIT: Placement confirmed on node sentinel-acc-16339-worker for pod 95147558-5ff9-4a78-8f3d-5bd6ee65e8c1.
+[Sentinel-Server] COMMIT: Placement confirmed on node sentinel-acc-16339-worker2 for pod 6cd84ea5-aeae-49d5-a46a-d4dee7d89a08.
+[Sentinel-ConfigWatcher] Configuration loaded from v2/sentinel-config.yaml
+[Sentinel-Server] COMMIT: Placement confirmed on node sentinel-acc-16339-worker for pod 6598d7c1-6af7-4f8c-8de0-a0ed30f09f18.
+Error from server (BadRequest): previous terminated container "sidecar" in pod "aco-sentinel-scheduler-86754cbc7f-82z28" not found
