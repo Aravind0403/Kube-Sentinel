@@ -1,0 +1,4 @@
+FROM alpine:3.19
+WORKDIR /bin
+COPY kube-scheduler-linux-amd64 /bin/kube-scheduler
+CMD ["/bin/kube-scheduler"]

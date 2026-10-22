@@ -1,0 +1,66 @@
+[
+  {
+    "id": "L1",
+    "name": "Healthy scheduler and sidecar",
+    "inputs": "Deployment on GKE Standard",
+    "expected": "Deployment ready within 180s",
+    "observed": "Scheduler & sidecar running and healthy",
+    "status": "PASS"
+  },
+  {
+    "id": "L2",
+    "name": "Ordinary eligible workload",
+    "inputs": "Unconstrained pod; 3 candidate nodes (zsh.15 Spot, zsh.40 On-Demand, .50 On-Demand)",
+    "expected": "Spot selection for cost minimization",
+    "observed": "Bound to gke-sentinel-gke-10647-spot-pool-860eebbe-46nl",
+    "status": "PASS"
+  },
+  {
+    "id": "L3",
+    "name": "Protected latency-critical workload",
+    "inputs": "Label kube-sentinel.io/workload-type: latency-critical",
+    "expected": "Exclusion of Spot node; selection of lowest-cost on-demand",
+    "observed": "Correctly bound to on-demand node gke-sentinel-gke-10647-default-pool-c1cc63cc-8q8z",
+    "status": "PASS"
+  },
+  {
+    "id": "L4",
+    "name": "Explicit cost ceiling enforcement",
+    "inputs": "Ceiling $1.00/hr (excludes $2.50 worker)",
+    "expected": "Placement strictly on candidate <= $1.00/hr",
+    "observed": "Bound to gke-sentinel-gke-10647-default-pool-c1cc63cc-8q8z",
+    "status": "PASS"
+  },
+  {
+    "id": "L5",
+    "name": "Malformed telemetry worker exclusion",
+    "inputs": "Worker 2 telemetry arithmetic mismatch (allocatable != used + free)",
+    "expected": "Worker 2 excluded from candidate set",
+    "observed": "Bound to healthy gke-sentinel-gke-10647-default-pool-c1cc63cc-8q8z",
+    "status": "PASS"
+  },
+  {
+    "id": "L6",
+    "name": "Stale heartbeat worker exclusion",
+    "inputs": "Worker 2 heartbeat aged > 120s",
+    "expected": "Worker 2 rejected due to confidence degradation",
+    "observed": "Bound to healthy gke-sentinel-gke-10647-default-pool-c1cc63cc-8q8z",
+    "status": "PASS"
+  },
+  {
+    "id": "L7",
+    "name": "Mandatory constraint all-worker rejection",
+    "inputs": "Cost ceiling $0.05 (all nodes >= $0.15)",
+    "expected": "Remains unbound (Pending)",
+    "observed": "Pending without binding as expected",
+    "status": "PASS"
+  },
+  {
+    "id": "L8",
+    "name": "Sidecar failure & recovery",
+    "inputs": "Fault: sidecar killed; post-recovery pod",
+    "expected": "Prove fallback during outage; prove native scoring after restart",
+    "observed": "Outage preserved on-demand with proven fallback; restart resumed proven native scoring on gke-sentinel-gke-10647-spot-pool-860eebbe-46nl",
+    "status": "PASS"
+  }
+]

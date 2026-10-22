@@ -1,0 +1,31 @@
+[Sentinel-ConfigWatcher] Configuration loaded from v2/sentinel-config.yaml
+[Sentinel-Persistence] State loaded successfully from v2/sentinel_state.json
+[Sentinel-FederationServer] Serving metrics on port 8083...
+[Sentinel-Server] Listening on port 50051...
+[Sentinel-Server] SCORE: Evaluated 3 candidate nodes for pod default/pod-l8-recovered (4a5e8e87-0c3e-410a-9293-9ce6ae3bab94)
+[Sentinel-Server] COMMIT: Placement confirmed on node gke-sentinel-gke-10647-spot-pool-860eebbe-46nl for pod 4a5e8e87-0c3e-410a-9293-9ce6ae3bab94.
+[Sentinel-Server] SCORE: Evaluated 3 candidate nodes for pod default/bench-pod-1 (4c10da5b-bbf6-4f42-b701-a2ae8528853e)
+[Sentinel-Server] COMMIT: Placement confirmed on node gke-sentinel-gke-10647-spot-pool-860eebbe-46nl for pod 4c10da5b-bbf6-4f42-b701-a2ae8528853e.
+[Sentinel-ConfigWatcher] Configuration loaded from v2/sentinel-config.yaml
+[Sentinel-Server] SCORE: Evaluated 3 candidate nodes for pod default/bench-pod-2 (738ccd0d-a8c6-411a-8e64-8fd039b1781e)
+[Sentinel-Server] COMMIT: Placement confirmed on node gke-sentinel-gke-10647-spot-pool-860eebbe-46nl for pod 738ccd0d-a8c6-411a-8e64-8fd039b1781e.
+[Sentinel-Server] SCORE: Evaluated 3 candidate nodes for pod default/bench-pod-3 (7d71e772-ec5f-493f-b068-e6f6f494de44)
+[Sentinel-Server] COMMIT: Placement confirmed on node gke-sentinel-gke-10647-spot-pool-860eebbe-46nl for pod 7d71e772-ec5f-493f-b068-e6f6f494de44.
+[Sentinel-ConfigWatcher] Configuration loaded from v2/sentinel-config.yaml
+[Sentinel-Server] SCORE: Evaluated 3 candidate nodes for pod default/bench-pod-4 (1b52a162-973d-4186-8fc0-6549d535478b)
+[Sentinel-Server] COMMIT: Placement confirmed on node gke-sentinel-gke-10647-spot-pool-860eebbe-46nl for pod 1b52a162-973d-4186-8fc0-6549d535478b.
+[Sentinel-Server] SCORE: Evaluated 3 candidate nodes for pod default/bench-pod-5 (47156060-3a14-459d-a488-76519b23abab)
+[Sentinel-Server] COMMIT: Placement confirmed on node gke-sentinel-gke-10647-spot-pool-860eebbe-46nl for pod 47156060-3a14-459d-a488-76519b23abab.
+[Sentinel-ConfigWatcher] Configuration loaded from v2/sentinel-config.yaml
+[Sentinel-Server] SCORE: Evaluated 3 candidate nodes for pod default/bench-pod-6 (de28cc11-cecf-46d1-a5a3-3389b4a62e5c)
+[Sentinel-Server] COMMIT: Placement confirmed on node gke-sentinel-gke-10647-spot-pool-860eebbe-46nl for pod de28cc11-cecf-46d1-a5a3-3389b4a62e5c.
+[Sentinel-Server] SCORE: Evaluated 3 candidate nodes for pod default/bench-pod-7 (005c850e-5b22-438c-86c7-a047ab6a9209)
+[Sentinel-Server] COMMIT: Placement confirmed on node gke-sentinel-gke-10647-spot-pool-860eebbe-46nl for pod 005c850e-5b22-438c-86c7-a047ab6a9209.
+[Sentinel-Server] SCORE: Evaluated 3 candidate nodes for pod default/bench-pod-8 (948f083c-0747-42b9-8407-ca572bc53ded)
+[Sentinel-Server] COMMIT: Placement confirmed on node gke-sentinel-gke-10647-spot-pool-860eebbe-46nl for pod 948f083c-0747-42b9-8407-ca572bc53ded.
+[Sentinel-ConfigWatcher] Configuration loaded from v2/sentinel-config.yaml
+[Sentinel-Server] SCORE: Evaluated 3 candidate nodes for pod default/bench-pod-9 (ebee6662-e2ff-4a7d-978b-137b6c43cb78)
+[Sentinel-Server] COMMIT: Placement confirmed on node gke-sentinel-gke-10647-spot-pool-860eebbe-46nl for pod ebee6662-e2ff-4a7d-978b-137b6c43cb78.
+[Sentinel-Server] SCORE: Evaluated 3 candidate nodes for pod default/bench-pod-10 (221f5603-850c-43ce-a1c3-51740892c36e)
+[Sentinel-Server] COMMIT: Placement confirmed on node gke-sentinel-gke-10647-spot-pool-860eebbe-46nl for pod 221f5603-850c-43ce-a1c3-51740892c36e.
+[Sentinel-ConfigWatcher] Configuration loaded from v2/sentinel-config.yaml

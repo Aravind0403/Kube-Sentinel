@@ -1,0 +1,4 @@
+NAME                                                STATUS   ROLES    AGE     VERSION               INTERNAL-IP   EXTERNAL-IP     OS-IMAGE                             KERNEL-VERSION      CONTAINER-RUNTIME
+gke-sentinel-gke-10647-default-pool-c1cc63cc-8q8z   Ready    <none>   6m16s   v1.36.4-gke.1495002   10.128.0.28   34.58.250.122   Container-Optimized OS from Google   6.12.105+ (amd64)   containerd://2.2.7
+gke-sentinel-gke-10647-default-pool-c1cc63cc-v410   Ready    <none>   6m16s   v1.36.4-gke.1495002   10.128.0.27   34.30.172.98    Container-Optimized OS from Google   6.12.105+ (amd64)   containerd://2.2.7
+gke-sentinel-gke-10647-spot-pool-860eebbe-46nl      Ready    <none>   5m2s    v1.36.4-gke.1495002   10.128.0.29   34.41.196.104   Container-Optimized OS from Google   6.12.105+ (amd64)   containerd://2.2.7

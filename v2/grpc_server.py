@@ -21,6 +21,20 @@ import math
 from concurrent import futures
 from typing import Dict
 
+_active_servicer = None
+
+def _global_shutdown_handler(signum, frame) -> None:
+    print(f"[Sentinel-Server] Received signal {signum}, persisting state and exiting immediately...", flush=True)
+    if _active_servicer is not None:
+        try:
+            _active_servicer.persistence.save()
+        except Exception as e:
+            print(f"[Sentinel-Server] Error saving state during shutdown: {e}", flush=True)
+    os._exit(0)
+
+signal.signal(signal.SIGINT, _global_shutdown_handler)
+signal.signal(signal.SIGTERM, _global_shutdown_handler)
+
 import grpc
 
 # Add project root and libraries to path
@@ -166,6 +180,18 @@ class FederationHTTPServer:
                         "rollback_count": self.server.rollback_count
                     }
                     h.wfile.write(json.dumps(response).encode())
+                elif h.path == "/shutdown":
+                    h.send_response(200)
+                    h.end_headers()
+                    h.wfile.write(b"shutting down\n")
+                    def do_exit():
+                        time.sleep(0.1)
+                        try:
+                            self.server.persistence.save()
+                        except Exception:
+                            pass
+                        os._exit(0)
+                    threading.Thread(target=do_exit, daemon=True).start()
                 else:
                     h.send_response(404)
                     h.end_headers()
@@ -515,8 +541,10 @@ class SentinelSchedulerServicer(sentinel_pb2_grpc.SentinelSchedulerServicer):
 
 def serve(port: int = 50051) -> tuple[grpc.Server, SentinelSchedulerServicer]:
     """Start the gRPC server."""
+    global _active_servicer
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     servicer = SentinelSchedulerServicer()
+    _active_servicer = servicer
     sentinel_pb2_grpc.add_SentinelSchedulerServicer_to_server(
         servicer, server
     )
@@ -534,17 +562,6 @@ if __name__ == "__main__":
 
     server, servicer = serve(port=args.port)
 
-    def shutdown_handler(signum, frame) -> None:
-        print(f"[Sentinel-Server] Received signal {signum}, persisting state and exiting immediately...", flush=True)
-        try:
-            servicer.persistence.save()
-        except Exception as e:
-            print(f"[Sentinel-Server] Error saving state during shutdown: {e}", flush=True)
-        os._exit(0)
-
-    signal.signal(signal.SIGINT, shutdown_handler)
-    signal.signal(signal.SIGTERM, shutdown_handler)
-
     while True:
-        time.sleep(86400)
+        time.sleep(1)
 
