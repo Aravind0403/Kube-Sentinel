@@ -1,293 +1,127 @@
 # Kube-Sentinel
 
-**Trust-Weighted, Cost-Optimal Kubernetes Scheduler Plugin via Native Go Framework & Telemetry Consistency Daemon**  
-*(Formerly ACO-Sentinel)*
+A native Kubernetes scheduler plugin that combines placement constraints, cost-aware scoring, and telemetry consistency checks.
 
-[![GKE Verified](https://img.shields.io/badge/GKE-Verified_Control_Plane-blue?style=flat-square)](#gke-cluster-deployment--empirical-benchmarks)
-[![KWOK Verified](https://img.shields.io/badge/KWOK-Verified_Control_Plane-blue?style=flat-square)](#kwok-verification--empirical-benchmarks)
-[![Peak Throughput](https://img.shields.io/badge/Peak_Throughput-1%2C250_pods%2Fsec-success?style=flat-square)](#summary-of-gke-control-plane-benchmarks)
-[![Failover Availability](https://img.shields.io/badge/Failover-100%25_Availability_(0_Failures)-brightgreen?style=flat-square)](#summary-of-gke-control-plane-benchmarks)
-[![Cost Reduction](https://img.shields.io/badge/GPU_Cost_Savings-46.3%25_vs_Default_K8s-orange?style=flat-square)](#kwok-verification--empirical-benchmarks)
+Kube-Sentinel is a portfolio engineering project. The current baseline is [v0.1.0](https://github.com/Aravind0403/Kube-Sentinel/releases/tag/v0.1.0); this branch cleans up its implementation and public interface. Local bindings and native daemon failover have been tested. The cluster outage/recovery scenario still needs stronger evidence before cloud acceptance.
 
-Kube-Sentinel is an enterprise-grade, high-throughput Kubernetes custom scheduler designed for heterogeneous cloud and GPU clusters. It decouples high-speed scheduling execution (a native Go plugin implementing the Kubernetes Scheduling Framework) from mathematical telemetry verification (a Python daemon communicating over a sub-millisecond loopback gRPC channel).
+## What it does
 
----
+- Keeps protected latency-critical workloads off recognized Spot capacity.
+- Filters CPU architecture, GPU requirements, explicit cost ceilings, and unacceptable telemetry.
+- Uses a Python sidecar for cost and telemetry-confidence scoring.
+- Keeps native Go filters active when the sidecar is unavailable; a circuit breaker supplies neutral fallback scores.
+- Tracks placement commit/rollback through scheduling lifecycle hooks.
 
-## The Core Problems Solved
+Pricing and optional observations are supplied as node metadata. The project does not automatically discover current cloud prices or collect trustworthy host utilization. Absent optional observations use defaults; supplied malformed observations are rejected. Consistency checks cannot authenticate a node that reports internally consistent false data.
 
-### 1. Blind Trust in Node Telemetry
-Default Kubernetes schedulers implicitly trust all metrics reported by node agents. If a worker node or daemon flaps, experiences high network jitter, drops heartbeats, or reports corrupted resource allocations, standard schedulers continue routing critical workloads to it. Kube-Sentinel enforces a **Multi-Dimensional Zero-Trust Pipeline ($\kappa_i$)** that continuously cross-checks telemetry against scheduler cache ground truth and mathematically discounts degraded hosts.
-
-### 2. Accidental vs. Intentional QoS Compliance
-Default Kubernetes scheduling (`LeastAllocated`) achieves 100% latency-sensitive QoS compliance **by accident**: it spreads workloads to the largest available nodes (such as \$25/hr V100/A10 instances), which happen to be On-Demand, wasting vast compute budgets on small batch pods. Conversely, aggressive bin-packing (`MostAllocated`) is **QoS-blind**, placing up to 47.9% of Latency-Sensitive pods onto preemptible Spot instances. 
-
-**Kube-Sentinel achieves 100% QoS compliance intentionally, at 46.3% lower cost**, by treating instance pricing, preemption risk, and resource headroom as a first-class, non-compensable composite heuristic ($\eta_i$).
-
----
-
-## Comparison With Kubernetes Schedulers
-
-| Feature / System | Default `kube-scheduler` | CNCF Volcano | CNCF Koordinator | **Kube-Sentinel (Ours)** |
-| :--- | :--- | :--- | :--- | :--- |
-| **Control Plane Type** | Native In-Tree | Standalone Engine | Native Plugin + Webhooks | **Native Framework Plugin (Go)** |
-| **IPC Architecture** | In-Memory | Dedicated Controller | Daemon / Webhook | **Sub-ms gRPC Loopback (:50051)** |
-| **Telemetry Verification** | Blind Trust | Blind Trust | Agent Co-location | **Zero-Trust Multi-Check ($\kappa_i$)** |
-| **Jitter / Flap Protection** | ❌ None | ❌ None | ❌ None | **EMA + 3-State Hysteresis** |
-| **Cloud Cost Awareness** | ❌ None | ❌ None | ❌ None | **Real-Time Hourly Pricing ($\eta_i$)** |
-| **Spot vs On-Demand SLA** | ❌ Accidental | SLA Priority Queues | Co-location Priority | **Non-Compensable Intent Gating** |
-| **Sidecar Failover Safety** | Built-in | HA Replicas | K8s Pod Restart | **Active 3-State Circuit Breaker** |
-
----
-
-## System Architecture
-
-The architecture isolates the microsecond-level scheduling critical path in Go from data-science telemetry processing in Python:
+## Architecture
 
 ```mermaid
-graph TB
-    subgraph K8s_CP["Kubernetes Control Plane"]
-        APIServer["K8s API Server"]
-        KubeScheduler["kube-scheduler<br/>(with Kube-Sentinel Plugin)"]
-    end
-
-    subgraph Worker_Nodes["Worker Nodes Cluster"]
-        SafeNode["Safe Node<br/>(κ = 1.0)"]
-        AdvNode["Adversarial Node<br/>(κ = 0.0)"]
-        FlapNode["Flapping Node<br/>(κ = 0.28)"]
-        TelemetryAgent["Telemetry Agent<br/>(Annotates K8s API)"]
-    end
-
-    subgraph Go_Plugin["Kube-Sentinel Go Plugin"]
-        PreScoreHook["PreScore Hook<br/>(Batch Evaluation)"]
-        ScoreHook["Score Hook<br/>(Final Scoring with Trust)"]
-        ReserveHook["Reserve Hook<br/>(Optimistic Cache Map)"]
-        UnreserveHook["Unreserve Hook<br/>(Rollback Transaction)"]
-        PostBindHook["PostBind Hook<br/>(Commit Transaction)"]
-        CircuitBreaker["Circuit Breaker<br/>(Closed / Open / Half-Open)"]
-        LocalCache["Local Placement Cache<br/>(reservedPlacements Map)"]
-        PrometheusMetrics["Prometheus Metrics<br/>(:8082)"]
-    end
-
-    subgraph Python_Sidecar["Sentinel Sidecar (Python Daemon)"]
-        gRPCServer["gRPC Server<br/>(:50051)"]
-        TrustCalc["Zero-Trust Calculator<br/>(κ_int × κ_fresh × κ_heartbeat × κ_cross)"]
-        CostEngine["Intent & Cost Engine<br/>(η = r × c × s × p)"]
-        StatePersist["State Persistence<br/>(Atomic JSON Dump)"]
-        FederationEP["Federation Endpoint<br/>(:8083 /placements)"]
-    end
-
-    subgraph Monitoring["Observability"]
-        Prometheus["Prometheus Server"]
-    end
-
-    %% Connections
-    Worker_Nodes -->|Status & Annotations| APIServer
-    APIServer -->|Informer Sync| KubeScheduler
-    KubeScheduler -->|Delegates Lifecycle Hooks| Go_Plugin
-
-    PreScoreHook -->|"gRPC: ScoreNodes"| gRPCServer
-    UnreserveHook -->|"gRPC: PlacementCommitted(Rollback)"| gRPCServer
-    PostBindHook -->|"gRPC: PlacementCommitted(Commit)"| gRPCServer
-
-    PreScoreHook -->|Checks State| CircuitBreaker
-    CircuitBreaker -->|Fallback if Open| ScoreHook
-    ReserveHook -->|Stores Correlation| LocalCache
-
-    gRPCServer --> TrustCalc
-    TrustCalc --> CostEngine
-    gRPCServer --> StatePersist
-
-    PrometheusMetrics -->|Scrape Metrics| Prometheus
+flowchart LR
+    A[Kubernetes scheduling cycle] --> B[Go PreFilter and Filter]
+    B --> C[PreScore: sidecar RPC]
+    C --> D[Python cost and confidence scoring]
+    D --> E[Go Score]
+    C --> F[Circuit breaker fallback]
+    F --> E
+    E --> G[Reserve, bind, commit or rollback]
 ```
 
-1. **Go Scheduler Plugin:** Implements the official Kubernetes Scheduling Framework (`PreScore`, `Score`, `Reserve`, `Unreserve`, `PostBind`). It maintains an optimistic in-memory reservation cache (`reservedPlacements`) to eliminate Time-of-Check to Time-of-Use (TOCTOU) races and rolls back failed bindings immediately via `Unreserve`.
-2. **Sentinel Python Daemon:** Exposes a high-throughput gRPC endpoint (`/ScoreNodes` & `/PlacementCommitted`). It processes non-linear telemetry consistency equations, tracks arrival variance across nodes, and returns trust-weighted vector scores.
-3. **Resilient Circuit Breaker:** An active 3-state breaker (`CLOSED` $\to$ `OPEN` $\to$ `HALF-OPEN` $\to$ `CLOSED`) inside the Go plugin detects sidecar timeouts (>50 ms) and automatically falls back to native capacity fit, guaranteeing **0 failed bindings** during daemon crashes or upgrades.
+The custom scheduler is selected through `spec.schedulerName`. Standard Kubernetes resource and affinity filters remain enabled in the local profile. This is a per-Pod scoring path; it does not perform global batch optimization.
 
----
+## Run the native acceptance tests
 
-## Key Mathematical Models
+Requirements: Go matching `v2/go_plugin/go.mod`, Python 3.11 or newer, and a local environment that permits test subprocesses and loopback sockets.
 
-Rather than hard-rejecting nodes with poor metrics (which causes sudden capacity cliffs and scheduling thrashing), Kube-Sentinel applies a multiplicative trust discount factor $\kappa_i$ to composite cost scores:
-
-$$\text{FinalScore}_i = \eta_i \times \kappa_i^\gamma$$
-
-where $\eta_i$ is the base intent and cost heuristic, $\kappa_i$ is the composite trust factor, and $\gamma$ is the trust sensitivity exponent.
-
-### 1. Intent-Aware Cost Gating ($\eta_i$)
-To prevent fatal SLA compromises, the base score enforces strict non-compensable multiplicative gating:
-
-$$\eta_i = r_i \times c_i \times s_i \times p_i$$
-
-* **Reliability Factor ($r_i$):** Enforces an eviction penalty if a Latency-Sensitive (LS) pod is routed to a preemptible Spot node ($r_i = 0.0$).
-* **Cost Efficiency ($c_i$):** Inversely weights candidate nodes by their real-time hourly instance cost.
-* **SLA Headroom ($s_i$):** Strict penalty for nodes exceeding maximum safe CPU/memory utilization thresholds.
-* **Workload Prediction ($p_i$):** Short-horizon Exponential Moving Average (EMA) spike projection.
-
-### 2. The 4-Dimensional Zero-Trust Model ($\kappa_i$)
-
-```mermaid
-graph LR
-    subgraph Inputs["Node Telemetry Inputs"]
-        Metrics["Allocatable / Used / Free CPU"]
-        Timestamps["Heartbeat Timestamp (Δt)"]
-        Intervals["Heartbeat Intervals (CV)"]
-        Expected["Scheduler Expected Free"]
-    end
-
-    subgraph Trust_Dimensions["Trust Calculation Dimensions"]
-        K_int["Internal Consistency<br/>κ_internal = max(0, 1 - Δ / A)"]
-        K_fresh["Heartbeat Freshness<br/>κ_fresh = max(0, 1 - Δt / T_max)"]
-        K_hb["Heartbeat Jitter<br/>κ_heartbeat = max(0, 1 - CV / CV_max)"]
-        K_cross["Cross-Scheduler<br/>κ_cross = max(0, 1 - |Exp - Rep| / A)"]
-    end
-
-    subgraph Gate["Zero-Trust Multiplier Gate"]
-        Product["Multiplicative Product<br/>κ_raw = κ_int × κ_fresh × κ_hb × κ_cross"]
-        EMA["Exponential Moving Average<br/>κ_i = EMA(κ_raw, α=0.5)"]
-    end
-
-    subgraph Scoring["Final Node Score Engine"]
-        Eta["Base Cost Heuristic (η_i)<br/>(SLA / Pricing / Headroom)"]
-        FinalScore["Final Score<br/>Score_i = η_i × (κ_i)^γ"]
-    end
-
-    Metrics --> K_int
-    Timestamps --> K_fresh
-    Intervals --> K_hb
-    Expected --> K_cross
-
-    K_int --> Product
-    K_fresh --> Product
-    K_hb --> Product
-    K_cross --> Product
-
-    Product --> EMA
-    EMA --> FinalScore
-    Eta --> FinalScore
+```sh
+python3 -m venv .venv
+. .venv/bin/activate
+python -m pip install -r requirements.txt
+export SENTINEL_ACCEPTANCE_PYTHON="$(command -v python)"
+(cd v2/go_plugin && go test -race -count=1 -v ./...)
+python v2/verify_confidence.py
 ```
 
-* **Internal Consistency ($\kappa_{\text{internal}}$):** Validates arithmetic balance: $|(A_i - U_i) - F_i| = 0$. If reported allocatable minus used does not equal free, trust collapses to 0.
-* **Heartbeat Freshness ($\kappa_{\text{fresh}}$):** Exponentially discounts nodes as elapsed time $\Delta t$ approaches timeout $T_{\text{max}}$.
-* **Heartbeat Jitter ($\kappa_{\text{heartbeat}}$):** Evaluates arrival interval variance using the Coefficient of Variation ($\text{CV}$). Flapping networks trigger a dynamic penalty.
-* **Cross-Scheduler Consistency ($\kappa_{\text{cross}}$):** Compares node-reported capacity against the scheduler cache ground truth (`NodeInfo`).
+Setting `SENTINEL_ACCEPTANCE_PYTHON` is required to execute the real daemon failover test. Without it, that test skips. CI sets it explicitly.
 
----
+## Run the local cluster fixtures
 
-## GKE Cluster Deployment & Empirical Benchmarks
+Install kind, kubectl, and a working Docker or Podman runtime. Allow enough resources for one control-plane container and three worker containers; the runner builds images for the host architecture.
 
-Kube-Sentinel has been fully containerized and verified on a live **Google Kubernetes Engine (GKE)** cluster (`gpu-inference-cluster` in `us-central1-a`, Kubernetes `v1.35.6-gke.1049000`) across both standard CPU and physical NVIDIA GPU node pools.
-
-* **Full GKE Empirical Benchmark Report:** [GKE_BENCHMARKS.md](file:///Users/aravindsundaresan/Development/ACO_Project_Front/ACO_Project_Upfront_V2/GKE_BENCHMARKS.md)
-* **Node Pools Tested:**
-  * **CPU Node Pool:** `cpu-pool` (1 × `e2-medium` node)
-  * **GPU Node Pool:** `gpu-pool` (1 × `g2-standard-4` node with 1 × NVIDIA L4 GPU)
-
-### Summary of GKE Control-Plane Benchmarks
-
-| Metric Category | Target / Baseline | Kube-Sentinel Result | Engineering Significance |
-| :--- | :--- | :--- | :--- |
-| **1. Peak gRPC Throughput** | 1,000 pods/sec SLA | **1,252.6 pods/sec (CPU) / 1,245.6 pods/sec (GPU)** | Peak knee throughput at 1,000 pod burst with sub-millisecond P99 latency (**0.981 ms CPU / 0.971 ms GPU**). |
-| **2. Heavy Queue Latency Cap** | < 10.0 ms K8s SLA | **3.98 ms P99** | Linearly scales under 10,000 pod queue bursts, capping at 3.98 ms. |
-| **3. GPU Cost Reduction** | Default K8s ($120.00/hr) | **$64.44/hr (46.3% Savings)** | Alibaba GPU trace replay across 32 nodes; packs efficiently without SLA degradation. |
-| **4. QoS SLA Compliance** | Bin-packing K8s (52.1%) | **100.0% LS $\to$ ON_DEMAND** | Intentional preemption penalties steer Latency-Sensitive pods off Spot instances. |
-| **5. Chaos Failover Availability**| 0% packet loss target | **100.0% (0 failed bindings)** | Circuit breaker (`CLOSED` $\to$ `OPEN` $\to$ `HALF-OPEN` $\to$ `CLOSED`) handles daemon `SIGKILL`. |
-| **6. Zero-Trust Isolation** | 100% isolation target | **300 / 300 Degraded Ticks (100%)** | Multiplicative Trust engine ($\kappa \to 0.0$) bypasses lying and flapping nodes. |
-
-> **Hardware Invariance:** Hosting the 2-container custom scheduler pod on the NVIDIA L4 GPU instance (`g2-standard-4`) vs. the CPU instance (`e2-medium`) produced virtually identical sub-millisecond latency profiles (P99 **0.971 ms** on GPU vs. **0.981 ms** on CPU), confirming that host resource types do not degrade gRPC IPC loopback performance.
-
----
-
-## KWOK Verification & Empirical Benchmarks
-
-Complete benchmark protocols, JSON raw log outputs, and summary tables are documented in [BENCHMARKS.md](file:///Users/aravindsundaresan/Development/ACO_Project_Front/ACO_Project_Upfront_V2/BENCHMARKS.md).
-
-### Main Comparison Table (Alibaba ATC'23 GPU Trace)
-
-| Strategy | Total Hourly Placement Cost ($/hr) | LS $\to$ ON_DEMAND Compliance | Underlying Mechanism / Why |
-| :--- | :--- | :--- | :--- |
-| **Default `kube-scheduler` (`LeastAllocated`)** | **$120.00/hr** | **100.0%** | **Accidental compliance:** Spreads to largest nodes (V100M32/A10) first, which happen to be On-Demand. Wastes $25/hr nodes on small 2-core pods. |
-| **Bin-Packing `kube-scheduler` (`MostAllocated`)** | $60.04/hr | 52.1% | **QoS-Blind:** Packs pods indiscriminately onto partially-filled nodes, exposing 47.9% of Latency-Sensitive pods to SPOT preemption cascades. |
-| **Kube-Sentinel Cost-Only (Ablation)** | $60.00/hr | 74.4% | **Structural alignment:** Price heuristic ($c_i$) steers to cheapest node ($0.60/hr T4), which structurally aligns with On-Demand. |
-| **Kube-Sentinel + QoS (Ours)** | **$64.44/hr** | **100.0%** | **Intentional compliance:** Explicit $r_i$ penalty on SPOT nodes guarantees non-preemptible routing at 46.3% lower cost than Default K8s. |
-
----
-
-## Validation Results
-
-### A. Real-Time K8s Cluster Validation (KWOK Run)
-We simulated a 15-pod trace against 4 nodes under a Namespace `ResourceQuota` of 20 CPU cores:
-* **`node-safe-cheap`** & **`node-safe-expensive`**: Retained high trust ($\kappa \approx 1.0$) and received preferred routing.
-* **`node-adversarial`** (reported 40 free cores on a 16-core node): Isolated completely (**0 placements**) due to $\kappa_{\text{internal}}$ collapsing trust to `0.0`.
-* **`node-flapping`** (jittery network latency): Bypassed after receiving only 1 pod due to a **72.1% trust penalty**.
-
-![KWOK Commit vs Rollback Results](docs/kwok-validation.png)
-
-### B. Go Simulation Exponent ($\gamma$) Sweeps
-Sweeping the trust sensitivity exponent $\gamma \in \{0, 0.5, 1.0, 2.0, 4.0\}$ over 100 workloads shows the transition curve. At $\gamma = 0$, compromised nodes receive standard workloads. At $\gamma = 2.0$ to $4.0$, **100% of the workload is successfully routed to safe nodes**:
-
-![Trust Sensitivity Sweeps](docs/v2-experiments.png)
-
----
-
----
-
-## Local Verification & Test Suite
-
-Kube-Sentinel provides fully automated, authentic test suites covering both the native Go scheduling framework plugin and the Python telemetry verification daemon:
-
-### 1. Go Scheduler Plugin Unit & Failure Isolation Tests
-Executes the native Go unit tests covering PreScore, Score, FilterPlugin hard-filtering (zero-trust, architecture mismatch, GPU fit, cost ceiling), optimistic reservation caching, and circuit breaker backoff state transitions:
-```bash
-cd v2/go_plugin
-go test -v -race ./...
+```sh
+bash scripts/run_local_acceptance.sh
 ```
 
-### 2. Telemetry Integrity & Confidence Math Verification
-Verifies the 4-dimensional zero-trust telemetry engine against clock skew, arithmetic discrepancy, heartbeat jitter, and cross-consistency checks:
-```bash
-python3 v2/verify_confidence.py
+The runner creates and deletes a dedicated disposable kind cluster. It changes the current kubectl context; restore your previous context afterward. Use an isolated kubeconfig when working alongside other clusters. `KEEP_CLUSTER=true` retains the test cluster for debugging.
+
+Evidence is written to `artifacts/local-acceptance/<run-id>/`: run configuration, scenario results, Pod bindings, events, and logs. New runs are ignored by Git; explicitly add selected reviewed evidence when publishing a result.
+
+**Known acceptance limitation:** the inherited L8 test can report PASS without proving that the daemon was unavailable during binding or that native scoring resumed. Treat its result as provisional until the outage assertions described in [validation status](docs/validation.md) are implemented and rerun. A second Pod binding alone is insufficient proof.
+
+## Submit a workload
+
+Use the local cluster fixtures first; they supply the metadata needed by the price and telemetry policies.
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: protected-example
+  labels:
+    kube-sentinel.io/workload-type: latency-critical
+  annotations:
+    sentinel.cost/ceiling-usd: "1.00"
+spec:
+  schedulerName: kube-sentinel-scheduler
+  restartPolicy: Never
+  containers:
+    - name: worker
+      image: alpine:3.19
+      command: ["sleep", "60"]
+      resources:
+        requests:
+          cpu: 50m
+          memory: 64Mi
 ```
 
-### 3. Authentic Chaos Injection & Circuit Breaker Failover
-Launches a live Sentinel daemon, transmits scoring queries, executes `SIGKILL` on the sidecar process, verifies that the circuit breaker trips from `CLOSED` $\to$ `OPEN` and activates the fallback resource-fit scorer without stalling the scheduling queue (0 failed bindings, 100% availability), restarts the daemon, and verifies recovery through `HALF-OPEN` $\to$ `CLOSED`:
-```bash
-chmod +x scripts/kwok_chaos_failover.sh
-./scripts/kwok_chaos_failover.sh
+The ceiling requires known node pricing. Recognized GKE Spot metadata includes `cloud.google.com/gke-spot=true`. Additional policy keys are defined in `v2/go_plugin/plugin.go`; examples and all active fixtures use the new interface.
+
+## What the evidence establishes
+
+| Evidence | Supported conclusion | Limit |
+|---|---|---|
+| 39-case observation matrix | Optional, valid, malformed and unacceptable observations are handled by the native filter | Fixture coverage |
+| Native Go/Python failover | Real daemon termination, neutral fallback, breaker recovery on the same connection | No Kubernetes API or Pod binding in this test |
+| Archived kind L1–L7 | Real fixture Pod bindings and intended unschedulable outcomes | Archived before the interface rename; rerun this branch |
+| Archived kind L8 | Two Pods bind | Outage interval and recovered scoring are not established |
+| Offline policy replay | Modeled placement/admission tradeoffs | Different admitted work; no cloud bill savings proof |
+| gRPC benchmark | Scoring RPC latency and throughput | Not Pods bound per second |
+
+[Historical local artifacts](artifacts/local-acceptance/local-20261022-165257/) are retained unchanged for provenance, including their original names. There is no production SLA, verified physical GPU performance claim, or equivalent-work cloud savings claim for this release.
+
+## Optional experiments
+
+Run from the repository root with the Python environment active:
+
+```sh
+python scripts/replay_policy.py --jobs 50
+python scripts/benchmark_grpc.py --candidate-nodes 16 --max-burst 250
+python scripts/benchmark_telemetry.py --ticks 3
 ```
 
-### 4. Alibaba GPU Cluster Trace Replayer
-Replays real cluster workload distributions across 32 heterogeneous GPU nodes (A10, T4, P100, V100, G2, G3) with per-scheduler capacity tracking and duration-weighted cost attribution:
-```bash
-python3 scripts/kwok_trace_replayer.py --jobs 100
-```
+The socket experiments start a local sidecar when their loopback endpoint is unused. Outputs go to ignored `artifacts/benchmarks/`. The replay is a synthetic workload generator informed by a published cluster profile, not an execution of a downloaded production trace or the live Kubernetes scheduler.
 
-### 5. Live gRPC Knee & Throughput Benchmark
-Executes live loopback RPC queries over socket `:50051` measuring actual serialization and scoring latency under burst queues up to 1,000 pods:
-```bash
-python3 scripts/kwok_grpc_knee_test.py --candidate-nodes 32 --max-burst 1000
-```
+## Repository map
 
-### 6. Telemetry Jitter & Adversarial Isolation Benchmark
-Injects perturbed arithmetic balances and heartbeat jitter to measure real-time node confidence degradation and progressive isolation:
-```bash
-python3 scripts/kwok_scale_jitter_benchmark.py --ticks 5
-```
+| Path | Purpose |
+|---|---|
+| `v2/go_plugin/` | Native plugin, circuit breaker and acceptance tests |
+| `v2/grpc_server.py`, `v2/confidence.py` | Sidecar and telemetry-confidence logic |
+| `v2/proto/` | RPC schema and generated bindings |
+| `core/orchestrator/` | Shared scoring models and cost engine used by the sidecar |
+| `k8s/local/` | Disposable local-cluster profile |
+| `scripts/` | Local acceptance and three scoped experiments |
+| `artifacts/local-acceptance/` | Preserved release evidence |
+| `docs/` | Validation, interface migration, cleanup and next cloud checks |
 
----
-
-## Project Structure
-
-| Directory / File | Description |
-| :--- | :--- |
-| `v2/go_plugin/plugin.go` | Canonical Go K8s Scheduling Framework plugin (`Filter`, `PreScore`, `Score`, `Reserve`, `Unreserve`, `PostBind`). |
-| `v2/go_plugin/plugin_test.go` | Comprehensive Go test suite covering filtering, scoring, reservation cache eviction, and circuit breaker transitions. |
-| `v2/go_plugin/pb/` | Generated Go Protobuf bindings with typed economic, hardware, and filtering schemas. |
-| `v2/grpc_server.py` | Production Python gRPC server (`ACOPredictiveSchedulerServicer`) with dual-resource consistency and GPU matching. |
-| `v2/confidence.py` | 4-dimensional zero-trust telemetry engine and EMA confidence smoothing. |
-| `v2/proto/sentinel.proto` | Unified Protobuf IPC contract for pod requirements, node telemetry, economics, and scores. |
-| `scripts/` | Authentic benchmarking scripts (chaos failover, trace replayer, gRPC knee test, scale jitter benchmark). |
-| `docs/` | Measured benchmark JSON results (`kwok-chaos-results.json`, `kwok-trace-replay-results.json`, `kwok-grpc-knee-results.json`, `kwok-jitter-benchmark.json`). |
-| `.github/workflows/ci.yml` | Multi-stage GitHub Actions CI pipeline running Go tests, confidence math, and integration benchmarks. |
-| `archive/extender/` | Archived legacy HTTP extender (retired in favor of canonical native plugin architecture). |
-
+Retired implementations, personal drafts, obsolete infrastructure and old charts are recoverable from Git history. See [migration notes](docs/migration.md) before updating an existing deployment. For the next stage, see the [Google Cloud check plan](docs/google-cloud-checks.md).

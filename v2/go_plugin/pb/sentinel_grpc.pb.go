@@ -19,148 +19,147 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	ACOPredictiveScheduler_ScoreNodes_FullMethodName         = "/sentinel.ACOPredictiveScheduler/ScoreNodes"
-	ACOPredictiveScheduler_PlacementCommitted_FullMethodName = "/sentinel.ACOPredictiveScheduler/PlacementCommitted"
+	SentinelScheduler_ScoreNodes_FullMethodName         = "/sentinel.SentinelScheduler/ScoreNodes"
+	SentinelScheduler_PlacementCommitted_FullMethodName = "/sentinel.SentinelScheduler/PlacementCommitted"
 )
 
-// ACOPredictiveSchedulerClient is the client API for ACOPredictiveScheduler service.
+// SentinelSchedulerClient is the client API for SentinelScheduler service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 //
-// Service coordinating custom scoring and placement checks between K8s and ACO
-type ACOPredictiveSchedulerClient interface {
+// Service coordinating custom scoring and placement checks between the Go scheduler and Python sidecar
+type SentinelSchedulerClient interface {
 	// Score nodes based on cost engine and predictive trust heuristic
 	ScoreNodes(ctx context.Context, in *ScoreRequest, opts ...grpc.CallOption) (*ScoreResponse, error)
-	// Confirms the placement of a pod to commit pheromones or rollback reservations
+	// Confirms the placement of a pod to commit or roll back placement accounting
 	PlacementCommitted(ctx context.Context, in *PlacementCommittedRequest, opts ...grpc.CallOption) (*PlacementCommittedResponse, error)
 }
 
-type aCOPredictiveSchedulerClient struct {
+type sentinelSchedulerClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewACOPredictiveSchedulerClient(cc grpc.ClientConnInterface) ACOPredictiveSchedulerClient {
-	return &aCOPredictiveSchedulerClient{cc}
+func NewSentinelSchedulerClient(cc grpc.ClientConnInterface) SentinelSchedulerClient {
+	return &sentinelSchedulerClient{cc}
 }
 
-func (c *aCOPredictiveSchedulerClient) ScoreNodes(ctx context.Context, in *ScoreRequest, opts ...grpc.CallOption) (*ScoreResponse, error) {
+func (c *sentinelSchedulerClient) ScoreNodes(ctx context.Context, in *ScoreRequest, opts ...grpc.CallOption) (*ScoreResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(ScoreResponse)
-	err := c.cc.Invoke(ctx, ACOPredictiveScheduler_ScoreNodes_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, SentinelScheduler_ScoreNodes_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *aCOPredictiveSchedulerClient) PlacementCommitted(ctx context.Context, in *PlacementCommittedRequest, opts ...grpc.CallOption) (*PlacementCommittedResponse, error) {
+func (c *sentinelSchedulerClient) PlacementCommitted(ctx context.Context, in *PlacementCommittedRequest, opts ...grpc.CallOption) (*PlacementCommittedResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(PlacementCommittedResponse)
-	err := c.cc.Invoke(ctx, ACOPredictiveScheduler_PlacementCommitted_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, SentinelScheduler_PlacementCommitted_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// ACOPredictiveSchedulerServer is the server API for ACOPredictiveScheduler service.
-// All implementations must embed UnimplementedACOPredictiveSchedulerServer
+// SentinelSchedulerServer is the server API for SentinelScheduler service.
+// All implementations must embed UnimplementedSentinelSchedulerServer
 // for forward compatibility.
 //
-// Service coordinating custom scoring and placement checks between K8s and ACO
-type ACOPredictiveSchedulerServer interface {
+// Service coordinating custom scoring and placement checks between the Go scheduler and Python sidecar
+type SentinelSchedulerServer interface {
 	// Score nodes based on cost engine and predictive trust heuristic
 	ScoreNodes(context.Context, *ScoreRequest) (*ScoreResponse, error)
-	// Confirms the placement of a pod to commit pheromones or rollback reservations
+	// Confirms the placement of a pod to commit or roll back placement accounting
 	PlacementCommitted(context.Context, *PlacementCommittedRequest) (*PlacementCommittedResponse, error)
-	mustEmbedUnimplementedACOPredictiveSchedulerServer()
+	mustEmbedUnimplementedSentinelSchedulerServer()
 }
 
-// UnimplementedACOPredictiveSchedulerServer must be embedded to have
+// UnimplementedSentinelSchedulerServer must be embedded to have
 // forward compatible implementations.
 //
 // NOTE: this should be embedded by value instead of pointer to avoid a nil
 // pointer dereference when methods are called.
-type UnimplementedACOPredictiveSchedulerServer struct{}
+type UnimplementedSentinelSchedulerServer struct{}
 
-func (UnimplementedACOPredictiveSchedulerServer) ScoreNodes(context.Context, *ScoreRequest) (*ScoreResponse, error) {
+func (UnimplementedSentinelSchedulerServer) ScoreNodes(context.Context, *ScoreRequest) (*ScoreResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ScoreNodes not implemented")
 }
-func (UnimplementedACOPredictiveSchedulerServer) PlacementCommitted(context.Context, *PlacementCommittedRequest) (*PlacementCommittedResponse, error) {
+func (UnimplementedSentinelSchedulerServer) PlacementCommitted(context.Context, *PlacementCommittedRequest) (*PlacementCommittedResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method PlacementCommitted not implemented")
 }
-func (UnimplementedACOPredictiveSchedulerServer) mustEmbedUnimplementedACOPredictiveSchedulerServer() {
-}
-func (UnimplementedACOPredictiveSchedulerServer) testEmbeddedByValue() {}
+func (UnimplementedSentinelSchedulerServer) mustEmbedUnimplementedSentinelSchedulerServer() {}
+func (UnimplementedSentinelSchedulerServer) testEmbeddedByValue()                           {}
 
-// UnsafeACOPredictiveSchedulerServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to ACOPredictiveSchedulerServer will
+// UnsafeSentinelSchedulerServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to SentinelSchedulerServer will
 // result in compilation errors.
-type UnsafeACOPredictiveSchedulerServer interface {
-	mustEmbedUnimplementedACOPredictiveSchedulerServer()
+type UnsafeSentinelSchedulerServer interface {
+	mustEmbedUnimplementedSentinelSchedulerServer()
 }
 
-func RegisterACOPredictiveSchedulerServer(s grpc.ServiceRegistrar, srv ACOPredictiveSchedulerServer) {
-	// If the following call panics, it indicates UnimplementedACOPredictiveSchedulerServer was
+func RegisterSentinelSchedulerServer(s grpc.ServiceRegistrar, srv SentinelSchedulerServer) {
+	// If the following call panics, it indicates UnimplementedSentinelSchedulerServer was
 	// embedded by pointer and is nil.  This will cause panics if an
 	// unimplemented method is ever invoked, so we test this at initialization
 	// time to prevent it from happening at runtime later due to I/O.
 	if t, ok := srv.(interface{ testEmbeddedByValue() }); ok {
 		t.testEmbeddedByValue()
 	}
-	s.RegisterService(&ACOPredictiveScheduler_ServiceDesc, srv)
+	s.RegisterService(&SentinelScheduler_ServiceDesc, srv)
 }
 
-func _ACOPredictiveScheduler_ScoreNodes_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _SentinelScheduler_ScoreNodes_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ScoreRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ACOPredictiveSchedulerServer).ScoreNodes(ctx, in)
+		return srv.(SentinelSchedulerServer).ScoreNodes(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: ACOPredictiveScheduler_ScoreNodes_FullMethodName,
+		FullMethod: SentinelScheduler_ScoreNodes_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ACOPredictiveSchedulerServer).ScoreNodes(ctx, req.(*ScoreRequest))
+		return srv.(SentinelSchedulerServer).ScoreNodes(ctx, req.(*ScoreRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ACOPredictiveScheduler_PlacementCommitted_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _SentinelScheduler_PlacementCommitted_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(PlacementCommittedRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ACOPredictiveSchedulerServer).PlacementCommitted(ctx, in)
+		return srv.(SentinelSchedulerServer).PlacementCommitted(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: ACOPredictiveScheduler_PlacementCommitted_FullMethodName,
+		FullMethod: SentinelScheduler_PlacementCommitted_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ACOPredictiveSchedulerServer).PlacementCommitted(ctx, req.(*PlacementCommittedRequest))
+		return srv.(SentinelSchedulerServer).PlacementCommitted(ctx, req.(*PlacementCommittedRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-// ACOPredictiveScheduler_ServiceDesc is the grpc.ServiceDesc for ACOPredictiveScheduler service.
+// SentinelScheduler_ServiceDesc is the grpc.ServiceDesc for SentinelScheduler service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var ACOPredictiveScheduler_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "sentinel.ACOPredictiveScheduler",
-	HandlerType: (*ACOPredictiveSchedulerServer)(nil),
+var SentinelScheduler_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "sentinel.SentinelScheduler",
+	HandlerType: (*SentinelSchedulerServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
 			MethodName: "ScoreNodes",
-			Handler:    _ACOPredictiveScheduler_ScoreNodes_Handler,
+			Handler:    _SentinelScheduler_ScoreNodes_Handler,
 		},
 		{
 			MethodName: "PlacementCommitted",
-			Handler:    _ACOPredictiveScheduler_PlacementCommitted_Handler,
+			Handler:    _SentinelScheduler_PlacementCommitted_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -6,16 +6,16 @@ metadata:
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: aco-scheduler-sa
+  name: sentinel-scheduler-sa
   namespace: sentinel-system
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: aco-scheduler-role-binding
+  name: sentinel-scheduler-role-binding
 subjects:
   - kind: ServiceAccount
-    name: aco-scheduler-sa
+    name: sentinel-scheduler-sa
     namespace: sentinel-system
 roleRef:
   kind: ClusterRole
@@ -25,10 +25,10 @@ roleRef:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: aco-scheduler-volume-binding
+  name: sentinel-scheduler-volume-binding
 subjects:
   - kind: ServiceAccount
-    name: aco-scheduler-sa
+    name: sentinel-scheduler-sa
     namespace: sentinel-system
 roleRef:
   kind: ClusterRole
@@ -38,7 +38,7 @@ roleRef:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: aco-scheduler-config
+  name: sentinel-scheduler-config
   namespace: sentinel-system
 data:
   scheduler-config.yaml: |
@@ -47,30 +47,30 @@ data:
     leaderElection:
       leaderElect: false
     profiles:
-      - schedulerName: aco-sentinel-scheduler
+      - schedulerName: kube-sentinel-scheduler
         plugins:
           preFilter:
             enabled:
-              - name: ACOPredictiveScheduler
+              - name: SentinelScheduler
           filter:
             enabled:
-              - name: ACOPredictiveScheduler
+              - name: SentinelScheduler
           preScore:
             enabled:
-              - name: ACOPredictiveScheduler
+              - name: SentinelScheduler
           score:
             enabled:
-              - name: ACOPredictiveScheduler
+              - name: SentinelScheduler
                 weight: 100
           reserve:
             enabled:
-              - name: ACOPredictiveScheduler
+              - name: SentinelScheduler
           preBind:
             enabled:
-              - name: ACOPredictiveScheduler
+              - name: SentinelScheduler
           postBind:
             enabled:
-              - name: ACOPredictiveScheduler
+              - name: SentinelScheduler
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -97,24 +97,24 @@ data:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: aco-sentinel-scheduler
+  name: kube-sentinel-scheduler
   namespace: sentinel-system
   labels:
-    app: aco-sentinel-scheduler
+    app: kube-sentinel-scheduler
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: aco-sentinel-scheduler
+      app: kube-sentinel-scheduler
   template:
     metadata:
       labels:
-        app: aco-sentinel-scheduler
+        app: kube-sentinel-scheduler
     spec:
-      serviceAccountName: aco-scheduler-sa
+      serviceAccountName: sentinel-scheduler-sa
       containers:
         - name: scheduler
-          image: localhost/aco-sentinel-scheduler:local
+          image: localhost/kube-sentinel-scheduler:local
           imagePullPolicy: Never
           command:
             - /bin/kube-scheduler
@@ -126,7 +126,7 @@ spec:
             - name: sentinel-config-volume
               mountPath: /etc/sentinel
         - name: sidecar
-          image: localhost/aco-sentinel-sidecar:local
+          image: localhost/kube-sentinel-sidecar:local
           imagePullPolicy: Never
           ports:
             - containerPort: 50051
@@ -136,7 +136,7 @@ spec:
       volumes:
         - name: config-volume
           configMap:
-            name: aco-scheduler-config
+            name: sentinel-scheduler-config
         - name: sentinel-config-volume
           configMap:
             name: sentinel-plugin-config

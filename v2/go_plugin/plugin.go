@@ -23,23 +23,23 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/kubernetes/pkg/scheduler/framework"
 
-	"aco-sentinel-plugin/pb"
+	"sentinel-plugin/pb"
 )
 
 const (
-	Name = "ACOPredictiveScheduler"
+	Name = "SentinelScheduler"
 
 	// Annotations for telemetry passing
-	AnnotationReportedAllocatableCPU = "aco-sentinel.io/reported-allocatable-cpu"
-	AnnotationReportedUsedCPU        = "aco-sentinel.io/reported-used-cpu"
-	AnnotationReportedFreeCPU        = "aco-sentinel.io/reported-free-cpu"
+	AnnotationReportedAllocatableCPU = "kube-sentinel.io/reported-allocatable-cpu"
+	AnnotationReportedUsedCPU        = "kube-sentinel.io/reported-used-cpu"
+	AnnotationReportedFreeCPU        = "kube-sentinel.io/reported-free-cpu"
 
-	AnnotationReportedAllocatableMem = "aco-sentinel.io/reported-allocatable-memory-gb"
-	AnnotationReportedUsedMem        = "aco-sentinel.io/reported-used-memory-gb"
-	AnnotationReportedFreeMem        = "aco-sentinel.io/reported-free-memory-gb"
+	AnnotationReportedAllocatableMem = "kube-sentinel.io/reported-allocatable-memory-gb"
+	AnnotationReportedUsedMem        = "kube-sentinel.io/reported-used-memory-gb"
+	AnnotationReportedFreeMem        = "kube-sentinel.io/reported-free-memory-gb"
 
-	AnnotationLastHeartbeat      = "aco-sentinel.io/last-heartbeat-timestamp"
-	AnnotationHeartbeatIntervals = "aco-sentinel.io/recent-heartbeat-intervals"
+	AnnotationLastHeartbeat      = "kube-sentinel.io/last-heartbeat-timestamp"
+	AnnotationHeartbeatIntervals = "kube-sentinel.io/recent-heartbeat-intervals"
 
 	AnnotationHourlyCostUSD      = "sentinel.cost/hourly-usd"
 	AnnotationIsSpot             = "sentinel.cost/is-spot"
@@ -51,7 +51,7 @@ const (
 	AnnotationCostCeilingUSD     = "sentinel.cost/ceiling-usd"
 	AnnotationForceReject        = "sentinel.trust/force-reject"
 
-	LabelWorkloadType            = "aco-sentinel.io/workload-type"
+	LabelWorkloadType            = "kube-sentinel.io/workload-type"
 	LabelGpuRequired             = "sentinel.gpu/required"
 	LabelGpuTypeRequired         = "sentinel.gpu/type-required"
 )
@@ -428,7 +428,7 @@ func (al *AuditLogger) LogDecision(pod *v1.Pod, node string, decision string, tr
 		Decision:  decision,
 		Trust:     trust,
 		Reason:    reason,
-		Scheduler: "ACO-Sentinel",
+		Scheduler: "Kube-Sentinel",
 	}
 	data, err := json.Marshal(entry)
 	if err != nil {
@@ -442,7 +442,7 @@ func (al *AuditLogger) LogDecision(pod *v1.Pod, node string, decision string, tr
 // SentinelPlugin implements the PreFilter, Filter, PreScore, Score, Reserve, and PostBind plugins
 type SentinelPlugin struct {
 	handle             framework.Handle
-	client             pb.ACOPredictiveSchedulerClient
+	client             pb.SentinelSchedulerClient
 	conn               *grpc.ClientConn
 	gamma              float64
 	mu                 sync.RWMutex
@@ -525,7 +525,7 @@ func New(obj runtime.Object, handle framework.Handle) (framework.Plugin, error) 
 		return nil, fmt.Errorf("failed to dial gRPC: %w", err)
 	}
 
-	client := pb.NewACOPredictiveSchedulerClient(conn)
+	client := pb.NewSentinelSchedulerClient(conn)
 	cb := NewCircuitBreaker(cfg.Resilience.CircuitBreaker.FailureThreshold, cfg.Resilience.CircuitBreaker.TimeoutSeconds)
 	al, _ := NewAuditLogger("/var/log/sentinel/audit.json")
 	if al == nil {

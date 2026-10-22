@@ -708,8 +708,8 @@ const file_sentinel_proto_rawDesc = "" +
 	"\anode_id\x18\x02 \x01(\tR\x06nodeId\x12\x18\n" +
 	"\asuccess\x18\x03 \x01(\bR\asuccess\"@\n" +
 	"\x1aPlacementCommittedResponse\x12\"\n" +
-	"\facknowledged\x18\x01 \x01(\bR\facknowledged2\xb8\x01\n" +
-	"\x16ACOPredictiveScheduler\x12=\n" +
+	"\facknowledged\x18\x01 \x01(\bR\facknowledged2\xb3\x01\n" +
+	"\x11SentinelScheduler\x12=\n" +
 	"\n" +
 	"ScoreNodes\x12\x16.sentinel.ScoreRequest\x1a\x17.sentinel.ScoreResponse\x12_\n" +
 	"\x12PlacementCommitted\x12#.sentinel.PlacementCommittedRequest\x1a$.sentinel.PlacementCommittedResponseB\x14Z\x12v2/go_plugin/pb;pbb\x06proto3"
@@ -740,10 +740,10 @@ var file_sentinel_proto_depIdxs = []int32{
 	0, // 0: sentinel.ScoreRequest.pod:type_name -> sentinel.PodSpec
 	1, // 1: sentinel.ScoreRequest.nodes:type_name -> sentinel.NodeCandidate
 	3, // 2: sentinel.ScoreResponse.scores:type_name -> sentinel.NodeScore
-	2, // 3: sentinel.ACOPredictiveScheduler.ScoreNodes:input_type -> sentinel.ScoreRequest
-	5, // 4: sentinel.ACOPredictiveScheduler.PlacementCommitted:input_type -> sentinel.PlacementCommittedRequest
-	4, // 5: sentinel.ACOPredictiveScheduler.ScoreNodes:output_type -> sentinel.ScoreResponse
-	6, // 6: sentinel.ACOPredictiveScheduler.PlacementCommitted:output_type -> sentinel.PlacementCommittedResponse
+	2, // 3: sentinel.SentinelScheduler.ScoreNodes:input_type -> sentinel.ScoreRequest
+	5, // 4: sentinel.SentinelScheduler.PlacementCommitted:input_type -> sentinel.PlacementCommittedRequest
+	4, // 5: sentinel.SentinelScheduler.ScoreNodes:output_type -> sentinel.ScoreResponse
+	6, // 6: sentinel.SentinelScheduler.PlacementCommitted:output_type -> sentinel.PlacementCommittedResponse
 	5, // [5:7] is the sub-list for method output_type
 	3, // [3:5] is the sub-list for method input_type
 	3, // [3:3] is the sub-list for extension type_name

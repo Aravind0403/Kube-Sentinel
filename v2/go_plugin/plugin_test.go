@@ -14,11 +14,11 @@ import (
 	types "k8s.io/apimachinery/pkg/types"
 	"k8s.io/kubernetes/pkg/scheduler/framework"
 
-	"aco-sentinel-plugin/pb"
+	"sentinel-plugin/pb"
 )
 
 type mockClient struct {
-	pb.ACOPredictiveSchedulerClient
+	pb.SentinelSchedulerClient
 	scoreNodesCalled bool
 	commitCalled     bool
 	lastSuccess      bool

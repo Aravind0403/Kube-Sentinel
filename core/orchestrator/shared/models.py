@@ -1,7 +1,7 @@
 """
 orchestrator/shared/models.py
 ─────────────────────────────
-The single source of truth for every data structure in ACO V2.
+The single source of truth for every data structure in Kube-Sentinel.
 
 Design philosophy
 -----------------
@@ -9,7 +9,7 @@ Every model answers one question: "What does the system *need to know*
 about this thing in order to make a smart scheduling decision?"
 
 V1 kept things simple (and correct). V2 extends each model with the
-fields that the ACO core, the cost engine, and the predictor will need.
+fields that the scheduler, the cost engine, and the predictor will need.
 No V1 field has been removed — all callers still work as-is.
 
 Reading guide
@@ -38,7 +38,7 @@ class WorkloadType(str, Enum):
     Why it matters:
         Each class has different SLA constraints and hardware affinity.
         The admission controller enforces different rules per class.
-        The ACO heuristic weights change per class.
+        The placement heuristic weights change per class.
 
     LATENCY_CRITICAL  → API servers, inference endpoints. Needs <10ms scheduling.
     BATCH             → ML training, ETL. Throughput over latency. GPU-heavy.
@@ -75,7 +75,7 @@ class NodeArch(str, Enum):
     - ARM64 nodes (e.g., AWS Graviton) are cheaper per core.
     - GPU nodes have a separate scheduling path entirely.
 
-    The ACO heuristic uses arch affinity as part of η (eta).
+    The placement heuristic uses arch affinity as part of η (eta).
     """
     X86_64 = "x86_64"
     ARM64 = "arm64"
@@ -102,7 +102,7 @@ class JobState(str, Enum):
     Lifecycle states of a job execution.
 
     PENDING    → Admitted, waiting in the priority queue.
-    SCHEDULED  → ACO assigned it to a node; resources reserved.
+    SCHEDULED  → scheduler assigned it to a node; resources reserved.
     RUNNING    → Job is actively executing on its node.
     COMPLETED  → Finished successfully; resources released.
     FAILED     → Terminated with error; resources released.
@@ -432,7 +432,7 @@ class ComputeNode(BaseModel):
         """
         Quick feasibility check: can this node satisfy a resource request?
 
-        Used by the bin-packer and ACO fast-path to filter candidate nodes
+        Used by the bin-packer and native filter to filter candidate nodes
         before running the full scoring function.
 
         Checks (in order):
@@ -625,7 +625,7 @@ class JobExecution(BaseModel):
 
 # ─────────────────────────────────────────────────────────────────────────────
 # SECTION 6: PREDICTION MODEL
-# Output of the forecaster — consumed by the ACO cost engine.
+# Output of the forecaster — consumed by the cost engine.
 # ─────────────────────────────────────────────────────────────────────────────
 
 class PredictionResult(BaseModel):
@@ -634,7 +634,7 @@ class PredictionResult(BaseModel):
 
     This is produced by orchestrator/control_plane/predictor.py (Phase 3)
     and consumed by:
-    - The ACO cost engine (to penalise nodes predicted to be overloaded)
+    - The cost engine (to penalise nodes predicted to be overloaded)
     - The telemetry collector (to trigger container pre-warming)
     - The /predict API endpoint (for observability)
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-kwok_scale_jitter_benchmark.py
+benchmark_telemetry.py
 Kube-Sentinel - Authentic Telemetry Jitter & Adversarial Node Isolation Benchmark
 
 Sends real candidate batches containing arithmetic discrepancies, heartbeat jitter,
@@ -10,6 +10,7 @@ and eligibility filter decisions.
 
 import sys
 import os
+os.makedirs("artifacts/benchmarks", exist_ok=True)
 import time
 import json
 import argparse
@@ -40,7 +41,7 @@ def run_jitter_benchmark(host="127.0.0.1:50051", total_nodes=100, jitter_pct=20.
 
     print(f"Connecting to live gRPC server at {host}...")
     channel = grpc.insecure_channel(host)
-    stub = sentinel_pb2_grpc.ACOPredictiveSchedulerStub(channel)
+    stub = sentinel_pb2_grpc.SentinelSchedulerStub(channel)
 
     pod = sentinel_pb2.PodSpec(
         uid="pod-jitter-eval",
@@ -161,10 +162,10 @@ def run_jitter_benchmark(host="127.0.0.1:50051", total_nodes=100, jitter_pct=20.
     }
 
     os.makedirs("docs", exist_ok=True)
-    with open("docs/kwok-jitter-benchmark.json", "w") as f:
+    with open("artifacts/benchmarks/telemetry.json", "w") as f:
         json.dump(results, f, indent=2)
 
-    print("Results saved to docs/kwok-jitter-benchmark.json")
+    print("Results saved to artifacts/benchmarks/telemetry.json")
 
 
 def main():

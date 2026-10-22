@@ -1,7 +1,7 @@
 """
 v2/confidence.py
 ────────────────
-Phase 1: Confidence Math implementation for ACO-Sentinel.
+Telemetry confidence calculations for Kube-Sentinel.
 
 This module provides the core trust metric math and confidence tracking for
 cluster nodes. It implements three dimensions of node telemetry validation:

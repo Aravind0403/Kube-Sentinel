@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-kwok_grpc_knee_test.py
+benchmark_grpc.py
 Kube-Sentinel - Authentic gRPC Throughput & Latency Knee Benchmark
 
 Executes REAL loopback gRPC calls over socket :50051 using the compiled Protobuf stubs,
@@ -9,6 +9,7 @@ measuring actual serialization, transport, and scoring execution latencies.
 
 import sys
 import os
+os.makedirs("artifacts/benchmarks", exist_ok=True)
 import time
 import json
 import argparse
@@ -95,7 +96,7 @@ def run_benchmark(target_host="127.0.0.1:50051", burst_steps=None, candidate_nod
 
     print(f"Connecting to live gRPC server at {target_host}...")
     channel = grpc.insecure_channel(target_host)
-    stub = sentinel_pb2_grpc.ACOPredictiveSchedulerStub(channel)
+    stub = sentinel_pb2_grpc.SentinelSchedulerStub(channel)
 
     print("Executing 50 warm-up RPC queries...")
     warm_req = build_test_request(candidate_count=candidate_nodes)
@@ -176,7 +177,7 @@ def main():
     results = run_benchmark(target_host=args.host, burst_steps=steps, candidate_nodes=args.candidate_nodes)
 
     os.makedirs("docs", exist_ok=True)
-    out_path = "docs/kwok-grpc-knee-results.json"
+    out_path = "artifacts/benchmarks/grpc.json"
     with open(out_path, "w") as f:
         json.dump(results, f, indent=2)
 

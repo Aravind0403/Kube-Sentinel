@@ -44,7 +44,8 @@ logs/
 kube-scheduler*
 v2/go_plugin/kube-scheduler*
 
-## MD Files 
-*.md
-Progress.md
-learning/
+# Local state and generated benchmark output
+sentinel_state.json
+artifacts/benchmarks/
+artifacts/local-acceptance/*/
+!artifacts/local-acceptance/local-20261022-165257/

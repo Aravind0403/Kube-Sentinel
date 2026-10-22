@@ -4,12 +4,12 @@ package sentinel;
 
 option go_package = "v2/go_plugin/pb;pb";
 
-// Service coordinating custom scoring and placement checks between K8s and ACO
-service ACOPredictiveScheduler {
+// Service coordinating custom scoring and placement checks between the Go scheduler and Python sidecar
+service SentinelScheduler {
   // Score nodes based on cost engine and predictive trust heuristic
   rpc ScoreNodes(ScoreRequest) returns (ScoreResponse);
 
-  // Confirms the placement of a pod to commit pheromones or rollback reservations
+  // Confirms the placement of a pod to commit or roll back placement accounting
   rpc PlacementCommitted(PlacementCommittedRequest) returns (PlacementCommittedResponse);
 }
 

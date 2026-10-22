@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-kwok_trace_replayer.py
-ACO-Sentinel (Version 2) - KWOK Trace Replayer & Cost Efficiency Benchmark
+replay_policy.py
+Kube-Sentinel (Version 2) - KWOK Trace Replayer & Cost Efficiency Benchmark
 
 Replays production cluster traces (Alibaba ATC'23 GPU cluster dataset profile)
 benchmarking placement cost reduction and ON_DEMAND QoS compliance across:
@@ -9,8 +9,8 @@ benchmarking placement cost reduction and ON_DEMAND QoS compliance across:
 2. First-Fit Baseline
 3. Default Kube-Scheduler (NodeResourcesFit - LeastAllocated) [Official Default K8s Plugin]
 4. Default Kube-Scheduler (NodeResourcesFit - MostAllocated)  [Official Bin-Packing Plugin]
-5. ACO-Sentinel Cost-Only
-6. ACO-Sentinel + QoS & Trust Aware (Ours)
+5. Kube-Sentinel Cost-Only
+6. Kube-Sentinel + QoS & Trust Aware (Ours)
 
 Tracks independent cluster allocation states per scheduler and duration-weighted
 resource costs (USD).
@@ -18,6 +18,7 @@ resource costs (USD).
 
 import sys
 import os
+os.makedirs("artifacts/benchmarks", exist_ok=True)
 import time
 import json
 import random
@@ -87,8 +88,8 @@ def simulate_trace_replay(num_jobs=100, seeds=5):
         "firstfit",
         "kube_least",
         "kube_most",
-        "aco_cost_only",
-        "aco_qos_aware"
+        "sentinel_cost_only",
+        "sentinel_qos_aware"
     ]
 
     total_costs = {s: [] for s in strat_names}
@@ -162,11 +163,11 @@ def simulate_trace_replay(num_jobs=100, seeds=5):
                         return (used_cpu + used_mem) / 2.0
                     chosen = max(feasible, key=used_ratio)
 
-                elif strat == "aco_cost_only":
+                elif strat == "sentinel_cost_only":
                     # Pure cost minimization without QoS awareness
                     chosen = min(feasible, key=lambda n: n["cost_per_hr"])
 
-                elif strat == "aco_qos_aware":
+                elif strat == "sentinel_qos_aware":
                     # Sentinel QoS & Trust Aware:
                     # 1. Enforces ON_DEMAND for LS workloads (strict: does not fall back to Spot)
                     # 2. Leverages discounted SPOT nodes for BE workloads
@@ -201,12 +202,12 @@ def simulate_trace_replay(num_jobs=100, seeds=5):
 
     avg_costs = {s: float(np.mean(total_costs[s])) for s in strat_names}
 
-    cost_reduction_vs_random = ((avg_costs["random"] - avg_costs["aco_cost_only"]) / avg_costs["random"]) * 100.0
-    cost_reduction_vs_firstfit = ((avg_costs["firstfit"] - avg_costs["aco_cost_only"]) / avg_costs["firstfit"]) * 100.0
-    cost_reduction_vs_kube_least = ((avg_costs["kube_least"] - avg_costs["aco_qos_aware"]) / avg_costs["kube_least"]) * 100.0
-    cost_reduction_vs_kube_most = ((avg_costs["kube_most"] - avg_costs["aco_qos_aware"]) / avg_costs["kube_most"]) * 100.0
+    cost_reduction_vs_random = ((avg_costs["random"] - avg_costs["sentinel_cost_only"]) / avg_costs["random"]) * 100.0
+    cost_reduction_vs_firstfit = ((avg_costs["firstfit"] - avg_costs["sentinel_cost_only"]) / avg_costs["firstfit"]) * 100.0
+    cost_reduction_vs_kube_least = ((avg_costs["kube_least"] - avg_costs["sentinel_qos_aware"]) / avg_costs["kube_least"]) * 100.0
+    cost_reduction_vs_kube_most = ((avg_costs["kube_most"] - avg_costs["sentinel_qos_aware"]) / avg_costs["kube_most"]) * 100.0
 
-    ls_compliance_aco = (qos_compliance_counts["aco_qos_aware"] / max(1, total_ls_jobs_evaluated)) * 100.0
+    ls_compliance_sentinel = (qos_compliance_counts["sentinel_qos_aware"] / max(1, total_ls_jobs_evaluated)) * 100.0
     ls_compliance_kube_least = (qos_compliance_counts["kube_least"] / max(1, total_ls_jobs_evaluated)) * 100.0
     ls_compliance_kube_most = (qos_compliance_counts["kube_most"] / max(1, total_ls_jobs_evaluated)) * 100.0
 
@@ -219,13 +220,13 @@ def simulate_trace_replay(num_jobs=100, seeds=5):
         "firstfit_cost_usd": round(avg_costs["firstfit"], 2),
         "kube_scheduler_least_allocated_usd": round(avg_costs["kube_least"], 2),
         "kube_scheduler_most_allocated_usd": round(avg_costs["kube_most"], 2),
-        "aco_cost_only_usd": round(avg_costs["aco_cost_only"], 2),
-        "aco_qos_aware_usd": round(avg_costs["aco_qos_aware"], 2),
+        "sentinel_cost_only_usd": round(avg_costs["sentinel_cost_only"], 2),
+        "sentinel_qos_aware_usd": round(avg_costs["sentinel_qos_aware"], 2),
         "cost_reduction_vs_random_pct": round(cost_reduction_vs_random, 1),
         "cost_reduction_vs_firstfit_pct": round(cost_reduction_vs_firstfit, 1),
         "cost_savings_vs_default_kube_scheduler_pct": round(cost_reduction_vs_kube_least, 1),
         "cost_savings_vs_kube_binpacking_pct": round(cost_reduction_vs_kube_most, 1),
-        "ls_on_demand_compliance_pct": round(ls_compliance_aco, 1),
+        "ls_on_demand_compliance_pct": round(ls_compliance_sentinel, 1),
         "kube_scheduler_ls_compliance_pct": round(ls_compliance_kube_least, 1),
         "kube_binpacking_ls_compliance_pct": round(ls_compliance_kube_most, 1),
         "placed_jobs": placed_jobs_counts,
@@ -248,19 +249,19 @@ def main():
     print(f"2. First-Fit Baseline                         : ${results['firstfit_cost_usd']:.2f} (Placed: {results['placed_jobs']['firstfit']}/{args.jobs})")
     print(f"3. Default kube-scheduler (NodeResourcesFit) : ${results['kube_scheduler_least_allocated_usd']:.2f} (Placed: {results['placed_jobs']['kube_least']}/{args.jobs}, LS Compliance: {results['kube_scheduler_ls_compliance_pct']}%)")
     print(f"4. Bin-Packing kube-scheduler (MostAllocated) : ${results['kube_scheduler_most_allocated_usd']:.2f} (Placed: {results['placed_jobs']['kube_most']}/{args.jobs}, LS Compliance: {results['kube_binpacking_ls_compliance_pct']}%)")
-    print(f"5. ACO-Sentinel Cost-Only                     : ${results['aco_cost_only_usd']:.2f} (Placed: {results['placed_jobs']['aco_cost_only']}/{args.jobs})")
-    print(f"6. ACO-Sentinel + QoS Aware (Ours)            : ${results['aco_qos_aware_usd']:.2f} (Placed: {results['placed_jobs']['aco_qos_aware']}/{args.jobs}, LS Compliance: {results['ls_on_demand_compliance_pct']}%)")
+    print(f"5. Kube-Sentinel Cost-Only                     : ${results['sentinel_cost_only_usd']:.2f} (Placed: {results['placed_jobs']['sentinel_cost_only']}/{args.jobs})")
+    print(f"6. Kube-Sentinel + QoS Aware (Ours)            : ${results['sentinel_qos_aware_usd']:.2f} (Placed: {results['placed_jobs']['sentinel_qos_aware']}/{args.jobs}, LS Compliance: {results['ls_on_demand_compliance_pct']}%)")
     print("-" * 80)
-    print(f"Model Cost Savings vs Default kube-scheduler  : {results['cost_savings_vs_default_kube_scheduler_pct']}%")
-    print(f"Model Cost Savings vs kube Bin-Packing        : {results['cost_savings_vs_kube_binpacking_pct']}%")
+    print(f"Modeled attributed cost difference vs spread  : {results['cost_savings_vs_default_kube_scheduler_pct']}%")
+    print(f"Modeled attributed cost difference vs packing        : {results['cost_savings_vs_kube_binpacking_pct']}%")
     print(f"LS -> ON_DEMAND QoS Compliance                 : {results['ls_on_demand_compliance_pct']}%")
-    print("Note: Reported figures reflect offline modeled resource cost attribution, not measured cloud provider invoices.")
+    print("Note: Reported figures reflect offline modeled resource cost attribution, not measured cloud provider invoices. Different admitted work makes these figures unsuitable as equivalent-work savings.")
 
     os.makedirs("docs", exist_ok=True)
-    with open("docs/kwok-trace-replay-results.json", "w") as f:
+    with open("artifacts/benchmarks/policy.json", "w") as f:
         json.dump(results, f, indent=2)
 
-    print("\nResults written to docs/kwok-trace-replay-results.json")
+    print("\nResults written to artifacts/benchmarks/policy.json")
 
 
 if __name__ == "__main__":

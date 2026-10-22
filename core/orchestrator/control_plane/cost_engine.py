@@ -1,85 +1,7 @@
-"""
-orchestrator/control_plane/cost_engine.py
-──────────────────────────────────────────
-CostEngine: composite node scoring for placement decisions.
+"""Composite reliability, price, headroom and optional prediction scoring.
 
-What this is
-─────────────
-The cost engine translates raw node economics and risk into a single
-scalar score — the η (eta) heuristic that the ACO colony uses when
-deciding where to place a job.
-
-V1 scheduler had zero cost awareness. If two nodes both had free CPUs,
-it picked the first one in the list. This leads to:
-  • Latency-critical jobs landing on spot instances (→ SLA breach risk)
-  • Batch jobs running on expensive on-demand nodes (→ budget waste)
-  • No consideration of predicted load (→ nodes already near saturation)
-
-V2 cost engine fixes all three by scoring each (job, node) pair.
-
-The composite score
-────────────────────
-  score(job, node) = reliability_factor(job, node)
-                   × cost_efficiency_factor(job, node)
-                   × sla_headroom_factor(job, node)
-                   × prediction_factor(job, node)
-
-All four sub-scores are in (0.0, 1.0] and multiplied together.
-A score of 0.0 means "never place this job here" (hard gate).
-A score close to 1.0 means "excellent fit across all dimensions."
-
-This score feeds directly into the ACO as η[i][j] — it IS the heuristic.
-When the ant computes P(job i → node j), it weights by score(i,j)^β.
-
-Sub-scores explained
-─────────────────────
-1. reliability_factor:
-     ON_DEMAND node:         always 1.0
-     SPOT + LATENCY_CRITICAL: penalised if interruption_prob > SPOT_PENALTY_THRESHOLD
-       score = (1 − interruption_prob)  → [0, 1], drops toward 0 as risk rises
-     SPOT + BATCH/STREAM:    mild penalty only; interruption is tolerable
-       score = 1 − 0.3 × interruption_prob  → still usable even at 50% risk
-
-2. cost_efficiency_factor:
-     Rewards cheaper nodes without completely ignoring expensive ones.
-     norm_cost = node.cost_per_hour / MAX_COST_REFERENCE (1.0 USD/hr)
-     score = 1 / (1 + norm_cost)   → asymptotic: never zero, rewards cheap
-
-     Why not just 1/cost?  At cost=0.01 → score=100. At cost=0.1 → score=10.
-     That dynamic range is too wide; cheap nodes would dominate completely.
-     The (1 + norm_cost) denominator flattens it: 0.01→0.99, 0.5→0.67, 1.0→0.5.
-
-3. sla_headroom_factor:
-     Does the node have enough spare capacity to meet the job's latency SLA?
-     Uses cpu_utilisation_pct (real telemetry if available, allocation otherwise).
-     headroom = (100 - cpu_util) / 100   → 0.0 (fully loaded) to 1.0 (empty)
-     For LATENCY_CRITICAL: score = headroom (strict — needs real breathing room)
-     For BATCH / STREAM:   score = max(headroom, 0.1)  (forgiving — throughput jobs)
-
-4. prediction_factor:
-     If a PredictionResult is available for this node, use spike_probability
-     to penalise nodes expected to become overloaded during the job's run.
-     score = 1 − (spike_probability × SPIKE_PENALTY_WEIGHT)
-     SPIKE_PENALTY_WEIGHT = 0.5 → a 100% spike prediction halves the score.
-     If no prediction available: score = 1.0 (neutral — no penalty).
-
-Integration
-───────────
-  Phase 2 (current):
-    Colony.run() → passes the existing Ant._workload_affinity_score and
-    Ant._resource_headroom_score + Ant._cost_score as sub-components of η.
-
-  Phase 5 (upcoming):
-    aco_schedule() in scheduler.py will call CostEngine.score_node() to
-    produce a richer η that incorporates prediction and SLA headroom.
-    The CostEngine replaces the current per-function approach in ant.py
-    with a single authoritative score function.
-
-Standalone use:
-    from orchestrator.control_plane.cost_engine import CostEngine
-    engine = CostEngine()
-    score = engine.score_node(job=job, node=node, prediction=result)
-    # Returns float in [0.0, 1.0]
+The Python sidecar uses this score as input to trust-weighted node ranking.
+Mandatory placement restrictions are also enforced in the Go Filter hook.
 """
 
 from __future__ import annotations
@@ -127,9 +49,9 @@ At weight=0.5:
   spike_prob = 1.0 → prediction_factor = 0.5  (heavy penalty — halves score)
 
 This is intentionally soft: the predictor has uncertainty, and we should
-not hard-block placements based on predictions alone. The colony sees
+not hard-block placements based on predictions alone. The scorer assigns
 lower η for risky nodes and will prefer alternatives — but if all nodes
-are predicted to spike, the colony still picks the least-bad one.
+are predicted to spike, ranking can still prefer the least penalized option.
 """
 
 SLA_STRICT_THRESHOLD: float = 0.2
@@ -174,8 +96,7 @@ class CostEngine:
         """
         Compute the composite placement score for (job, node).
 
-        This is the η heuristic fed into the ACO selection formula:
-            P(job i → node j) ∝ τ[i,j]^α × score(i,j)^β
+        This score is multiplied by telemetry confidence in the sidecar.
 
         Algorithm:
             1. Compute four independent sub-scores.
@@ -200,8 +121,7 @@ class CostEngine:
             Because the sub-scores are independent checks. Failing ANY one of
             them should drag the total score down proportionally. If the cost
             gate returns 0.0 (node over budget), the whole score is 0.0 — the
-            node is effectively invisible to the ACO colony, just like a zero-η
-            arc in the original ant.py implementation.
+            node receives no preference from this scorer.
         """
         r = self.reliability_factor(job, node, spot_threshold=spot_threshold)
         if r == 0.0:
@@ -287,7 +207,7 @@ class CostEngine:
         Why asymptotic (never zero)?
             Even a very expensive node should not be completely ruled out by cost
             alone — the job might have no other feasible option. The hard budget
-            gate (cost_ceiling_usd) in ant.py handles absolute budget exclusions.
+            gate in the native Go filter handles absolute budget exclusions.
             Here we just reward cheaper nodes relatively.
 
         Args:

@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"aco-sentinel-plugin/pb"
+	"sentinel-plugin/pb"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	v1 "k8s.io/api/core/v1"
@@ -80,7 +80,7 @@ func TestAcceptanceNativeDaemonFailover(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer conn.Close()
-	plugin := &SentinelPlugin{client: pb.NewACOPredictiveSchedulerClient(conn), circuitBreaker: NewCircuitBreaker(2, 1), gamma: 2, reservedPlacements: map[string]placementEntry{}}
+	plugin := &SentinelPlugin{client: pb.NewSentinelSchedulerClient(conn), circuitBreaker: NewCircuitBreaker(2, 1), gamma: 2, reservedPlacements: map[string]placementEntry{}}
 	pod := &v1.Pod{ObjectMeta: metav1.ObjectMeta{Name: "protected", Labels: map[string]string{LabelWorkloadType: "latency-critical"}}, Spec: v1.PodSpec{Containers: []v1.Container{{Resources: v1.ResourceRequirements{Requests: v1.ResourceList{v1.ResourceCPU: resource.MustParse("1"), v1.ResourceMemory: resource.MustParse("1Gi")}}}}}}
 	good := &v1.Node{ObjectMeta: metav1.ObjectMeta{Name: "good", Labels: map[string]string{"kubernetes.io/arch": "amd64"}, Annotations: map[string]string{AnnotationHourlyCostUSD: "0.50", AnnotationLastHeartbeat: "0"}}, Status: v1.NodeStatus{Allocatable: v1.ResourceList{v1.ResourceCPU: resource.MustParse("8"), v1.ResourceMemory: resource.MustParse("32Gi")}}}
 	spot := good.DeepCopy()
@@ -125,7 +125,7 @@ func TestAcceptanceNativeDaemonFailover(t *testing.T) {
 	// Observe a real recovery probe without changing or replacing the plugin connection.
 	probeObserved := false
 	wrapped := plugin.client
-	plugin.client = &acceptanceProbeObserver{ACOPredictiveSchedulerClient: wrapped, onScore: func() {
+	plugin.client = &acceptanceProbeObserver{SentinelSchedulerClient: wrapped, onScore: func() {
 		if plugin.circuitBreaker.GetState() == HalfOpen {
 			probeObserved = true
 		}
@@ -147,11 +147,11 @@ func TestAcceptanceNativeDaemonFailover(t *testing.T) {
 }
 
 type acceptanceProbeObserver struct {
-	pb.ACOPredictiveSchedulerClient
+	pb.SentinelSchedulerClient
 	onScore func()
 }
 
 func (o *acceptanceProbeObserver) ScoreNodes(ctx context.Context, req *pb.ScoreRequest, opts ...grpc.CallOption) (*pb.ScoreResponse, error) {
 	o.onScore()
-	return o.ACOPredictiveSchedulerClient.ScoreNodes(ctx, req, opts...)
+	return o.SentinelSchedulerClient.ScoreNodes(ctx, req, opts...)
 }

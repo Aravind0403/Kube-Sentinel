@@ -1,4 +1,4 @@
-module aco-sentinel-plugin
+module sentinel-plugin
 
 go 1.25.0
 

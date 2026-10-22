@@ -43,9 +43,9 @@ cleanup() {
     echo ""
     echo "--- Collecting Cluster Diagnostic Logs ---"
     if kubectl cluster-info --context "kind-${CLUSTER_NAME}" &>/dev/null; then
-        kubectl logs -n sentinel-system deployment/aco-sentinel-scheduler -c scheduler > "${ARTIFACTS_DIR}/scheduler.log" 2>&1 || true
-        kubectl logs -n sentinel-system deployment/aco-sentinel-scheduler -c sidecar > "${ARTIFACTS_DIR}/sidecar.log" 2>&1 || true
-        kubectl logs -n sentinel-system deployment/aco-sentinel-scheduler -c sidecar --previous >> "${ARTIFACTS_DIR}/sidecar.log" 2>&1 || true
+        kubectl logs -n sentinel-system deployment/kube-sentinel-scheduler -c scheduler > "${ARTIFACTS_DIR}/scheduler.log" 2>&1 || true
+        kubectl logs -n sentinel-system deployment/kube-sentinel-scheduler -c sidecar > "${ARTIFACTS_DIR}/sidecar.log" 2>&1 || true
+        kubectl logs -n sentinel-system deployment/kube-sentinel-scheduler -c sidecar --previous >> "${ARTIFACTS_DIR}/sidecar.log" 2>&1 || true
         kubectl get events -A -o json > "${ARTIFACTS_DIR}/events.json" 2>&1 || true
     fi
 
@@ -85,8 +85,8 @@ trap cleanup EXIT
 
 # 1. Build Local Images
 echo "[Step 1/4] Building local images for native architecture..."
-${CONTAINER_CLI} build -t aco-sentinel-scheduler:local -f "${REPO_ROOT}/v2/Dockerfile.scheduler" "${REPO_ROOT}"
-${CONTAINER_CLI} build -t aco-sentinel-sidecar:local -f "${REPO_ROOT}/v2/Dockerfile.grpc" "${REPO_ROOT}"
+${CONTAINER_CLI} build -t localhost/kube-sentinel-scheduler:local -f "${REPO_ROOT}/v2/Dockerfile.scheduler" "${REPO_ROOT}"
+${CONTAINER_CLI} build -t localhost/kube-sentinel-sidecar:local -f "${REPO_ROOT}/v2/Dockerfile.grpc" "${REPO_ROOT}"
 echo "✓ Local container images built successfully."
 
 # 2. Create Kind Cluster
@@ -97,8 +97,8 @@ kubectl cluster-info --context "kind-${CLUSTER_NAME}"
 # 3. Load Images into Kind Cluster
 echo "[Step 3/4] Loading local images into Kind cluster nodes..."
 TMP_DIR=$(mktemp -d)
-${CONTAINER_CLI} save aco-sentinel-scheduler:local -o "${TMP_DIR}/scheduler.tar"
-${CONTAINER_CLI} save aco-sentinel-sidecar:local -o "${TMP_DIR}/sidecar.tar"
+${CONTAINER_CLI} save localhost/kube-sentinel-scheduler:local -o "${TMP_DIR}/scheduler.tar"
+${CONTAINER_CLI} save localhost/kube-sentinel-sidecar:local -o "${TMP_DIR}/sidecar.tar"
 kind load image-archive "${TMP_DIR}/scheduler.tar" --name "${CLUSTER_NAME}"
 kind load image-archive "${TMP_DIR}/sidecar.tar" --name "${CLUSTER_NAME}"
 rm -rf "${TMP_DIR}"
@@ -131,26 +131,26 @@ kubectl label node "${W_CHEAP}" fixture.sentinel/role=cheap-on-demand --overwrit
 kubectl annotate node "${W_CHEAP}" \
     sentinel.cost/hourly-usd="0.40" \
     sentinel.cost/is-spot="false" \
-    aco-sentinel.io/reported-allocatable-cpu="8.0" \
-    aco-sentinel.io/reported-used-cpu="2.0" \
-    aco-sentinel.io/reported-free-cpu="6.0" \
-    aco-sentinel.io/reported-allocatable-memory-gb="32.0" \
-    aco-sentinel.io/reported-used-memory-gb="8.0" \
-    aco-sentinel.io/reported-free-memory-gb="24.0" \
-    aco-sentinel.io/last-heartbeat-timestamp="${NOW}" --overwrite
+    kube-sentinel.io/reported-allocatable-cpu="8.0" \
+    kube-sentinel.io/reported-used-cpu="2.0" \
+    kube-sentinel.io/reported-free-cpu="6.0" \
+    kube-sentinel.io/reported-allocatable-memory-gb="32.0" \
+    kube-sentinel.io/reported-used-memory-gb="8.0" \
+    kube-sentinel.io/reported-free-memory-gb="24.0" \
+    kube-sentinel.io/last-heartbeat-timestamp="${NOW}" --overwrite
 
 # Fixture 2: Expensive On-Demand ($2.50/hr, on-demand, valid telemetry)
 kubectl label node "${W_EXP}" fixture.sentinel/role=expensive-on-demand --overwrite
 kubectl annotate node "${W_EXP}" \
     sentinel.cost/hourly-usd="2.50" \
     sentinel.cost/is-spot="false" \
-    aco-sentinel.io/reported-allocatable-cpu="8.0" \
-    aco-sentinel.io/reported-used-cpu="2.0" \
-    aco-sentinel.io/reported-free-cpu="6.0" \
-    aco-sentinel.io/reported-allocatable-memory-gb="32.0" \
-    aco-sentinel.io/reported-used-memory-gb="8.0" \
-    aco-sentinel.io/reported-free-memory-gb="24.0" \
-    aco-sentinel.io/last-heartbeat-timestamp="${NOW}" --overwrite
+    kube-sentinel.io/reported-allocatable-cpu="8.0" \
+    kube-sentinel.io/reported-used-cpu="2.0" \
+    kube-sentinel.io/reported-free-cpu="6.0" \
+    kube-sentinel.io/reported-allocatable-memory-gb="32.0" \
+    kube-sentinel.io/reported-used-memory-gb="8.0" \
+    kube-sentinel.io/reported-free-memory-gb="24.0" \
+    kube-sentinel.io/last-heartbeat-timestamp="${NOW}" --overwrite
 
 # Fixture 3: Provider-labeled Spot ($0.15/hr, Spot, valid telemetry)
 kubectl label node "${W_SPOT}" cloud.google.com/gke-spot=true fixture.sentinel/role=spot --overwrite
@@ -158,19 +158,19 @@ kubectl annotate node "${W_SPOT}" \
     sentinel.cost/hourly-usd="0.15" \
     sentinel.cost/is-spot="true" \
     sentinel.cost/spot-interruption-prob="0.15" \
-    aco-sentinel.io/reported-allocatable-cpu="8.0" \
-    aco-sentinel.io/reported-used-cpu="1.0" \
-    aco-sentinel.io/reported-free-cpu="7.0" \
-    aco-sentinel.io/reported-allocatable-memory-gb="32.0" \
-    aco-sentinel.io/reported-used-memory-gb="4.0" \
-    aco-sentinel.io/reported-free-memory-gb="28.0" \
-    aco-sentinel.io/last-heartbeat-timestamp="${NOW}" --overwrite
+    kube-sentinel.io/reported-allocatable-cpu="8.0" \
+    kube-sentinel.io/reported-used-cpu="1.0" \
+    kube-sentinel.io/reported-free-cpu="7.0" \
+    kube-sentinel.io/reported-allocatable-memory-gb="32.0" \
+    kube-sentinel.io/reported-used-memory-gb="4.0" \
+    kube-sentinel.io/reported-free-memory-gb="28.0" \
+    kube-sentinel.io/last-heartbeat-timestamp="${NOW}" --overwrite
 
 refresh_heartbeats() {
     local t=$(date +%s)
-    kubectl annotate node "${W_CHEAP}" aco-sentinel.io/last-heartbeat-timestamp="${t}" --overwrite
-    kubectl annotate node "${W_EXP}" aco-sentinel.io/last-heartbeat-timestamp="${t}" --overwrite
-    kubectl annotate node "${W_SPOT}" aco-sentinel.io/last-heartbeat-timestamp="${t}" --overwrite
+    kubectl annotate node "${W_CHEAP}" kube-sentinel.io/last-heartbeat-timestamp="${t}" --overwrite
+    kubectl annotate node "${W_EXP}" kube-sentinel.io/last-heartbeat-timestamp="${t}" --overwrite
+    kubectl annotate node "${W_SPOT}" kube-sentinel.io/last-heartbeat-timestamp="${t}" --overwrite
 }
 
 # 4. Deploy Native Scheduler & Sidecar
@@ -215,10 +215,10 @@ echo "==========================================================================
 
 # L1: Healthy scheduler and sidecar readiness
 echo "Running L1: Healthy scheduler and sidecar deployment check..."
-if kubectl rollout status deployment/aco-sentinel-scheduler -n sentinel-system --timeout=90s; then
-    record_scenario "L1" "Healthy scheduler and sidecar" "Deployment aco-sentinel-scheduler in sentinel-system" "Deployment ready within 90s" "Scheduler & sidecar running and healthy" "PASS"
+if kubectl rollout status deployment/kube-sentinel-scheduler -n sentinel-system --timeout=90s; then
+    record_scenario "L1" "Healthy scheduler and sidecar" "Deployment kube-sentinel-scheduler in sentinel-system" "Deployment ready within 90s" "Scheduler & sidecar running and healthy" "PASS"
 else
-    record_scenario "L1" "Healthy scheduler and sidecar" "Deployment aco-sentinel-scheduler in sentinel-system" "Deployment ready within 90s" "Rollout timed out or failed" "FAIL"
+    record_scenario "L1" "Healthy scheduler and sidecar" "Deployment kube-sentinel-scheduler in sentinel-system" "Deployment ready within 90s" "Rollout timed out or failed" "FAIL"
     exit 1
 fi
 
@@ -249,7 +249,7 @@ kind: Pod
 metadata:
   name: pod-l2
 spec:
-  schedulerName: aco-sentinel-scheduler
+  schedulerName: kube-sentinel-scheduler
   restartPolicy: Never
   containers:
     - name: worker
@@ -263,10 +263,10 @@ EOF
 
 if BOUND_NODE=$(wait_for_pod_scheduled "pod-l2" 30); then
     archive_pod "pod-l2"
-    record_scenario "L2" "Ordinary eligible workload" "Pod pod-l2 (cpu: 50m, mem: 64Mi, schedulerName: aco-sentinel-scheduler)" "Binds to any healthy worker" "Bound to ${BOUND_NODE}" "PASS"
+    record_scenario "L2" "Ordinary eligible workload" "Pod pod-l2 (cpu: 50m, mem: 64Mi, schedulerName: kube-sentinel-scheduler)" "Binds to any healthy worker" "Bound to ${BOUND_NODE}" "PASS"
 else
     archive_pod "pod-l2"
-    record_scenario "L2" "Ordinary eligible workload" "Pod pod-l2 (cpu: 50m, mem: 64Mi, schedulerName: aco-sentinel-scheduler)" "Binds to any healthy worker" "Failed to schedule within 30s" "FAIL"
+    record_scenario "L2" "Ordinary eligible workload" "Pod pod-l2 (cpu: 50m, mem: 64Mi, schedulerName: kube-sentinel-scheduler)" "Binds to any healthy worker" "Failed to schedule within 30s" "FAIL"
     exit 1
 fi
 kubectl delete pod pod-l2 --now >/dev/null 2>&1
@@ -280,9 +280,9 @@ kind: Pod
 metadata:
   name: pod-l3
   labels:
-    aco-sentinel.io/workload-type: "latency-critical"
+    kube-sentinel.io/workload-type: "latency-critical"
 spec:
-  schedulerName: aco-sentinel-scheduler
+  schedulerName: kube-sentinel-scheduler
   restartPolicy: Never
   containers:
     - name: worker
@@ -318,11 +318,11 @@ kind: Pod
 metadata:
   name: pod-l4
   labels:
-    aco-sentinel.io/workload-type: "latency-critical"
+    kube-sentinel.io/workload-type: "latency-critical"
   annotations:
     sentinel.cost/ceiling-usd: "1.00"
 spec:
-  schedulerName: aco-sentinel-scheduler
+  schedulerName: kube-sentinel-scheduler
   restartPolicy: Never
   containers:
     - name: worker
@@ -353,7 +353,7 @@ kubectl delete pod pod-l4 --now >/dev/null 2>&1
 echo "Running L5: Malformed telemetry worker exclusion..."
 refresh_heartbeats
 # Inject corrupted free memory exceeding allocatable into expensive worker (1000GB > 32GB)
-kubectl annotate node "${W_EXP}" aco-sentinel.io/reported-free-memory-gb="1000.0" --overwrite
+kubectl annotate node "${W_EXP}" kube-sentinel.io/reported-free-memory-gb="1000.0" --overwrite
 
 kubectl apply -f - <<EOF
 apiVersion: v1
@@ -361,9 +361,9 @@ kind: Pod
 metadata:
   name: pod-l5
   labels:
-    aco-sentinel.io/workload-type: "latency-critical"
+    kube-sentinel.io/workload-type: "latency-critical"
 spec:
-  schedulerName: aco-sentinel-scheduler
+  schedulerName: kube-sentinel-scheduler
   restartPolicy: Never
   containers:
     - name: worker
@@ -389,7 +389,7 @@ else
     exit 1
 fi
 # Restore valid telemetry
-kubectl annotate node "${W_EXP}" aco-sentinel.io/reported-free-memory-gb="24.0" --overwrite
+kubectl annotate node "${W_EXP}" kube-sentinel.io/reported-free-memory-gb="24.0" --overwrite
 kubectl delete pod pod-l5 --now >/dev/null 2>&1
 
 # L6: One stale-heartbeat worker plus a healthy worker
@@ -397,7 +397,7 @@ echo "Running L6: Stale heartbeat worker exclusion..."
 refresh_heartbeats
 # Inject stale heartbeat (2 hours ago) into expensive worker
 STALE_TIME=$(( $(date +%s) - 7200 ))
-kubectl annotate node "${W_EXP}" aco-sentinel.io/last-heartbeat-timestamp="${STALE_TIME}" --overwrite
+kubectl annotate node "${W_EXP}" kube-sentinel.io/last-heartbeat-timestamp="${STALE_TIME}" --overwrite
 
 kubectl apply -f - <<EOF
 apiVersion: v1
@@ -405,9 +405,9 @@ kind: Pod
 metadata:
   name: pod-l6
   labels:
-    aco-sentinel.io/workload-type: "latency-critical"
+    kube-sentinel.io/workload-type: "latency-critical"
 spec:
-  schedulerName: aco-sentinel-scheduler
+  schedulerName: kube-sentinel-scheduler
   restartPolicy: Never
   containers:
     - name: worker
@@ -433,7 +433,7 @@ else
     exit 1
 fi
 # Restore fresh heartbeat
-kubectl annotate node "${W_EXP}" aco-sentinel.io/last-heartbeat-timestamp="$(date +%s)" --overwrite
+kubectl annotate node "${W_EXP}" kube-sentinel.io/last-heartbeat-timestamp="$(date +%s)" --overwrite
 kubectl delete pod pod-l6 --now >/dev/null 2>&1
 
 # L7: All workers violate a mandatory requirement (Must remain Pending)
@@ -448,7 +448,7 @@ metadata:
   annotations:
     sentinel.cost/ceiling-usd: "0.05"
 spec:
-  schedulerName: aco-sentinel-scheduler
+  schedulerName: kube-sentinel-scheduler
   restartPolicy: Never
   containers:
     - name: worker
@@ -477,7 +477,7 @@ kubectl delete pod pod-l7 --now >/dev/null 2>&1
 echo "Running L8: Daemon failure and recovery across workload submissions..."
 refresh_heartbeats
 # Kill python daemon inside sidecar container
-SCHED_POD=$(kubectl get pods -n sentinel-system -l app=aco-sentinel-scheduler -o jsonpath='{.items[0].metadata.name}')
+SCHED_POD=$(kubectl get pods -n sentinel-system -l app=kube-sentinel-scheduler -o jsonpath='{.items[0].metadata.name}')
 echo "Injecting fault: killing sidecar process in ${SCHED_POD}..."
 kubectl exec -n sentinel-system "${SCHED_POD}" -c sidecar -- pkill -9 -f "v2/grpc_server.py" || true
 
@@ -488,9 +488,9 @@ kind: Pod
 metadata:
   name: pod-l8-outage
   labels:
-    aco-sentinel.io/workload-type: "latency-critical"
+    kube-sentinel.io/workload-type: "latency-critical"
 spec:
-  schedulerName: aco-sentinel-scheduler
+  schedulerName: kube-sentinel-scheduler
   restartPolicy: Never
   containers:
     - name: worker
@@ -521,7 +521,7 @@ kubectl delete pod pod-l8-outage --now >/dev/null 2>&1
 echo "Waiting for sidecar process recovery..."
 sleep 5
 # Check if sidecar is responsive again
-kubectl rollout status deployment/aco-sentinel-scheduler -n sentinel-system --timeout=60s
+kubectl rollout status deployment/kube-sentinel-scheduler -n sentinel-system --timeout=60s
 
 # Submit post-recovery workload
 refresh_heartbeats
@@ -531,7 +531,7 @@ kind: Pod
 metadata:
   name: pod-l8-recovered
 spec:
-  schedulerName: aco-sentinel-scheduler
+  schedulerName: kube-sentinel-scheduler
   restartPolicy: Never
   containers:
     - name: worker
@@ -562,8 +562,8 @@ cat <<EOF > "${ARTIFACTS_DIR}/run.json"
   "timestamp": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
   "git_commit": "$(git rev-parse HEAD)",
   "images": {
-    "scheduler": "aco-sentinel-scheduler:local",
-    "sidecar": "aco-sentinel-sidecar:local"
+    "scheduler": "localhost/kube-sentinel-scheduler:local",
+    "sidecar": "localhost/kube-sentinel-sidecar:local"
   },
   "versions": {
     "kubernetes": "$(kubectl version -o json | python3 -c 'import sys, json; print(json.load(sys.stdin)["serverVersion"]["gitVersion"])')",

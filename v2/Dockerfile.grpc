@@ -6,7 +6,8 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends procps && rm -rf /var/lib/apt/lists/*
 
 # Install dependencies (gRPC + Pydantic + CostEngine dependencies)
-RUN pip install --no-cache-dir grpcio grpcio-tools pydantic numpy prometheus-client pyyaml
+COPY requirements.txt /app/requirements.txt
+RUN pip install --no-cache-dir -r /app/requirements.txt
 
 # Copy core modules and V2 source code
 COPY core/ ./core/

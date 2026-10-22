@@ -1,7 +1,7 @@
 """
 v2/verify_confidence.py
 ───────────────────────
-Phase 1: Verification script for ACO-Sentinel confidence math.
+Phase 1: Verification script for Kube-Sentinel confidence math.
 
 Simulates four node scenarios (clean, arithmetically compromised, lagging, and flapping)
 and prints the resulting confidence trajectories to verify mathematical correctness.
@@ -15,7 +15,7 @@ from confidence import NodeConfidenceTracker
 
 def run_simulation() -> None:
     print("=" * 80)
-    print("ACO-SENTINEL: PHASE 1 CONFIDENCE MATH VERIFICATION")
+    print("KUBE-SENTINEL: CONFIDENCE MATH VERIFICATION")
     print("=" * 80)
 
     # ── Scenario 1: Clean Node ────────────────────────────────────────────────

@@ -5,7 +5,7 @@ import warnings
 
 import sentinel_pb2 as sentinel__pb2
 
-GRPC_GENERATED_VERSION = '1.82.1'
+GRPC_GENERATED_VERSION = '1.84.0'
 GRPC_VERSION = grpc.__version__
 _version_not_supported = False
 
@@ -25,8 +25,8 @@ if _version_not_supported:
     )
 
 
-class ACOPredictiveSchedulerStub:
-    """Service coordinating custom scoring and placement checks between K8s and ACO
+class SentinelSchedulerStub:
+    """Service coordinating custom scoring and placement checks between the Go scheduler and Python sidecar
     """
 
     def __init__(self, channel):
@@ -36,19 +36,19 @@ class ACOPredictiveSchedulerStub:
             channel: A grpc.Channel.
         """
         self.ScoreNodes = channel.unary_unary(
-                '/sentinel.ACOPredictiveScheduler/ScoreNodes',
+                '/sentinel.SentinelScheduler/ScoreNodes',
                 request_serializer=sentinel__pb2.ScoreRequest.SerializeToString,
                 response_deserializer=sentinel__pb2.ScoreResponse.FromString,
                 _registered_method=True)
         self.PlacementCommitted = channel.unary_unary(
-                '/sentinel.ACOPredictiveScheduler/PlacementCommitted',
+                '/sentinel.SentinelScheduler/PlacementCommitted',
                 request_serializer=sentinel__pb2.PlacementCommittedRequest.SerializeToString,
                 response_deserializer=sentinel__pb2.PlacementCommittedResponse.FromString,
                 _registered_method=True)
 
 
-class ACOPredictiveSchedulerServicer:
-    """Service coordinating custom scoring and placement checks between K8s and ACO
+class SentinelSchedulerServicer:
+    """Service coordinating custom scoring and placement checks between the Go scheduler and Python sidecar
     """
 
     def ScoreNodes(self, request, context):
@@ -59,14 +59,14 @@ class ACOPredictiveSchedulerServicer:
         raise NotImplementedError('Method not implemented!')
 
     def PlacementCommitted(self, request, context):
-        """Confirms the placement of a pod to commit pheromones or rollback reservations
+        """Confirms the placement of a pod to commit or roll back placement accounting
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
 
-def add_ACOPredictiveSchedulerServicer_to_server(servicer, server):
+def add_SentinelSchedulerServicer_to_server(servicer, server):
     rpc_method_handlers = {
             'ScoreNodes': grpc.unary_unary_rpc_method_handler(
                     servicer.ScoreNodes,
@@ -80,14 +80,14 @@ def add_ACOPredictiveSchedulerServicer_to_server(servicer, server):
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-            'sentinel.ACOPredictiveScheduler', rpc_method_handlers)
+            'sentinel.SentinelScheduler', rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
-    server.add_registered_method_handlers('sentinel.ACOPredictiveScheduler', rpc_method_handlers)
+    server.add_registered_method_handlers('sentinel.SentinelScheduler', rpc_method_handlers)
 
 
  # This class is part of an EXPERIMENTAL API.
-class ACOPredictiveScheduler:
-    """Service coordinating custom scoring and placement checks between K8s and ACO
+class SentinelScheduler:
+    """Service coordinating custom scoring and placement checks between the Go scheduler and Python sidecar
     """
 
     @staticmethod
@@ -104,7 +104,7 @@ class ACOPredictiveScheduler:
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/sentinel.ACOPredictiveScheduler/ScoreNodes',
+            '/sentinel.SentinelScheduler/ScoreNodes',
             sentinel__pb2.ScoreRequest.SerializeToString,
             sentinel__pb2.ScoreResponse.FromString,
             options,
@@ -131,7 +131,7 @@ class ACOPredictiveScheduler:
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/sentinel.ACOPredictiveScheduler/PlacementCommitted',
+            '/sentinel.SentinelScheduler/PlacementCommitted',
             sentinel__pb2.PlacementCommittedRequest.SerializeToString,
             sentinel__pb2.PlacementCommittedResponse.FromString,
             options,

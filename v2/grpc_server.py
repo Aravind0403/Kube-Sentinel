@@ -1,7 +1,7 @@
 """
 v2/grpc_server.py
 ─────────────────
-Phase 3: Python gRPC Server for ACO-Sentinel.
+Python gRPC scoring daemon for Kube-Sentinel.
 
 Serves the cost engine, workload predictor, and confidence tracker logic
 over gRPC to the Go scheduler plugin.
@@ -100,7 +100,7 @@ class StatePersistence:
     """
     Periodically flushes and recovers committed placement state to disk atomically.
     """
-    def __init__(self, server: ACOPredictiveSchedulerServicer, path: str = "v2/sentinel_state.json") -> None:
+    def __init__(self, server: SentinelSchedulerServicer, path: str = "v2/sentinel_state.json") -> None:
         self.server = server
         self.path = path
         if not os.path.exists(os.path.dirname(self.path)) and os.path.dirname(self.path):
@@ -117,8 +117,8 @@ class StatePersistence:
     def save(self) -> None:
         data = {
             "committed_placements": self.server.committed_placements,
-            "total_deposits": self.server.total_deposits,
-            "phantom_deposits": self.server.phantom_deposits,
+            "committed_count": self.server.committed_count,
+            "rollback_count": self.server.rollback_count,
             "timestamp": time.time()
         }
         try:
@@ -136,8 +136,8 @@ class StatePersistence:
                 with open(self.path, "r") as f:
                     data = json.load(f)
                 self.server.committed_placements = data.get("committed_placements", {})
-                self.server.total_deposits = data.get("total_deposits", 0)
-                self.server.phantom_deposits = data.get("phantom_deposits", 0)
+                self.server.committed_count = data.get("committed_count", 0)
+                self.server.rollback_count = data.get("rollback_count", 0)
                 print(f"[Sentinel-Persistence] State loaded successfully from {self.path}")
             except Exception as e:
                 print(f"[Sentinel-Persistence] Error loading state: {e}")
@@ -150,20 +150,20 @@ class FederationHTTPServer:
     """
     Exposes a lightweight, read-only HTTP server for pulling cluster placements.
     """
-    def __init__(self, server: ACOPredictiveSchedulerServicer, port: int = 8083) -> None:
+    def __init__(self, server: SentinelSchedulerServicer, port: int = 8083) -> None:
         self.server = server
         self.port = port
 
         class Handler(http.server.BaseHTTPRequestHandler):
             def do_GET(h) -> None:
-                if h.path == "/pheromones":
+                if h.path == "/placements":
                     h.send_response(200)
                     h.send_header("Content-Type", "application/json")
                     h.end_headers()
                     response = {
                         "placements": self.server.committed_placements,
-                        "total_deposits": self.server.total_deposits,
-                        "phantom_deposits": self.server.phantom_deposits
+                        "committed_count": self.server.committed_count,
+                        "rollback_count": self.server.rollback_count
                     }
                     h.wfile.write(json.dumps(response).encode())
                 else:
@@ -185,7 +185,7 @@ class FederationHTTPServer:
         self.httpd.shutdown()
 
 
-class ACOPredictiveSchedulerServicer(sentinel_pb2_grpc.ACOPredictiveSchedulerServicer):
+class SentinelSchedulerServicer(sentinel_pb2_grpc.SentinelSchedulerServicer):
     """
     gRPC service coordinating custom scoring and placement checks.
     """
@@ -194,8 +194,8 @@ class ACOPredictiveSchedulerServicer(sentinel_pb2_grpc.ACOPredictiveSchedulerSer
         self.cost_engine = CostEngine()
         self.confidence_trackers: Dict[str, NodeConfidenceTracker] = {}
         self.committed_placements: Dict[str, str] = {}
-        self.phantom_deposits = 0
-        self.total_deposits = 0
+        self.rollback_count = 0
+        self.committed_count = 0
         self.threshold_manager = AdaptiveThresholdManager()
         self.config_watcher = ConfigWatcher()
         self.persistence = StatePersistence(self)
@@ -215,8 +215,8 @@ class ACOPredictiveSchedulerServicer(sentinel_pb2_grpc.ACOPredictiveSchedulerSer
         if request.pod.uid == "reset":
             self.confidence_trackers.clear()
             self.committed_placements.clear()
-            self.phantom_deposits = 0
-            self.total_deposits = 0
+            self.rollback_count = 0
+            self.committed_count = 0
             return sentinel_pb2.ScoreResponse()
 
         # Collect intervals and calculate CVs for active threshold management
@@ -495,7 +495,7 @@ class ACOPredictiveSchedulerServicer(sentinel_pb2_grpc.ACOPredictiveSchedulerSer
         if request.success:
             if pod_uid not in self.committed_placements:
                 self.committed_placements[pod_uid] = node_id
-                self.total_deposits += 1
+                self.committed_count += 1
                 print(
                     f"[Sentinel-Server] COMMIT: Placement confirmed on node {node_id} "
                     f"for pod {pod_uid}."
@@ -503,7 +503,7 @@ class ACOPredictiveSchedulerServicer(sentinel_pb2_grpc.ACOPredictiveSchedulerSer
         else:
             if pod_uid in self.committed_placements:
                 del self.committed_placements[pod_uid]
-                self.phantom_deposits += 1
+                self.rollback_count += 1
                 print(
                     f"[Sentinel-Server] ROLLBACK: Unreserved placement on node {node_id} "
                     f"for pod {pod_uid}."
@@ -512,11 +512,11 @@ class ACOPredictiveSchedulerServicer(sentinel_pb2_grpc.ACOPredictiveSchedulerSer
         return sentinel_pb2.PlacementCommittedResponse(acknowledged=True)
 
 
-def serve(port: int = 50051) -> tuple[grpc.Server, ACOPredictiveSchedulerServicer]:
+def serve(port: int = 50051) -> tuple[grpc.Server, SentinelSchedulerServicer]:
     """Start the gRPC server."""
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-    servicer = ACOPredictiveSchedulerServicer()
-    sentinel_pb2_grpc.add_ACOPredictiveSchedulerServicer_to_server(
+    servicer = SentinelSchedulerServicer()
+    sentinel_pb2_grpc.add_SentinelSchedulerServicer_to_server(
         servicer, server
     )
     server.add_insecure_port(f"[::]:{port}")
