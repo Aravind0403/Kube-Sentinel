@@ -626,146 +626,303 @@ func extractPodSpec(pod *v1.Pod) *pb.PodSpec {
 	}
 }
 
-// extractNodeCandidate maps K8s Node and cache state to pb.NodeCandidate
-func extractNodeCandidate(nodeInfo *framework.NodeInfo) *pb.NodeCandidate {
+func parseSafeFloat(s string) (float64, bool) {
+	if s == "" {
+		return 0, false
+	}
+	val, err := strconv.ParseFloat(strings.TrimSpace(s), 64)
+	if err != nil || math.IsNaN(val) || math.IsInf(val, 0) {
+		return 0, false
+	}
+	return val, true
+}
+
+// NodeMetadata holds canonical, validated node attributes and telemetry (Blocker A & B fix)
+type NodeMetadata struct {
+	NodeID                   string
+	AllocCpu                 float64
+	AllocMem                 float64
+	ReqCpu                   float64
+	ReqMem                   float64
+	ExpectedFreeCpu          float64
+	ExpectedFreeMem          float64
+
+	// Telemetry - CPU
+	HasCPUTelemetry          bool
+	ReportedAllocCpu         float64
+	ReportedUsedCpu          float64
+	ReportedFreeCpu          float64
+
+	// Telemetry - Memory
+	HasMemTelemetry          bool
+	ReportedAllocMem         float64
+	ReportedUsedMem          float64
+	ReportedFreeMem          float64
+
+	// Telemetry - Heartbeat
+	HasHeartbeat             bool
+	LastHeartbeatTimestamp   float64
+	RecentHeartbeatIntervals []float64
+
+	// Economics
+	HourlyCostUSD            float64
+	CostKnown                bool
+	IsSpot                   bool
+	SpotInterruptionProb     float64
+
+	// Hardware & Accelerator
+	GPUCount                 int32
+	GPUType                  string
+	GPUTypeKnown             bool
+	GPUMemoryGB              float64
+	VRAMKnown                bool
+	Arch                     string
+	ArchKnown                bool
+	Zone                     string
+}
+
+// parseNodeMetadata extracts and validates node attributes across provider labels and annotations with canonical precedence
+func parseNodeMetadata(nodeInfo *framework.NodeInfo) (*NodeMetadata, error) {
+	if nodeInfo == nil {
+		return nil, fmt.Errorf("nodeInfo is nil")
+	}
 	node := nodeInfo.Node()
 	if node == nil {
-		return &pb.NodeCandidate{NodeId: "unknown"}
+		return nil, fmt.Errorf("node is nil")
 	}
 
 	allocCpu := float64(node.Status.Allocatable.Cpu().MilliValue()) / 1000.0
 	allocMem := float64(node.Status.Allocatable.Memory().Value()) / (1024.0 * 1024.0 * 1024.0)
 
-	// Compute K8s assumed-cache allocations (Requested resources)
 	reqCpu := float64(nodeInfo.Requested.MilliCPU) / 1000.0
 	reqMem := float64(nodeInfo.Requested.Memory) / (1024.0 * 1024.0 * 1024.0)
 
 	expectedFreeCpu := allocCpu - reqCpu
 	expectedFreeMem := allocMem - reqMem
 
-	// Default telemetry values fallback
-	repAllocCpu := allocCpu
-	repUsedCpu := reqCpu
-	repFreeCpu := expectedFreeCpu
+	meta := &NodeMetadata{
+		NodeID:                   node.Name,
+		AllocCpu:                 allocCpu,
+		AllocMem:                 allocMem,
+		ReqCpu:                   reqCpu,
+		ReqMem:                   reqMem,
+		ExpectedFreeCpu:          expectedFreeCpu,
+		ExpectedFreeMem:          expectedFreeMem,
+		ReportedAllocCpu:         allocCpu,
+		ReportedUsedCpu:          reqCpu,
+		ReportedFreeCpu:          expectedFreeCpu,
+		ReportedAllocMem:         allocMem,
+		ReportedUsedMem:          reqMem,
+		ReportedFreeMem:          expectedFreeMem,
+		RecentHeartbeatIntervals: []float64{},
+	}
 
-	repAllocMem := allocMem
-	repUsedMem := reqMem
-	repFreeMem := expectedFreeMem
-
-	var lastHeartbeat float64
-	var recentIntervals []float64
-
-	var hourlyCost float64
-	var isSpot bool
-	var spotInterruption float64
-	var gpuType string
-	var gpuCount int32
-	var gpuMemoryGb float64
-	var arch string
-	var zone string
-
+	// 1. Architecture extraction with canonical precedence:
+	// Labels -> Status.NodeInfo -> Annotations
+	rawArch := ""
 	if node.Labels != nil {
-		if node.Labels["cloud.google.com/gke-spot"] == "true" ||
-			node.Labels["eks.amazonaws.com/capacityType"] == "SPOT" {
-			isSpot = true
+		if val, ok := node.Labels["kubernetes.io/arch"]; ok && val != "" {
+			rawArch = val
 		}
-		if val, ok := node.Labels["cloud.google.com/gke-gpu"]; ok {
-			gpuType = val
-		} else if val, ok := node.Labels["accelerator"]; ok {
-			gpuType = val
+	}
+	if rawArch == "" && node.Status.NodeInfo.Architecture != "" {
+		rawArch = node.Status.NodeInfo.Architecture
+	}
+	if rawArch == "" && node.Annotations != nil {
+		if val, ok := node.Annotations[AnnotationArch]; ok && val != "" {
+			rawArch = val
+		}
+	}
+	if rawArch != "" {
+		meta.Arch = normalizeArch(rawArch)
+		if meta.Arch != "" {
+			meta.ArchKnown = true
+		}
+	}
+
+	// 2. Spot status extraction with canonical precedence:
+	// Provider labels (GKE, EKS, Karpenter) -> Annotations
+	if node.Labels != nil {
+		if strings.EqualFold(node.Labels["cloud.google.com/gke-spot"], "true") ||
+			strings.EqualFold(node.Labels["eks.amazonaws.com/capacityType"], "SPOT") ||
+			strings.EqualFold(node.Labels["karpenter.sh/capacity-type"], "spot") {
+			meta.IsSpot = true
 		}
 		if val, ok := node.Labels["topology.kubernetes.io/zone"]; ok {
-			zone = val
+			meta.Zone = val
 		}
 	}
-
-	if node.Status.NodeInfo.Architecture != "" {
-		arch = node.Status.NodeInfo.Architecture
-	}
-
-	if qty, ok := node.Status.Allocatable["nvidia.com/gpu"]; ok {
-		gpuCount = int32(qty.Value())
-	}
-
 	if node.Annotations != nil {
-		if val, err := strconv.ParseFloat(node.Annotations[AnnotationReportedAllocatableCPU], 64); err == nil {
-			repAllocCpu = val
+		if strings.EqualFold(node.Annotations[AnnotationIsSpot], "true") {
+			meta.IsSpot = true
 		}
-		if val, err := strconv.ParseFloat(node.Annotations[AnnotationReportedUsedCPU], 64); err == nil {
-			repUsedCpu = val
-		}
-		if val, err := strconv.ParseFloat(node.Annotations[AnnotationReportedFreeCPU], 64); err == nil {
-			repFreeCpu = val
-		}
-
-		if val, err := strconv.ParseFloat(node.Annotations[AnnotationReportedAllocatableMem], 64); err == nil {
-			repAllocMem = val
-		}
-		if val, err := strconv.ParseFloat(node.Annotations[AnnotationReportedUsedMem], 64); err == nil {
-			repUsedMem = val
-		}
-		if val, err := strconv.ParseFloat(node.Annotations[AnnotationReportedFreeMem], 64); err == nil {
-			repFreeMem = val
-		}
-
-		if val, err := strconv.ParseFloat(node.Annotations[AnnotationLastHeartbeat], 64); err == nil {
-			lastHeartbeat = val
-		}
-
-		if val, ok := node.Annotations[AnnotationHeartbeatIntervals]; ok && val != "" {
-			parts := strings.Split(val, ",")
-			for _, p := range parts {
-				if iv, err := strconv.ParseFloat(strings.TrimSpace(p), 64); err == nil {
-					recentIntervals = append(recentIntervals, iv)
+		if valStr, ok := node.Annotations[AnnotationSpotInterruption]; ok {
+			if prob, ok := parseSafeFloat(valStr); ok && prob >= 0 {
+				meta.SpotInterruptionProb = prob
+				if prob > 0.05 {
+					meta.IsSpot = true
 				}
 			}
 		}
+	}
 
-		if val, err := strconv.ParseFloat(node.Annotations[AnnotationHourlyCostUSD], 64); err == nil {
-			hourlyCost = val
-		}
-		if val, ok := node.Annotations[AnnotationIsSpot]; ok {
-			isSpot = val == "true"
-		}
-		if val, err := strconv.ParseFloat(node.Annotations[AnnotationSpotInterruption], 64); err == nil {
-			spotInterruption = val
-		}
-		if val, ok := node.Annotations[AnnotationGPUType]; ok && val != "" {
-			gpuType = val
-		}
-		if val, err := strconv.Atoi(node.Annotations[AnnotationGPUCount]); err == nil {
-			gpuCount = int32(val)
-		}
-		if val, err := strconv.ParseFloat(node.Annotations[AnnotationGPUMemoryGB], 64); err == nil {
-			gpuMemoryGb = val
-		}
-		if val, ok := node.Annotations[AnnotationArch]; ok && val != "" {
-			arch = val
+	// 3. GPU Inventory & Types
+	if qty, ok := node.Status.Allocatable["nvidia.com/gpu"]; ok {
+		meta.GPUCount = int32(qty.Value())
+	}
+	if node.Annotations != nil {
+		if valStr, ok := node.Annotations[AnnotationGPUCount]; ok {
+			if val, err := strconv.Atoi(strings.TrimSpace(valStr)); err == nil && val >= 0 {
+				meta.GPUCount = int32(val)
+			}
 		}
 	}
 
+	// GPU Model Type:
+	// Annotations -> GKE label -> standard accelerator label -> EKS label -> nvidia product label
+	rawGPUType := ""
+	if node.Annotations != nil {
+		if val, ok := node.Annotations[AnnotationGPUType]; ok && strings.TrimSpace(val) != "" {
+			rawGPUType = strings.TrimSpace(val)
+		}
+	}
+	if rawGPUType == "" && node.Labels != nil {
+		if val, ok := node.Labels["cloud.google.com/gke-gpu"]; ok && strings.TrimSpace(val) != "" {
+			rawGPUType = strings.TrimSpace(val)
+		} else if val, ok := node.Labels["accelerator"]; ok && strings.TrimSpace(val) != "" {
+			rawGPUType = strings.TrimSpace(val)
+		} else if val, ok := node.Labels["k8s.amazonaws.com/accelerator"]; ok && strings.TrimSpace(val) != "" {
+			rawGPUType = strings.TrimSpace(val)
+		} else if val, ok := node.Labels["nvidia.com/gpu.product"]; ok && strings.TrimSpace(val) != "" {
+			rawGPUType = strings.TrimSpace(val)
+		}
+	}
+	if rawGPUType != "" {
+		meta.GPUType = rawGPUType
+		meta.GPUTypeKnown = true
+	}
+
+	// GPU VRAM:
+	if node.Annotations != nil {
+		if valStr, ok := node.Annotations[AnnotationGPUMemoryGB]; ok {
+			if vram, ok := parseSafeFloat(valStr); ok && vram > 0 {
+				meta.GPUMemoryGB = vram
+				meta.VRAMKnown = true
+			}
+		}
+	}
+	if !meta.VRAMKnown && node.Labels != nil {
+		if valStr, ok := node.Labels["nvidia.com/gpu.memory"]; ok {
+			if vram, ok := parseSafeFloat(valStr); ok && vram > 0 {
+				if vram > 500 { // If in MB, convert to GB
+					vram = vram / 1024.0
+				}
+				meta.GPUMemoryGB = vram
+				meta.VRAMKnown = true
+			}
+		}
+	}
+
+	// 4. Cost Metadata:
+	if node.Annotations != nil {
+		if valStr, ok := node.Annotations[AnnotationHourlyCostUSD]; ok {
+			if cost, ok := parseSafeFloat(valStr); ok && cost >= 0 {
+				meta.HourlyCostUSD = cost
+				meta.CostKnown = true
+			}
+		}
+	}
+
+	// 5. Telemetry: CPU
+	if node.Annotations != nil {
+		aStr, hasA := node.Annotations[AnnotationReportedAllocatableCPU]
+		uStr, hasU := node.Annotations[AnnotationReportedUsedCPU]
+		fStr, hasF := node.Annotations[AnnotationReportedFreeCPU]
+		if hasA || hasU || hasF {
+			a, okA := parseSafeFloat(aStr)
+			u, okU := parseSafeFloat(uStr)
+			f, okF := parseSafeFloat(fStr)
+			if okA && okU && okF && a > 0 && u >= 0 && f >= 0 {
+				meta.ReportedAllocCpu = a
+				meta.ReportedUsedCpu = u
+				meta.ReportedFreeCpu = f
+				meta.HasCPUTelemetry = true
+			}
+		}
+	}
+
+	// 6. Telemetry: Memory
+	if node.Annotations != nil {
+		aStr, hasA := node.Annotations[AnnotationReportedAllocatableMem]
+		uStr, hasU := node.Annotations[AnnotationReportedUsedMem]
+		fStr, hasF := node.Annotations[AnnotationReportedFreeMem]
+		if hasA || hasU || hasF {
+			a, okA := parseSafeFloat(aStr)
+			u, okU := parseSafeFloat(uStr)
+			f, okF := parseSafeFloat(fStr)
+			if okA && okU && okF && a > 0 && u >= 0 && f >= 0 {
+				meta.ReportedAllocMem = a
+				meta.ReportedUsedMem = u
+				meta.ReportedFreeMem = f
+				meta.HasMemTelemetry = true
+			}
+		}
+	}
+
+	// 7. Telemetry: Heartbeat
+	if node.Annotations != nil {
+		if valStr, ok := node.Annotations[AnnotationLastHeartbeat]; ok {
+			if hb, ok := parseSafeFloat(valStr); ok && hb > 0 {
+				meta.LastHeartbeatTimestamp = hb
+				meta.HasHeartbeat = true
+			}
+		}
+		if valStr, ok := node.Annotations[AnnotationHeartbeatIntervals]; ok && valStr != "" {
+			parts := strings.Split(valStr, ",")
+			for _, p := range parts {
+				if iv, ok := parseSafeFloat(p); ok && iv > 0 {
+					meta.RecentHeartbeatIntervals = append(meta.RecentHeartbeatIntervals, iv)
+				}
+			}
+		}
+	}
+
+	return meta, nil
+}
+
+// extractNodeCandidate maps K8s Node and cache state to pb.NodeCandidate using unified parseNodeMetadata
+func extractNodeCandidate(nodeInfo *framework.NodeInfo) *pb.NodeCandidate {
+	meta, err := parseNodeMetadata(nodeInfo)
+	if err != nil || meta == nil {
+		nodeId := "unknown"
+		if nodeInfo != nil && nodeInfo.Node() != nil {
+			nodeId = nodeInfo.Node().Name
+		}
+		return &pb.NodeCandidate{NodeId: nodeId}
+	}
+
 	return &pb.NodeCandidate{
-		NodeId:                        node.Name,
-		AllocatableCpu:                allocCpu,
-		AllocatableMemoryGb:           allocMem,
-		SchedulerExpectedFreeCpu:      expectedFreeCpu,
-		SchedulerExpectedFreeMemoryGb: expectedFreeMem,
-		ReportedAllocatableCpu:        repAllocCpu,
-		ReportedUsedCpu:               repUsedCpu,
-		ReportedFreeCpu:               repFreeCpu,
-		ReportedAllocatableMemoryGb:   repAllocMem,
-		ReportedUsedMemoryGb:          repUsedMem,
-		ReportedFreeMemoryGb:          repFreeMem,
-		LastHeartbeatTimestamp:        lastHeartbeat,
-		RecentHeartbeatIntervals:      recentIntervals,
-		HourlyCostUsd:                 hourlyCost,
-		IsSpot:                        isSpot,
-		SpotInterruptionProb:          spotInterruption,
-		GpuType:                       gpuType,
-		GpuCount:                      gpuCount,
-		GpuMemoryGb:                   gpuMemoryGb,
-		Arch:                          normalizeArch(arch),
-		Zone:                          zone,
+		NodeId:                        meta.NodeID,
+		AllocatableCpu:                meta.AllocCpu,
+		AllocatableMemoryGb:           meta.AllocMem,
+		SchedulerExpectedFreeCpu:      meta.ExpectedFreeCpu,
+		SchedulerExpectedFreeMemoryGb: meta.ExpectedFreeMem,
+		ReportedAllocatableCpu:        meta.ReportedAllocCpu,
+		ReportedUsedCpu:               meta.ReportedUsedCpu,
+		ReportedFreeCpu:               meta.ReportedFreeCpu,
+		ReportedAllocatableMemoryGb:   meta.ReportedAllocMem,
+		ReportedUsedMemoryGb:          meta.ReportedUsedMem,
+		ReportedFreeMemoryGb:          meta.ReportedFreeMem,
+		LastHeartbeatTimestamp:        meta.LastHeartbeatTimestamp,
+		RecentHeartbeatIntervals:      meta.RecentHeartbeatIntervals,
+		HourlyCostUsd:                 meta.HourlyCostUSD,
+		IsSpot:                        meta.IsSpot,
+		SpotInterruptionProb:          meta.SpotInterruptionProb,
+		GpuType:                       meta.GPUType,
+		GpuCount:                      meta.GPUCount,
+		GpuMemoryGb:                   meta.GPUMemoryGB,
+		Arch:                          meta.Arch,
+		Zone:                          meta.Zone,
 	}
 }
 
@@ -791,19 +948,25 @@ func (p *SentinelPlugin) PreFilterExtensions() framework.PreFilterExtensions {
 	return nil
 }
 
-// Filter implements framework.FilterPlugin to hard-reject nodes with failed constraints or untrusted telemetry (V01, V04 fix)
+// Filter implements framework.FilterPlugin to hard-reject nodes with failed constraints or untrusted telemetry (V01, V04, Blocker A & B fix)
 // This runs natively in Go BEFORE PreScore, guaranteeing that mandatory restrictions hold even during daemon outages.
 func (p *SentinelPlugin) Filter(ctx context.Context, state *framework.CycleState, pod *v1.Pod, nodeInfo *framework.NodeInfo) *framework.Status {
-	node := nodeInfo.Node()
-	if node == nil {
+	if nodeInfo == nil || nodeInfo.Node() == nil {
 		return framework.NewStatus(framework.Unschedulable, "Node is nil")
 	}
+	node := nodeInfo.Node()
 
 	// 1. Explicit poison check
 	if node.Annotations != nil {
-		if val, ok := node.Annotations[AnnotationForceReject]; ok && val == "true" {
+		if strings.EqualFold(node.Annotations[AnnotationForceReject], "true") {
 			return framework.NewStatus(framework.Unschedulable, "Node marked as untrusted by Sentinel")
 		}
+	}
+
+	// Parse unified node metadata with strict validation
+	meta, err := parseNodeMetadata(nodeInfo)
+	if err != nil {
+		return framework.NewStatus(framework.Unschedulable, fmt.Sprintf("Failed to parse node metadata: %v", err))
 	}
 
 	// Retrieve pre-filtered constraints (or extract on demand if PreFilter was not invoked)
@@ -815,96 +978,86 @@ func (p *SentinelPlugin) Filter(ctx context.Context, state *framework.CycleState
 		c = extractPodConstraints(pod)
 	}
 
-	// 2. Mandatory Architecture Filter (V01, V04 fix)
+	// 2. Mandatory Architecture Filter (Blocker A fix)
 	if c.requiredArch != "" {
-		nodeArch := ""
-		if node.Labels != nil {
-			nodeArch = node.Labels["kubernetes.io/arch"]
+		if !meta.ArchKnown {
+			return framework.NewStatus(framework.Unschedulable, fmt.Sprintf("Node architecture unknown; cannot satisfy required %s", c.requiredArch))
 		}
-		if nodeArch == "" && node.Annotations != nil {
-			nodeArch = node.Annotations[AnnotationArch]
-		}
-		if nodeArch == "" && node.Status.NodeInfo.Architecture != "" {
-			nodeArch = node.Status.NodeInfo.Architecture
-		}
-		if nodeArch != "" && normalizeArch(nodeArch) != c.requiredArch {
-			return framework.NewStatus(framework.Unschedulable, fmt.Sprintf("Architecture mismatch: pod requires %s, node has %s", c.requiredArch, nodeArch))
+		if meta.Arch != c.requiredArch {
+			return framework.NewStatus(framework.Unschedulable, fmt.Sprintf("Architecture mismatch: pod requires %s, node has %s", c.requiredArch, meta.Arch))
 		}
 	}
 
-	// 3. Mandatory Cost Ceiling Filter (V01, V04 fix)
+	// 3. Mandatory Cost Ceiling Filter (Blocker A fix)
 	if c.costCeilingUSD > 0 {
-		if node.Annotations != nil {
-			if val, ok := node.Annotations[AnnotationHourlyCostUSD]; ok {
-				if cost, err := strconv.ParseFloat(val, 64); err == nil && cost > c.costCeilingUSD {
-					return framework.NewStatus(framework.Unschedulable, fmt.Sprintf("Node cost $%.2f/hr exceeds pod ceiling $%.2f/hr", cost, c.costCeilingUSD))
-				}
-			}
+		if !meta.CostKnown {
+			return framework.NewStatus(framework.Unschedulable, fmt.Sprintf("Node cost unknown; cannot satisfy mandatory ceiling $%.2f/hr", c.costCeilingUSD))
+		}
+		if meta.HourlyCostUSD > c.costCeilingUSD {
+			return framework.NewStatus(framework.Unschedulable, fmt.Sprintf("Node cost $%.2f/hr exceeds pod ceiling $%.2f/hr", meta.HourlyCostUSD, c.costCeilingUSD))
 		}
 	}
 
-	// 4. Mandatory GPU & VRAM Filter (V01, V04 fix)
+	// 4. Mandatory GPU, Type & VRAM Filter (Blocker A fix)
 	if c.gpuRequested > 0 {
-		nodeGPUCount := 0
-		if node.Annotations != nil {
-			if val, ok := node.Annotations[AnnotationGPUCount]; ok {
-				nodeGPUCount, _ = strconv.Atoi(val)
+		if float64(meta.GPUCount) < c.gpuRequested {
+			return framework.NewStatus(framework.Unschedulable, fmt.Sprintf("Insufficient GPUs: pod requires %.0f, node has %d", c.gpuRequested, meta.GPUCount))
+		}
+		if c.gpuTypeRequired != "" {
+			if !meta.GPUTypeKnown {
+				return framework.NewStatus(framework.Unschedulable, fmt.Sprintf("Node GPU model unknown; cannot satisfy required %s", c.gpuTypeRequired))
+			}
+			if !strings.EqualFold(meta.GPUType, c.gpuTypeRequired) {
+				return framework.NewStatus(framework.Unschedulable, fmt.Sprintf("GPU model mismatch: pod requires %s, node has %s", c.gpuTypeRequired, meta.GPUType))
 			}
 		}
-		if nodeGPUCount == 0 && node.Status.Allocatable != nil {
-			if q, ok := node.Status.Allocatable["nvidia.com/gpu"]; ok {
-				nodeGPUCount = int(q.Value())
+		if c.minGPUMemoryGB > 0 {
+			if !meta.VRAMKnown {
+				return framework.NewStatus(framework.Unschedulable, fmt.Sprintf("Node GPU VRAM unknown; cannot satisfy mandatory requirement of %.1fGB", c.minGPUMemoryGB))
 			}
-		}
-		if float64(nodeGPUCount) < c.gpuRequested {
-			return framework.NewStatus(framework.Unschedulable, fmt.Sprintf("Insufficient GPUs: pod requires %.0f, node has %d", c.gpuRequested, nodeGPUCount))
-		}
-		if c.gpuTypeRequired != "" && node.Annotations != nil {
-			nodeGPUType := node.Annotations[AnnotationGPUType]
-			if nodeGPUType != "" && !strings.EqualFold(nodeGPUType, c.gpuTypeRequired) {
-				return framework.NewStatus(framework.Unschedulable, fmt.Sprintf("GPU model mismatch: pod requires %s, node has %s", c.gpuTypeRequired, nodeGPUType))
-			}
-		}
-		if c.minGPUMemoryGB > 0 && node.Annotations != nil {
-			if val, ok := node.Annotations[AnnotationGPUMemoryGB]; ok {
-				if vram, err := strconv.ParseFloat(val, 64); err == nil && vram < c.minGPUMemoryGB {
-					return framework.NewStatus(framework.Unschedulable, fmt.Sprintf("Insufficient GPU VRAM: pod requires %.1fGB, node has %.1fGB", c.minGPUMemoryGB, vram))
-				}
+			if meta.GPUMemoryGB < c.minGPUMemoryGB {
+				return framework.NewStatus(framework.Unschedulable, fmt.Sprintf("Insufficient GPU VRAM: pod requires %.1fGB, node has %.1fGB", c.minGPUMemoryGB, meta.GPUMemoryGB))
 			}
 		}
 	}
 
-	// 5. Mandatory Telemetry Arithmetic Balance Check (V01, V04 fix)
-	if node.Annotations != nil {
-		allocStr, ok1 := node.Annotations[AnnotationReportedAllocatableCPU]
-		usedStr, ok2 := node.Annotations[AnnotationReportedUsedCPU]
-		freeStr, ok3 := node.Annotations[AnnotationReportedFreeCPU]
-		if ok1 && ok2 && ok3 {
-			alloc, e1 := strconv.ParseFloat(allocStr, 64)
-			used, e2 := strconv.ParseFloat(usedStr, 64)
-			free, e3 := strconv.ParseFloat(freeStr, 64)
-			if e1 == nil && e2 == nil && e3 == nil && alloc > 0 {
-				delta := math.Abs((alloc - used) - free)
-				if delta > 0.05*alloc {
-					return framework.NewStatus(framework.Unschedulable, fmt.Sprintf("Untrusted telemetry: arithmetic balance failure (alloc=%.2f, used=%.2f, free=%.2f, delta=%.2f)", alloc, used, free, delta))
-				}
-			}
+	// 5. Mandatory QoS Rule: Latency Critical pods cannot run on Spot instances (Blocker A fix)
+	if c.isLatencyCritical && meta.IsSpot {
+		return framework.NewStatus(framework.Unschedulable, "Latency-critical workload disallowed on Spot node")
+	}
+
+	// 6. Mandatory Telemetry Observation-Quality Gate: CPU (Blocker B fix)
+	if meta.HasCPUTelemetry {
+		if meta.ReportedFreeCpu > meta.ReportedAllocCpu || meta.ReportedUsedCpu > meta.ReportedAllocCpu {
+			return framework.NewStatus(framework.Unschedulable, fmt.Sprintf("Untrusted telemetry: reported CPU free (%.2f) or used (%.2f) exceeds allocatable (%.2f)", meta.ReportedFreeCpu, meta.ReportedUsedCpu, meta.ReportedAllocCpu))
+		}
+		delta := math.Abs((meta.ReportedAllocCpu - meta.ReportedUsedCpu) - meta.ReportedFreeCpu)
+		if delta > 0.05*meta.ReportedAllocCpu {
+			return framework.NewStatus(framework.Unschedulable, fmt.Sprintf("Untrusted telemetry: CPU arithmetic balance failure (alloc=%.2f, used=%.2f, free=%.2f, delta=%.2f)", meta.ReportedAllocCpu, meta.ReportedUsedCpu, meta.ReportedFreeCpu, delta))
 		}
 	}
 
-	// 6. Mandatory QoS Rule: Latency Critical pods cannot run on Spot instances (V04 fix)
-	if c.isLatencyCritical && node.Annotations != nil {
-		isSpot := false
-		if val, ok := node.Annotations[AnnotationIsSpot]; ok && val == "true" {
-			isSpot = true
+	// 7. Mandatory Telemetry Observation-Quality Gate: Memory (Blocker B fix)
+	if meta.HasMemTelemetry {
+		if meta.ReportedFreeMem > meta.ReportedAllocMem || meta.ReportedUsedMem > meta.ReportedAllocMem {
+			return framework.NewStatus(framework.Unschedulable, fmt.Sprintf("Untrusted telemetry: reported memory free (%.2fGB) or used (%.2fGB) exceeds allocatable (%.2fGB)", meta.ReportedFreeMem, meta.ReportedUsedMem, meta.ReportedAllocMem))
 		}
-		if val, ok := node.Annotations[AnnotationSpotInterruption]; ok {
-			if prob, err := strconv.ParseFloat(val, 64); err == nil && prob > 0.05 {
-				isSpot = true
-			}
+		delta := math.Abs((meta.ReportedAllocMem - meta.ReportedUsedMem) - meta.ReportedFreeMem)
+		if delta > 0.05*meta.ReportedAllocMem {
+			return framework.NewStatus(framework.Unschedulable, fmt.Sprintf("Untrusted telemetry: memory arithmetic balance failure (alloc=%.2fGB, used=%.2fGB, free=%.2fGB, delta=%.2fGB)", meta.ReportedAllocMem, meta.ReportedUsedMem, meta.ReportedFreeMem, delta))
 		}
-		if isSpot {
-			return framework.NewStatus(framework.Unschedulable, "Latency-critical workload disallowed on Spot node")
+	}
+
+	// 8. Mandatory Telemetry Freshness & Clock Skew Gate (Blocker B fix)
+	if meta.HasHeartbeat {
+		now := float64(time.Now().UnixNano()) / 1e9
+		// Future heartbeat check (> 1.0s in future is a clock skew anomaly)
+		if meta.LastHeartbeatTimestamp-now > 1.0 {
+			return framework.NewStatus(framework.Unschedulable, fmt.Sprintf("Untrusted telemetry: heartbeat timestamp is in the future by %.2fs (clock skew anomaly)", meta.LastHeartbeatTimestamp-now))
+		}
+		// Stale heartbeat check (> 60.0s is stale)
+		if now-meta.LastHeartbeatTimestamp > 60.0 {
+			return framework.NewStatus(framework.Unschedulable, fmt.Sprintf("Untrusted telemetry: heartbeat stale by %.1fs (threshold 60.0s)", now-meta.LastHeartbeatTimestamp))
 		}
 	}
 

@@ -1,14 +1,15 @@
 {
+  "benchmark_category": "grpc_socket_failover_simulation",
   "total_requests": 100,
-  "failed_bindings": 0,
-  "availability_pct": 100.0,
+  "direct_grpc_requests": 60,
+  "fallback_requests": 40,
   "circuit_breaker_transitions": [
     "CLOSED",
     "OPEN",
     "HALF_OPEN",
     "CLOSED"
   ],
-  "mean_grpc_latency_ms": 0.68,
-  "mean_fallback_latency_ms": 0.019,
+  "mean_grpc_latency_ms": 0.656,
+  "mean_fallback_latency_ms": 0.018,
   "status": "PASSED"
 }

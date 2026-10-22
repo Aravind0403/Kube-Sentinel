@@ -392,3 +392,258 @@ func TestCircuitBreaker(t *testing.T) {
 		t.Errorf("Expected Open immediately after failure in HalfOpen, got %v", cb.GetState())
 	}
 }
+
+// TestNativeFilterMetadataParity explicitly verifies Blockers A & B test cases:
+// Provider labels (GKE/EKS), unknown price/VRAM rejection, GPU model matching across provider labels.
+func TestNativeFilterMetadataParity(t *testing.T) {
+	plugin := &SentinelPlugin{}
+	ctx := context.Background()
+
+	// Pod 1: Latency-critical workload
+	podLC := &v1.Pod{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "pod-lc",
+			Namespace: "default",
+			UID:       types.UID("pod-lc-uid"),
+			Labels: map[string]string{
+				LabelWorkloadType: "LATENCY_CRITICAL",
+			},
+		},
+	}
+
+	// 1. GKE-labeled Spot node (cloud.google.com/gke-spot=true)
+	nodeGKESpot := &v1.Node{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: "node-gke-spot",
+			Labels: map[string]string{
+				"cloud.google.com/gke-spot": "true",
+			},
+		},
+	}
+	infoGKESpot := framework.NewNodeInfo()
+	infoGKESpot.SetNode(nodeGKESpot)
+
+	state := framework.NewCycleState()
+	plugin.PreFilter(ctx, state, podLC)
+	status := plugin.Filter(ctx, state, podLC, infoGKESpot)
+	if status.IsSuccess() {
+		t.Fatalf("Expected GKE Spot node to be REJECTED for latency-critical workload")
+	}
+
+	// 2. EKS-labeled Spot node (eks.amazonaws.com/capacityType=SPOT)
+	nodeEKSSpot := &v1.Node{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: "node-eks-spot",
+			Labels: map[string]string{
+				"eks.amazonaws.com/capacityType": "SPOT",
+			},
+		},
+	}
+	infoEKSSpot := framework.NewNodeInfo()
+	infoEKSSpot.SetNode(nodeEKSSpot)
+
+	state = framework.NewCycleState()
+	plugin.PreFilter(ctx, state, podLC)
+	status = plugin.Filter(ctx, state, podLC, infoEKSSpot)
+	if status.IsSuccess() {
+		t.Fatalf("Expected EKS Spot node to be REJECTED for latency-critical workload")
+	}
+
+	// 3. Provider-labeled L4 node evaluated against A100-required workload
+	podA100 := &v1.Pod{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "pod-a100",
+			Namespace: "default",
+			UID:       types.UID("pod-a100-uid"),
+			Annotations: map[string]string{
+				AnnotationGPUCount: "1",
+				AnnotationGPUType:  "A100",
+			},
+		},
+	}
+	nodeL4 := &v1.Node{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: "node-l4-provider",
+			Labels: map[string]string{
+				"cloud.google.com/gke-gpu": "L4",
+			},
+		},
+		Status: v1.NodeStatus{
+			Allocatable: v1.ResourceList{
+				"nvidia.com/gpu": *resource.NewQuantity(1, resource.DecimalSI),
+			},
+		},
+	}
+	infoL4 := framework.NewNodeInfo()
+	infoL4.SetNode(nodeL4)
+
+	state = framework.NewCycleState()
+	plugin.PreFilter(ctx, state, podA100)
+	status = plugin.Filter(ctx, state, podA100, infoL4)
+	if status.IsSuccess() {
+		t.Fatalf("Expected provider-labeled L4 node to be REJECTED for A100-required workload")
+	}
+
+	// 4. Node with no price metadata evaluated against $1.00 ceiling
+	podCeiling := &v1.Pod{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "pod-ceiling",
+			Namespace: "default",
+			UID:       types.UID("pod-ceiling-uid"),
+			Annotations: map[string]string{
+				AnnotationCostCeilingUSD: "1.00",
+			},
+		},
+	}
+	nodeNoPrice := &v1.Node{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: "node-no-price",
+		},
+	}
+	infoNoPrice := framework.NewNodeInfo()
+	infoNoPrice.SetNode(nodeNoPrice)
+
+	state = framework.NewCycleState()
+	plugin.PreFilter(ctx, state, podCeiling)
+	status = plugin.Filter(ctx, state, podCeiling, infoNoPrice)
+	if status.IsSuccess() {
+		t.Fatalf("Expected node with missing price to be REJECTED when mandatory ceiling is declared")
+	}
+
+	// 5. Node with no VRAM metadata evaluated against 80 GB VRAM requirement
+	podVRAM := &v1.Pod{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "pod-vram",
+			Namespace: "default",
+			UID:       types.UID("pod-vram-uid"),
+			Annotations: map[string]string{
+				AnnotationGPUCount:    "1",
+				AnnotationGPUMemoryGB: "80.0",
+			},
+		},
+	}
+	nodeNoVRAM := &v1.Node{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: "node-no-vram",
+		},
+		Status: v1.NodeStatus{
+			Allocatable: v1.ResourceList{
+				"nvidia.com/gpu": *resource.NewQuantity(1, resource.DecimalSI),
+			},
+		},
+	}
+	infoNoVRAM := framework.NewNodeInfo()
+	infoNoVRAM.SetNode(nodeNoVRAM)
+
+	state = framework.NewCycleState()
+	plugin.PreFilter(ctx, state, podVRAM)
+	status = plugin.Filter(ctx, state, podVRAM, infoNoVRAM)
+	if status.IsSuccess() {
+		t.Fatalf("Expected node with missing VRAM metadata to be REJECTED when mandatory VRAM is declared")
+	}
+}
+
+// TestNativeFilterTelemetryGates tests memory arithmetic, stale heartbeats, and future timestamp rejection.
+func TestNativeFilterTelemetryGates(t *testing.T) {
+	plugin := &SentinelPlugin{}
+	ctx := context.Background()
+	pod := &v1.Pod{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "generic-pod",
+			Namespace: "default",
+			UID:       types.UID("gen-pod-1"),
+		},
+	}
+
+	// 1. Memory telemetry claiming 1000 GB free on 16 GB allocatable
+	nodeMemExceed := &v1.Node{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: "node-mem-exceed",
+			Annotations: map[string]string{
+				AnnotationReportedAllocatableMem: "16.0",
+				AnnotationReportedUsedMem:        "2.0",
+				AnnotationReportedFreeMem:        "1000.0", // 1000 > 16!
+			},
+		},
+		Status: v1.NodeStatus{
+			Allocatable: v1.ResourceList{
+				v1.ResourceMemory: *resource.NewQuantity(16*1024*1024*1024, resource.BinarySI),
+			},
+		},
+	}
+	infoMemExceed := framework.NewNodeInfo()
+	infoMemExceed.SetNode(nodeMemExceed)
+
+	state := framework.NewCycleState()
+	plugin.PreFilter(ctx, state, pod)
+	status := plugin.Filter(ctx, state, pod, infoMemExceed)
+	if status.IsSuccess() {
+		t.Fatalf("Expected node with free memory exceeding allocatable to be REJECTED")
+	}
+
+	// 2. Memory telemetry arithmetic balance failure (16 - 4 != 25)
+	nodeMemImbalance := &v1.Node{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: "node-mem-imbalance",
+			Annotations: map[string]string{
+				AnnotationReportedAllocatableMem: "16.0",
+				AnnotationReportedUsedMem:        "4.0",
+				AnnotationReportedFreeMem:        "25.0",
+			},
+		},
+		Status: v1.NodeStatus{
+			Allocatable: v1.ResourceList{
+				v1.ResourceMemory: *resource.NewQuantity(16*1024*1024*1024, resource.BinarySI),
+			},
+		},
+	}
+	infoMemImbalance := framework.NewNodeInfo()
+	infoMemImbalance.SetNode(nodeMemImbalance)
+
+	state = framework.NewCycleState()
+	plugin.PreFilter(ctx, state, pod)
+	status = plugin.Filter(ctx, state, pod, infoMemImbalance)
+	if status.IsSuccess() {
+		t.Fatalf("Expected node with memory arithmetic imbalance to be REJECTED")
+	}
+
+	// 3. Heartbeat one hour stale
+	staleTime := float64(time.Now().Add(-1 * time.Hour).Unix())
+	nodeStaleHB := &v1.Node{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: "node-stale-hb",
+			Annotations: map[string]string{
+				AnnotationLastHeartbeat: fmt.Sprintf("%.0f", staleTime),
+			},
+		},
+	}
+	infoStaleHB := framework.NewNodeInfo()
+	infoStaleHB.SetNode(nodeStaleHB)
+
+	state = framework.NewCycleState()
+	plugin.PreFilter(ctx, state, pod)
+	status = plugin.Filter(ctx, state, pod, infoStaleHB)
+	if status.IsSuccess() {
+		t.Fatalf("Expected node with 1-hour stale heartbeat to be REJECTED")
+	}
+
+	// 4. Heartbeat in the future (clock anomaly > 1.0s)
+	futureTime := float64(time.Now().Add(10 * time.Minute).Unix())
+	nodeFutureHB := &v1.Node{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: "node-future-hb",
+			Annotations: map[string]string{
+				AnnotationLastHeartbeat: fmt.Sprintf("%.0f", futureTime),
+			},
+		},
+	}
+	infoFutureHB := framework.NewNodeInfo()
+	infoFutureHB.SetNode(nodeFutureHB)
+
+	state = framework.NewCycleState()
+	plugin.PreFilter(ctx, state, pod)
+	status = plugin.Filter(ctx, state, pod, infoFutureHB)
+	if status.IsSuccess() {
+		t.Fatalf("Expected node with future heartbeat timestamp to be REJECTED")
+	}
+}

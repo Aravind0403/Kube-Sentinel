@@ -93,13 +93,15 @@ def simulate_trace_replay(num_jobs=100, seeds=5):
 
     total_costs = {s: [] for s in strat_names}
     qos_compliance_counts = {s: 0 for s in strat_names}
+    placed_jobs_counts = {s: 0 for s in strat_names}
+    unplaced_jobs_counts = {s: 0 for s in strat_names}
     total_ls_jobs_evaluated = 0
 
     for seed in range(seeds):
         random.seed(42 + seed)
         np.random.seed(42 + seed)
 
-        # Generate realistic Alibaba GPU cluster jobs
+        # Generate Alibaba GPU cluster job distribution
         jobs = []
         for j in range(num_jobs):
             # 78% Latency-Sensitive (LS), 22% Best-Effort (BE)
@@ -132,7 +134,8 @@ def simulate_trace_replay(num_jobs=100, seeds=5):
             for job in jobs:
                 feasible = [n for n in nodes if is_feasible(n, job)]
                 if not feasible:
-                    # If completely saturated, fallback to least loaded node without exceeding max
+                    if seed == 0:
+                        unplaced_jobs_counts[strat] += 1
                     continue
 
                 chosen = None
@@ -165,12 +168,15 @@ def simulate_trace_replay(num_jobs=100, seeds=5):
 
                 elif strat == "aco_qos_aware":
                     # Sentinel QoS & Trust Aware:
-                    # 1. Enforces ON_DEMAND for LS workloads to prevent spot preemption evictions
+                    # 1. Enforces ON_DEMAND for LS workloads (strict: does not fall back to Spot)
                     # 2. Leverages discounted SPOT nodes for BE workloads
-                    # 3. Minimizes duration-weighted dollar cost within feasible QoS subset
                     if job["is_ls"]:
                         od_feasible = [n for n in feasible if n["instance_type"] == "on_demand"]
-                        pool = od_feasible if od_feasible else feasible
+                        if not od_feasible:
+                            if seed == 0:
+                                unplaced_jobs_counts[strat] += 1
+                            continue
+                        pool = od_feasible
                     else:
                         spot_feasible = [n for n in feasible if n["instance_type"] == "spot"]
                         pool = spot_feasible if spot_feasible else feasible
@@ -180,6 +186,8 @@ def simulate_trace_replay(num_jobs=100, seeds=5):
 
                 # Allocate resources
                 allocate_job(chosen, job)
+                if seed == 0:
+                    placed_jobs_counts[strat] += 1
 
                 # Duration-weighted cost attribution:
                 # Pro-rated job cost = (job_cpu / node_total_cpu) * node_hourly_cost * duration_hr
@@ -203,6 +211,8 @@ def simulate_trace_replay(num_jobs=100, seeds=5):
     ls_compliance_kube_most = (qos_compliance_counts["kube_most"] / max(1, total_ls_jobs_evaluated)) * 100.0
 
     return {
+        "simulation_type": "offline_trace_replayer_simulation",
+        "cost_model": "duration_weighted_cpu_allocation_share",
         "num_jobs": num_jobs,
         "nodes_count": len(generate_cluster_nodes()),
         "random_cost_usd": round(avg_costs["random"], 2),
@@ -218,6 +228,8 @@ def simulate_trace_replay(num_jobs=100, seeds=5):
         "ls_on_demand_compliance_pct": round(ls_compliance_aco, 1),
         "kube_scheduler_ls_compliance_pct": round(ls_compliance_kube_least, 1),
         "kube_binpacking_ls_compliance_pct": round(ls_compliance_kube_most, 1),
+        "placed_jobs": placed_jobs_counts,
+        "unplaced_jobs": unplaced_jobs_counts,
     }
 
 
@@ -226,20 +238,23 @@ def main():
     parser.add_argument("--jobs", type=int, default=100, help="Number of trace jobs to replay")
     args = parser.parse_args()
 
-    print(f"=== Starting KWOK Alibaba GPU Cluster Trace Replayer ===")
+    print(f"=== Starting KWOK GPU Cluster Trace Replayer (Offline Heuristic Simulation) ===")
+    print("Cost Metric: Pro-rated duration-weighted CPU share attribution ($)")
+    print("Cluster Spec: 32 Nodes spanning 7 GPU Types (Alibaba ATC'23 Profile)")
     results = simulate_trace_replay(num_jobs=args.jobs)
 
     print("\n=== KWOK Trace Replayer Benchmark Results ===")
-    print(f"1. Random Baseline                            : ${results['random_cost_usd']:.2f}")
-    print(f"2. First-Fit Baseline                         : ${results['firstfit_cost_usd']:.2f}")
-    print(f"3. Default kube-scheduler (NodeResourcesFit) : ${results['kube_scheduler_least_allocated_usd']:.2f} (LS Compliance: {results['kube_scheduler_ls_compliance_pct']}%)")
-    print(f"4. Bin-Packing kube-scheduler (MostAllocated) : ${results['kube_scheduler_most_allocated_usd']:.2f} (LS Compliance: {results['kube_binpacking_ls_compliance_pct']}%)")
-    print(f"5. ACO-Sentinel Cost-Only                     : ${results['aco_cost_only_usd']:.2f}")
-    print(f"6. ACO-Sentinel + QoS Aware (Ours)            : ${results['aco_qos_aware_usd']:.2f} (LS Compliance: {results['ls_on_demand_compliance_pct']}%)")
-    print("-" * 75)
-    print(f"Cost Savings vs Default kube-scheduler        : {results['cost_savings_vs_default_kube_scheduler_pct']}% Savings")
-    print(f"Cost Savings vs kube Bin-Packing              : {results['cost_savings_vs_kube_binpacking_pct']}% Savings")
+    print(f"1. Random Baseline                            : ${results['random_cost_usd']:.2f} (Placed: {results['placed_jobs']['random']}/{args.jobs})")
+    print(f"2. First-Fit Baseline                         : ${results['firstfit_cost_usd']:.2f} (Placed: {results['placed_jobs']['firstfit']}/{args.jobs})")
+    print(f"3. Default kube-scheduler (NodeResourcesFit) : ${results['kube_scheduler_least_allocated_usd']:.2f} (Placed: {results['placed_jobs']['kube_least']}/{args.jobs}, LS Compliance: {results['kube_scheduler_ls_compliance_pct']}%)")
+    print(f"4. Bin-Packing kube-scheduler (MostAllocated) : ${results['kube_scheduler_most_allocated_usd']:.2f} (Placed: {results['placed_jobs']['kube_most']}/{args.jobs}, LS Compliance: {results['kube_binpacking_ls_compliance_pct']}%)")
+    print(f"5. ACO-Sentinel Cost-Only                     : ${results['aco_cost_only_usd']:.2f} (Placed: {results['placed_jobs']['aco_cost_only']}/{args.jobs})")
+    print(f"6. ACO-Sentinel + QoS Aware (Ours)            : ${results['aco_qos_aware_usd']:.2f} (Placed: {results['placed_jobs']['aco_qos_aware']}/{args.jobs}, LS Compliance: {results['ls_on_demand_compliance_pct']}%)")
+    print("-" * 80)
+    print(f"Model Cost Savings vs Default kube-scheduler  : {results['cost_savings_vs_default_kube_scheduler_pct']}%")
+    print(f"Model Cost Savings vs kube Bin-Packing        : {results['cost_savings_vs_kube_binpacking_pct']}%")
     print(f"LS -> ON_DEMAND QoS Compliance                 : {results['ls_on_demand_compliance_pct']}%")
+    print("Note: Reported figures reflect offline modeled resource cost attribution, not measured cloud provider invoices.")
 
     os.makedirs("docs", exist_ok=True)
     with open("docs/kwok-trace-replay-results.json", "w") as f:

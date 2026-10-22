@@ -69,10 +69,10 @@ def wait_for_port(port, timeout=5.0):
     return False
 
 def fallback_score(nodes):
-    """Fallback scorer in Go plugin: basic resource fit"""
+    """Fallback scorer in Go plugin: neutral safe score (50) for candidates passing Filter"""
     scores = {}
     for n in nodes:
-        scores[n.node_id] = int((n.allocatable_cpu / 8.0) * 100)
+        scores[n.node_id] = 50
     return scores
 
 def main():
@@ -236,17 +236,20 @@ def main():
 
     # Verify transitions
     print("\n=== Chaos Failover Test Summary ===")
-    print(f"Total Workload Evaluations : {30 + 10 + 30 + 30}")
-    print(f"Failed Pod Bindings        : 0 (100% Availability maintained via fallback)")
+    print(f"Benchmark Category         : gRPC Socket Failover Simulation (No Pod Binding)")
+    print(f"Total Requests Evaluated   : {len(latencies_closed) + len(latencies_open)}")
+    print(f"Direct gRPC Queries        : {len(latencies_closed)}")
+    print(f"Fallback-Handled Queries   : {len(latencies_open)}")
     print(f"Circuit Breaker Transitions: {' -> '.join(cb.state_transitions)}")
     print(f"P99 Normal gRPC Latency    : {sorted(latencies_closed)[int(0.99 * len(latencies_closed))]:.3f}ms")
     print(f"Mean Fallback Latency      : {sum(latencies_open)/len(latencies_open):.3f}ms")
 
     os.makedirs("docs", exist_ok=True)
     results = {
-        "total_requests": 100,
-        "failed_bindings": 0,
-        "availability_pct": 100.0,
+        "benchmark_category": "grpc_socket_failover_simulation",
+        "total_requests": len(latencies_closed) + len(latencies_open),
+        "direct_grpc_requests": len(latencies_closed),
+        "fallback_requests": len(latencies_open),
         "circuit_breaker_transitions": cb.state_transitions,
         "mean_grpc_latency_ms": round(sum(latencies_closed)/len(latencies_closed), 3),
         "mean_fallback_latency_ms": round(sum(latencies_open)/len(latencies_open), 3),
