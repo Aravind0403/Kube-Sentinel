@@ -842,12 +842,13 @@ func parseNodeMetadata(nodeInfo *framework.NodeInfo) (*NodeMetadata, error) {
 			a, okA := parseSafeFloat(aStr)
 			u, okU := parseSafeFloat(uStr)
 			f, okF := parseSafeFloat(fStr)
-			if okA && okU && okF && a > 0 && u >= 0 && f >= 0 {
-				meta.ReportedAllocCpu = a
-				meta.ReportedUsedCpu = u
-				meta.ReportedFreeCpu = f
-				meta.HasCPUTelemetry = true
+			if !okA || !okU || !okF || a <= 0 || u < 0 || f < 0 {
+				return nil, fmt.Errorf("invalid or incomplete CPU telemetry: require finite allocatable > 0 and finite used/free >= 0")
 			}
+			meta.ReportedAllocCpu = a
+			meta.ReportedUsedCpu = u
+			meta.ReportedFreeCpu = f
+			meta.HasCPUTelemetry = true
 		}
 	}
 
@@ -860,22 +861,25 @@ func parseNodeMetadata(nodeInfo *framework.NodeInfo) (*NodeMetadata, error) {
 			a, okA := parseSafeFloat(aStr)
 			u, okU := parseSafeFloat(uStr)
 			f, okF := parseSafeFloat(fStr)
-			if okA && okU && okF && a > 0 && u >= 0 && f >= 0 {
-				meta.ReportedAllocMem = a
-				meta.ReportedUsedMem = u
-				meta.ReportedFreeMem = f
-				meta.HasMemTelemetry = true
+			if !okA || !okU || !okF || a <= 0 || u < 0 || f < 0 {
+				return nil, fmt.Errorf("invalid or incomplete memory telemetry: require finite allocatable > 0 and finite used/free >= 0")
 			}
+			meta.ReportedAllocMem = a
+			meta.ReportedUsedMem = u
+			meta.ReportedFreeMem = f
+			meta.HasMemTelemetry = true
 		}
 	}
 
 	// 7. Telemetry: Heartbeat
 	if node.Annotations != nil {
 		if valStr, ok := node.Annotations[AnnotationLastHeartbeat]; ok {
-			if hb, ok := parseSafeFloat(valStr); ok && hb > 0 {
-				meta.LastHeartbeatTimestamp = hb
-				meta.HasHeartbeat = true
+			hb, valid := parseSafeFloat(valStr)
+			if !valid || hb <= 0 {
+				return nil, fmt.Errorf("invalid heartbeat telemetry: require a finite timestamp > 0")
 			}
+			meta.LastHeartbeatTimestamp = hb
+			meta.HasHeartbeat = true
 		}
 		if valStr, ok := node.Annotations[AnnotationHeartbeatIntervals]; ok && valStr != "" {
 			parts := strings.Split(valStr, ",")

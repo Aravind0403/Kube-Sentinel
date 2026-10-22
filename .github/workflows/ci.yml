@@ -8,7 +8,7 @@ on:
 
 jobs:
   test-go-plugin:
-    name: Go Scheduler Plugin Tests
+    name: Go Scheduler Plugin & Acceptance Tests
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
@@ -20,10 +20,22 @@ jobs:
           go-version: '1.22'
           cache-dependency-path: v2/go_plugin/go.sum
 
-      - name: Run Go Plugin Unit & Integration Tests
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install Python Dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run Go Plugin Unit & Native Failover Acceptance Tests
         run: |
           cd v2/go_plugin
-          go test -v -race ./...
+          export SENTINEL_ACCEPTANCE_PYTHON=$(which python3)
+          go test -race -count=1 -v ./...
 
   test-python-sidecar:
     name: Python Sidecar & Integration Benchmarks
