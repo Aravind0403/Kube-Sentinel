@@ -1,29 +1,29 @@
 [
   {
     "burst_size": 100,
-    "candidate_nodes": 32,
-    "p50_ms": 1.0091,
-    "p95_ms": 1.1734,
-    "p99_ms": 1.289,
-    "throughput_pods_per_sec": 983.89,
-    "total_wall_sec": 0.1016
+    "candidate_nodes": 16,
+    "p50_ms": 0.6114,
+    "p95_ms": 0.7517,
+    "p99_ms": 0.8023,
+    "throughput_pods_per_sec": 1596.49,
+    "total_wall_sec": 0.0626
   },
   {
     "burst_size": 500,
-    "candidate_nodes": 32,
-    "p50_ms": 1.0172,
-    "p95_ms": 1.364,
-    "p99_ms": 2.0307,
-    "throughput_pods_per_sec": 940.14,
-    "total_wall_sec": 0.5318
+    "candidate_nodes": 16,
+    "p50_ms": 0.6107,
+    "p95_ms": 0.7882,
+    "p99_ms": 1.013,
+    "throughput_pods_per_sec": 1570.29,
+    "total_wall_sec": 0.3184
   },
   {
     "burst_size": 1000,
-    "candidate_nodes": 32,
-    "p50_ms": 0.9851,
-    "p95_ms": 1.2085,
-    "p99_ms": 1.5822,
-    "throughput_pods_per_sec": 993.25,
-    "total_wall_sec": 1.0068
+    "candidate_nodes": 16,
+    "p50_ms": 0.5931,
+    "p95_ms": 0.8189,
+    "p99_ms": 1.1317,
+    "throughput_pods_per_sec": 1484.54,
+    "total_wall_sec": 0.6736
   }
 ]

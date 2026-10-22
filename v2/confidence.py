@@ -51,7 +51,14 @@ class EMA:
             The updated EMA value.
         """
         self.count += 1
-        self.value = self.alpha * sample + (1.0 - self.alpha) * self.value
+        if self.count == 1:
+            # First observation: initialize directly from sample to avoid cold-start smoothing of corrupted/dead nodes
+            self.value = float(sample)
+        elif sample == 0.0:
+            # Hard zero-trust event: immediately collapse trust without lag
+            self.value = 0.0
+        else:
+            self.value = self.alpha * sample + (1.0 - self.alpha) * self.value
         return self.value
 
 

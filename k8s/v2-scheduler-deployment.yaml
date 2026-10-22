@@ -44,6 +44,12 @@ data:
     profiles:
       - schedulerName: aco-sentinel-scheduler
         plugins:
+          preFilter:
+            enabled:
+              - name: ACOPredictiveScheduler
+          filter:
+            enabled:
+              - name: ACOPredictiveScheduler
           preScore:
             enabled:
               - name: ACOPredictiveScheduler

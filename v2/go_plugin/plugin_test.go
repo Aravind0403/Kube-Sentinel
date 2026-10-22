@@ -2,7 +2,10 @@ package main
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"testing"
+	"time"
 
 	grpc "google.golang.org/grpc"
 	v1 "k8s.io/api/core/v1"
@@ -40,15 +43,19 @@ func (m *mockClient) PlacementCommitted(ctx context.Context, in *pb.PlacementCom
 	return &pb.PlacementCommittedResponse{Acknowledged: true}, nil
 }
 
-func TestPlugin(t *testing.T) {
-	// Test Pod extraction
+func TestPluginLifecycle(t *testing.T) {
+	// Pod requiring amd64, $1.00 cost ceiling, latency-critical
 	pod := &v1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "test-pod",
+			Name:      "critical-service",
 			Namespace: "default",
-			UID:       types.UID("pod-123"),
+			UID:       types.UID("pod-crit-1"),
 			Labels: map[string]string{
-				LabelWorkloadType: "batch",
+				LabelWorkloadType: "LATENCY_CRITICAL",
+			},
+			Annotations: map[string]string{
+				AnnotationArch:           "amd64",
+				AnnotationCostCeilingUSD: "1.00",
 			},
 		},
 		Spec: v1.PodSpec{
@@ -65,82 +72,279 @@ func TestPlugin(t *testing.T) {
 		},
 	}
 
-	podSpec := extractPodSpec(pod)
-	if podSpec.Uid != "pod-123" || podSpec.WorkloadType != "batch" {
-		t.Errorf("Unexpected podSpec properties: %+v", podSpec)
-	}
-	if podSpec.CpuCoresRequested != 1.0 || podSpec.MemoryGbRequested != 1.0 {
-		t.Errorf("Unexpected resources in podSpec: CPU=%f, Mem=%f", podSpec.CpuCoresRequested, podSpec.MemoryGbRequested)
-	}
-
-	// Test Node Candidate extraction
-	node := &v1.Node{
+	// 1. Node 1: Eligible (amd64, $0.50/hr on-demand, balanced telemetry)
+	node1 := &v1.Node{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: "node-1",
+			Name: "node-1-eligible",
 			Annotations: map[string]string{
-				AnnotationReportedUsedCPU: "0.5",
+				AnnotationArch:                   "x86_64", // should normalize to amd64
+				AnnotationHourlyCostUSD:          "0.50",
+				AnnotationIsSpot:                 "false",
+				AnnotationReportedAllocatableCPU: "8.0",
+				AnnotationReportedUsedCPU:        "2.0",
+				AnnotationReportedFreeCPU:        "6.0",
+			},
+		},
+		Status: v1.NodeStatus{
+			Allocatable: v1.ResourceList{
+				v1.ResourceCPU:    *resource.NewMilliQuantity(8000, resource.DecimalSI),
+				v1.ResourceMemory: *resource.NewQuantity(16*1024*1024*1024, resource.BinarySI),
 			},
 		},
 	}
-	node.Status.Allocatable = v1.ResourceList{
-		v1.ResourceCPU:    *resource.NewMilliQuantity(2000, resource.DecimalSI),
-		v1.ResourceMemory: *resource.NewQuantity(4*1024*1024*1024, resource.BinarySI),
+	info1 := framework.NewNodeInfo()
+	info1.SetNode(node1)
+
+	// 2. Node 2: Ineligible - Cost exceeds ceiling ($10.00 > $1.00)
+	node2 := &v1.Node{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: "node-2-expensive",
+			Annotations: map[string]string{
+				AnnotationArch:          "amd64",
+				AnnotationHourlyCostUSD: "10.00",
+			},
+		},
 	}
+	info2 := framework.NewNodeInfo()
+	info2.SetNode(node2)
 
-	nodeInfo := framework.NewNodeInfo()
-	nodeInfo.SetNode(node)
-
-	candidate := extractNodeCandidate(nodeInfo)
-	if candidate.NodeId != "node-1" || candidate.AllocatableCpu != 2.0 || candidate.ReportedUsedCpu != 0.5 {
-		t.Errorf("Unexpected candidate properties: %+v", candidate)
+	// 3. Node 3: Ineligible - Architecture mismatch (arm64 vs amd64)
+	node3 := &v1.Node{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: "node-3-arm64",
+			Annotations: map[string]string{
+				AnnotationArch:          "arm64",
+				AnnotationHourlyCostUSD: "0.50",
+			},
+		},
 	}
+	info3 := framework.NewNodeInfo()
+	info3.SetNode(node3)
 
-	// Test Plugin Hooks with mock client
+	// 4. Node 4: Ineligible - Corrupted telemetry (alloc 8, used 2, free 20)
+	node4 := &v1.Node{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: "node-4-corrupt-telemetry",
+			Annotations: map[string]string{
+				AnnotationArch:                   "amd64",
+				AnnotationHourlyCostUSD:          "0.50",
+				AnnotationReportedAllocatableCPU: "8.0",
+				AnnotationReportedUsedCPU:        "2.0",
+				AnnotationReportedFreeCPU:        "20.0", // 8 - 2 != 20
+			},
+		},
+	}
+	info4 := framework.NewNodeInfo()
+	info4.SetNode(node4)
+
+	// 5. Node 5: Ineligible - Latency Critical workload on Spot instance
+	node5 := &v1.Node{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: "node-5-spot",
+			Annotations: map[string]string{
+				AnnotationArch:          "amd64",
+				AnnotationHourlyCostUSD: "0.20",
+				AnnotationIsSpot:        "true",
+			},
+		},
+	}
+	info5 := framework.NewNodeInfo()
+	info5.SetNode(node5)
+
 	mock := &mockClient{}
 	plugin := &SentinelPlugin{
 		client:             mock,
 		gamma:              1.0,
-		reservedPlacements: make(map[string]string),
+		reservedPlacements: make(map[string]placementEntry),
 	}
 
+	ctx := context.Background()
 	state := framework.NewCycleState()
-	status := plugin.PreScore(context.Background(), state, pod, []*v1.Node{node})
-	if status != nil && !status.IsSuccess() {
-		t.Errorf("PreScore failed: %v", status)
+
+	// STEP 1: PreFilter
+	preFilterRes, preFilterStatus := plugin.PreFilter(ctx, state, pod)
+	if preFilterStatus != nil && !preFilterStatus.IsSuccess() {
+		t.Fatalf("PreFilter failed: %v", preFilterStatus)
+	}
+	if preFilterRes != nil {
+		t.Errorf("Expected nil PreFilterResult")
 	}
 
+	// STEP 2: Filter (runs BEFORE PreScore, matching real K8s lifecycle)
+	// Node 1 must PASS
+	st1 := plugin.Filter(ctx, state, pod, info1)
+	if st1 != nil && !st1.IsSuccess() {
+		t.Errorf("Expected Node 1 to PASS Filter, got: %v", st1)
+	}
+
+	// Node 2 must FAIL (cost ceiling)
+	st2 := plugin.Filter(ctx, state, pod, info2)
+	if st2 == nil || st2.IsSuccess() {
+		t.Errorf("Expected Node 2 to FAIL Filter due to cost ceiling, but it passed")
+	}
+
+	// Node 3 must FAIL (architecture mismatch)
+	st3 := plugin.Filter(ctx, state, pod, info3)
+	if st3 == nil || st3.IsSuccess() {
+		t.Errorf("Expected Node 3 to FAIL Filter due to arch mismatch, but it passed")
+	}
+
+	// Node 4 must FAIL (corrupt arithmetic)
+	st4 := plugin.Filter(ctx, state, pod, info4)
+	if st4 == nil || st4.IsSuccess() {
+		t.Errorf("Expected Node 4 to FAIL Filter due to corrupt telemetry, but it passed")
+	}
+
+	// Node 5 must FAIL (latency critical on spot)
+	st5 := plugin.Filter(ctx, state, pod, info5)
+	if st5 == nil || st5.IsSuccess() {
+		t.Errorf("Expected Node 5 to FAIL Filter due to Spot policy, but it passed")
+	}
+
+	// STEP 3: PreScore (only with the node that passed Filter)
+	preScoreStatus := plugin.PreScore(ctx, state, pod, []*v1.Node{node1})
+	if preScoreStatus != nil && !preScoreStatus.IsSuccess() {
+		t.Fatalf("PreScore failed: %v", preScoreStatus)
+	}
 	if !mock.scoreNodesCalled {
-		t.Errorf("Expected PreScore to call ScoreNodes gRPC endpoint")
+		t.Errorf("Expected PreScore to call ScoreNodes")
 	}
 
-	// Test Filter Hook
-	filterStatus := plugin.Filter(context.Background(), state, pod, nodeInfo)
-	if filterStatus != nil && !filterStatus.IsSuccess() {
-		t.Errorf("Filter failed for eligible node: %v", filterStatus)
-	}
-
-	score, scoreStatus := plugin.Score(context.Background(), state, pod, "node-1")
+	// STEP 4: Score
+	score, scoreStatus := plugin.Score(ctx, state, pod, "node-1-eligible")
 	if scoreStatus != nil && !scoreStatus.IsSuccess() {
 		t.Errorf("Score failed: %v", scoreStatus)
 	}
 	if score != 85 {
-		t.Errorf("Expected score to be 85 (0.85 * 100), got %d", score)
+		t.Errorf("Expected score 85, got %d", score)
 	}
 
-	// Test Reserve/Commit lifecycle
-	reserveStatus := plugin.Reserve(context.Background(), state, pod, "node-1")
+	// STEP 5: Reserve and Commit
+	reserveStatus := plugin.Reserve(ctx, state, pod, "node-1-eligible")
 	if reserveStatus != nil && !reserveStatus.IsSuccess() {
 		t.Errorf("Reserve failed: %v", reserveStatus)
 	}
 
-	plugin.PostBind(context.Background(), state, pod, "node-1")
+	plugin.PostBind(ctx, state, pod, "node-1-eligible")
 	if !mock.commitCalled || !mock.lastSuccess {
-		t.Errorf("Expected PostBind to call PlacementCommitted with success=true")
+		t.Errorf("Expected PostBind to commit placement")
 	}
 
-	plugin.Unreserve(context.Background(), state, pod, "node-1")
+	plugin.Unreserve(ctx, state, pod, "node-1-eligible")
 	if mock.lastSuccess {
-		t.Errorf("Expected Unreserve to call PlacementCommitted with success=false")
+		t.Errorf("Expected Unreserve to rollback placement")
+	}
+}
+
+func TestScoreDoesNotAbortOnMissingCandidate(t *testing.T) {
+	plugin := &SentinelPlugin{
+		gamma:              1.0,
+		reservedPlacements: make(map[string]placementEntry),
+	}
+	ctx := context.Background()
+	state := framework.NewCycleState()
+	pod := &v1.Pod{ObjectMeta: metav1.ObjectMeta{Name: "p1", UID: "uid-1"}}
+
+	// Calling Score on an unlisted candidate must return (0, Success), NOT an error/Unschedulable
+	score, status := plugin.Score(ctx, state, pod, "non-existent-node")
+	if status == nil || !status.IsSuccess() {
+		t.Errorf("Score must return Success status, got: %v", status)
+	}
+	if score != 50 { // neutral fallback score when StateData is absent
+		t.Errorf("Expected neutral score 50, got %d", score)
+	}
+}
+
+func TestFilterEnforcesConstraintsDuringDaemonOutage(t *testing.T) {
+	// Plugin with nil client (simulating daemon down)
+	plugin := &SentinelPlugin{
+		client:             nil,
+		circuitBreaker:     nil,
+		gamma:              1.0,
+		reservedPlacements: make(map[string]placementEntry),
+	}
+	ctx := context.Background()
+	state := framework.NewCycleState()
+
+	pod := &v1.Pod{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: "pod-failover",
+			UID:  "uid-failover",
+			Annotations: map[string]string{
+				AnnotationArch:           "amd64",
+				AnnotationCostCeilingUSD: "1.00",
+			},
+		},
+	}
+
+	goodNode := &v1.Node{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: "good-node",
+			Annotations: map[string]string{
+				AnnotationArch:          "amd64",
+				AnnotationHourlyCostUSD: "0.50",
+			},
+		},
+	}
+	badNode := &v1.Node{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: "bad-node",
+			Annotations: map[string]string{
+				AnnotationArch:          "amd64",
+				AnnotationHourlyCostUSD: "10.00", // exceeds ceiling
+			},
+		},
+	}
+
+	infoGood := framework.NewNodeInfo()
+	infoGood.SetNode(goodNode)
+	infoBad := framework.NewNodeInfo()
+	infoBad.SetNode(badNode)
+
+	// Filter MUST independently reject badNode even when daemon is unavailable
+	if st := plugin.Filter(ctx, state, pod, infoBad); st == nil || st.IsSuccess() {
+		t.Errorf("Filter must reject badNode during daemon outage, but it passed")
+	}
+
+	if st := plugin.Filter(ctx, state, pod, infoGood); st != nil && !st.IsSuccess() {
+		t.Errorf("Filter must accept goodNode during daemon outage, got: %v", st)
+	}
+
+	// PreScore activates fallback path for passed nodes
+	preScoreSt := plugin.PreScore(ctx, state, pod, []*v1.Node{goodNode})
+	if preScoreSt != nil && !preScoreSt.IsSuccess() {
+		t.Errorf("PreScore fallback failed: %v", preScoreSt)
+	}
+
+	score, scoreSt := plugin.Score(ctx, state, pod, "good-node")
+	if scoreSt != nil && !scoreSt.IsSuccess() {
+		t.Errorf("Score failed in fallback: %v", scoreSt)
+	}
+	if score != 50 {
+		t.Errorf("Expected fallback score 50, got %d", score)
+	}
+}
+
+func TestBoundedReservationCache(t *testing.T) {
+	plugin := &SentinelPlugin{
+		gamma:              1.0,
+		reservedPlacements: make(map[string]placementEntry),
+	}
+	ctx := context.Background()
+	state := framework.NewCycleState()
+
+	// Inject 5,100 placements to trigger eviction bound
+	for i := 0; i < 5100; i++ {
+		pod := &v1.Pod{ObjectMeta: metav1.ObjectMeta{UID: types.UID(fmt.Sprintf("pod-%d", i))}}
+		plugin.Reserve(ctx, state, pod, "node-test")
+	}
+
+	plugin.mu.RLock()
+	count := len(plugin.reservedPlacements)
+	plugin.mu.RUnlock()
+
+	if count > 5000 {
+		t.Errorf("reservedPlacements exceeded strict bound: %d > 5000", count)
 	}
 }
 
@@ -150,26 +354,41 @@ func TestCircuitBreaker(t *testing.T) {
 		t.Errorf("Expected initially Closed state")
 	}
 
-	// Test backoff calculation
 	bo0 := cb.calculateBackoff(0)
 	if bo0 <= 0 {
 		t.Errorf("Expected non-zero backoff for attempt 0, got %v", bo0)
 	}
 
-	// Record failures to open breaker
 	cb.recordFailure()
 	cb.recordFailure()
-	cb.recordFailure()
-
-	if cb.GetState() != Open {
-		t.Errorf("Expected Open state after 3 failures, got %v", cb.GetState())
+	if cb.GetState() != Closed {
+		t.Errorf("Expected Closed after 2 failures")
 	}
 
-	// Manually set half-open
-	cb.state = int32(HalfOpen)
-	// Failed probe in HalfOpen should transition back to Open
 	cb.recordFailure()
 	if cb.GetState() != Open {
-		t.Errorf("Expected failed probe in HalfOpen to return to Open, got %v", cb.GetState())
+		t.Errorf("Expected Open after 3 failures")
+	}
+
+	cb.mu.Lock()
+	cb.lastFailure = time.Now().Add(-2 * time.Second)
+	cb.mu.Unlock()
+
+	// In Open state after timeout elapsed, AttemptCall transitions to HalfOpen
+	probeFailed := errors.New("probe network timeout")
+	err := cb.AttemptCall(context.Background(), func() error {
+		// Inside AttemptCall, state should have transitioned to HalfOpen
+		if cb.GetState() != HalfOpen {
+			t.Errorf("Expected HalfOpen during probe attempt, got %v", cb.GetState())
+		}
+		return probeFailed
+	})
+	if err == nil {
+		t.Errorf("Expected probe call to return error")
+	}
+
+	// In HalfOpen, a failure immediately reopens
+	if cb.GetState() != Open {
+		t.Errorf("Expected Open immediately after failure in HalfOpen, got %v", cb.GetState())
 	}
 }

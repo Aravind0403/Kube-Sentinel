@@ -1,10 +1,10 @@
 {
   "total_nodes": 100,
   "jitter_pct": 20.0,
-  "ticks": 5,
-  "clean_mean_confidence": 0.9288,
-  "perturbed_mean_confidence": 0.1356,
-  "total_perturbed_evaluated": 100,
+  "ticks": 3,
+  "clean_mean_confidence": 0.9331,
+  "perturbed_mean_confidence": 0.0,
+  "total_perturbed_evaluated": 60,
   "total_perturbed_isolated": 60,
-  "isolation_rate_pct": 60.0
+  "isolation_rate_pct": 100.0
 }

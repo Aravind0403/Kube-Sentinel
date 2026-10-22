@@ -62,9 +62,8 @@ def run_jitter_benchmark(host="127.0.0.1:50051", total_nodes=100, jitter_pct=20.
     clean_confidences = []
     perturbed_confidences = []
 
-    now = time.time()
-
     for tick in range(1, iterations + 1):
+        now = time.time()
         nodes = []
         # 1. Clean nodes (consistent math, steady 5s heartbeats)
         for i in range(clean_count):
@@ -128,14 +127,14 @@ def run_jitter_benchmark(host="127.0.0.1:50051", total_nodes=100, jitter_pct=20.
             if "perturbed" in ns.node_id:
                 total_perturbed_evaluated += 1
                 perturbed_confidences.append(ns.confidence)
-                # An isolated node is either marked ineligible or discounted below 0.10
-                if not ns.is_eligible or ns.confidence < 0.10:
+                # An isolated node is marked ineligible by daemon or discounted below 0.05 threshold
+                if not ns.is_eligible or ns.confidence < 0.05:
                     total_perturbed_isolated += 1
             else:
                 clean_confidences.append(ns.confidence)
 
         print(f"Tick {tick:02d}: Evaluated {len(nodes)} nodes in {elapsed_ms:.2f}ms | Isolated {total_perturbed_isolated}/{total_perturbed_evaluated} degraded candidates")
-        now += 5.0
+        time.sleep(0.5)
 
     channel.close()
     if server_proc:

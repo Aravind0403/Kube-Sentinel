@@ -8,7 +8,7 @@
     "HALF_OPEN",
     "CLOSED"
   ],
-  "mean_grpc_latency_ms": 0.659,
-  "mean_fallback_latency_ms": 0.018,
+  "mean_grpc_latency_ms": 0.68,
+  "mean_fallback_latency_ms": 0.019,
   "status": "PASSED"
 }

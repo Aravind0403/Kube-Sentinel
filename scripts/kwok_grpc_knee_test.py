@@ -97,7 +97,6 @@ def run_benchmark(target_host="127.0.0.1:50051", burst_steps=None, candidate_nod
     channel = grpc.insecure_channel(target_host)
     stub = sentinel_pb2_grpc.ACOPredictiveSchedulerStub(channel)
 
-    # 1. Warm-up phase (50 calls to warm JIT, TCP sockets, and Python import caches)
     print("Executing 50 warm-up RPC queries...")
     warm_req = build_test_request(candidate_count=candidate_nodes)
     for _ in range(50):
@@ -105,14 +104,17 @@ def run_benchmark(target_host="127.0.0.1:50051", burst_steps=None, candidate_nod
             resp = stub.ScoreNodes(warm_req, timeout=5.0)
             if not resp.scores:
                 raise RuntimeError("Empty response received from daemon")
+            eligible_count = sum(1 for s in resp.scores if s.is_eligible)
+            if eligible_count == 0:
+                raise RuntimeError("Zero candidates marked eligible during warm-up - check constraint alignment")
         except Exception as e:
             print(f"ERROR: Failed warm-up connection to gRPC daemon: {e}")
             if server_proc:
                 server_proc.kill()
             sys.exit(1)
 
-    print("Warm-up complete. Connection healthy.\n")
-    print(f"{'Burst Size':<12} | {'P50 (ms)':<10} | {'P95 (ms)':<10} | {'P99 (ms)':<10} | {'Throughput (pods/s)':<20}")
+    print(f"Warm-up complete. Connection healthy ({eligible_count}/{len(warm_req.nodes)} candidates eligible).\n")
+    print(f"{'Burst Size':<12} | {'P50 (ms)':<10} | {'P95 (ms)':<10} | {'P99 (ms)':<10} | {'Throughput (RPC/s)':<20}")
     print("-" * 65)
 
     results = []

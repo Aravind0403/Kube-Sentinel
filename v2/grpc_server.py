@@ -51,6 +51,18 @@ from orchestrator.shared.models import (
 )
 
 
+def normalize_arch(arch_str: Optional[str]) -> Optional[str]:
+    """Canonical normalization for CPU architecture identifiers."""
+    if not arch_str:
+        return None
+    s = str(arch_str).lower().strip()
+    if s in ("amd64", "x86_64", "x86-64", "x86", "x64"):
+        return "amd64"
+    if s in ("arm64", "aarch64", "arm"):
+        return "arm64"
+    return s
+
+
 class ConfigWatcher:
     """
     Background file-watcher reloading yaml configuration dynamically.
@@ -228,23 +240,22 @@ class ACOPredictiveSchedulerServicer(sentinel_pb2_grpc.ACOPredictiveSchedulerSer
         cv_max = thresholds["cv_max"]
         t_max = thresholds["t_max"]
 
-        # Map workload type string to enum
-        # Map workload type string to enum
-        workload_type_map = {
-            "batch": WorkloadType.BATCH,
-            "latency-critical": WorkloadType.LATENCY_CRITICAL,
-            "stream-processing": WorkloadType.STREAM,
-        }
-        w_type = workload_type_map.get(request.pod.workload_type.lower(), WorkloadType.BATCH)
+        # Map workload type string to enum (case and separator insensitive)
+        w_raw = request.pod.workload_type.upper().replace("-", "_")
+        if "LATENCY" in w_raw or "CRITICAL" in w_raw:
+            w_type = WorkloadType.LATENCY_CRITICAL
+        elif "STREAM" in w_raw:
+            w_type = WorkloadType.STREAM
+        else:
+            w_type = WorkloadType.BATCH
 
-        # Parse architecture requirement
+        # Parse architecture requirement with normalization (V04 fix)
         arch_req = None
-        if request.pod.required_arch:
-            arch_lower = request.pod.required_arch.lower()
-            if "arm" in arch_lower:
-                arch_req = NodeArch.ARM64
-            elif "x86" in arch_lower:
-                arch_req = NodeArch.X86_64
+        norm_req_arch = normalize_arch(request.pod.required_arch)
+        if norm_req_arch == "arm64":
+            arch_req = NodeArch.ARM64
+        elif norm_req_arch == "amd64":
+            arch_req = NodeArch.X86_64
 
         # Re-construct JobRequest object for CostEngine with full typed constraints (F03, F07 fixes)
         has_gpu = request.pod.gpu_requested > 0
@@ -299,10 +310,15 @@ class ACOPredictiveSchedulerServicer(sentinel_pb2_grpc.ACOPredictiveSchedulerSer
                 k_int_mem = 1.0
             k_internal = k_int_cpu * k_int_mem
 
-            # 2. Freshness check against real server time (F08 fix)
+            # 2. Freshness check against real server time (F08, V04 fixes)
             if node_cand.last_heartbeat_timestamp > 0:
-                delta_t = max(0.0, current_time - node_cand.last_heartbeat_timestamp)
-                k_fresh = calculate_freshness(delta_t, tracker.t_max)
+                raw_delta = current_time - node_cand.last_heartbeat_timestamp
+                # If heartbeat is more than 1.0s in the future, reject as invalid clock anomaly
+                if raw_delta < -1.0:
+                    k_fresh = 0.0
+                else:
+                    delta_t = max(0.0, raw_delta)
+                    k_fresh = calculate_freshness(delta_t, tracker.t_max)
             else:
                 k_fresh = 0.0
 
@@ -371,11 +387,12 @@ class ACOPredictiveSchedulerServicer(sentinel_pb2_grpc.ACOPredictiveSchedulerSer
                 region=node_cand.zone if node_cand.zone else "us-central1",
             )
 
-            node_arch = NodeArch.X86_64
-            if node_cand.arch and "arm" in node_cand.arch.lower():
+            # Do not allow GPU capability to overwrite CPU architecture (V04 fix)
+            norm_cand_arch = normalize_arch(node_cand.arch)
+            if norm_cand_arch == "arm64":
                 node_arch = NodeArch.ARM64
-            elif node_cand.gpu_count > 0:
-                node_arch = NodeArch.GPU_NODE
+            else:
+                node_arch = NodeArch.X86_64
 
             gpu_inv = {node_cand.gpu_type: int(node_cand.gpu_count)} if node_cand.gpu_count > 0 and node_cand.gpu_type else {}
             gpu_vram = {node_cand.gpu_type: float(node_cand.gpu_memory_gb)} if node_cand.gpu_count > 0 and node_cand.gpu_type else {}
@@ -393,27 +410,49 @@ class ACOPredictiveSchedulerServicer(sentinel_pb2_grpc.ACOPredictiveSchedulerSer
                 latest_telemetry=node_telemetry,
             )
 
-            # Hard eligibility filtering (F03, F11 fixes)
+            # Hard eligibility filtering - INDEPENDENT checks (V04 fix)
             is_eligible = True
-            filter_reason = "PASSED"
+            reasons = []
 
-            if job.arch_required and compute_node.arch != job.arch_required:
+            # 1. Architecture Check
+            if norm_req_arch and norm_cand_arch and norm_req_arch != norm_cand_arch:
                 is_eligible = False
-                filter_reason = f"ARCH_MISMATCH: requires {job.arch_required}, node has {compute_node.arch}"
-            elif job.resources.gpu_required:
+                reasons.append(f"ARCH_MISMATCH: requires {norm_req_arch}, node has {norm_cand_arch}")
+
+            # 2. GPU Count and Model Check
+            if job.resources.gpu_required:
                 total_gpus = sum(compute_node.gpu_inventory.values())
                 if total_gpus < job.resources.gpu_count:
                     is_eligible = False
-                    filter_reason = f"INSUFFICIENT_GPUS: requires {job.resources.gpu_count}, node has {total_gpus}"
-                elif job.gpu_model_preferred and job.gpu_model_preferred not in compute_node.gpu_inventory:
+                    reasons.append(f"INSUFFICIENT_GPUS: requires {job.resources.gpu_count}, node has {total_gpus}")
+                if job.gpu_model_preferred and job.gpu_model_preferred not in compute_node.gpu_inventory:
                     is_eligible = False
-                    filter_reason = f"GPU_MODEL_UNAVAILABLE: requires {job.gpu_model_preferred}"
-            elif job.cost_ceiling_usd and compute_node.cost_profile.cost_per_hour_usd > job.cost_ceiling_usd:
+                    reasons.append(f"GPU_MODEL_UNAVAILABLE: requires {job.gpu_model_preferred}")
+
+            # 3. GPU VRAM Check (V04 fix)
+            if job.resources.gpu_memory_gb and job.resources.gpu_memory_gb > 0:
+                node_vram = max(compute_node.gpu_vram_gb.values(), default=0.0) if compute_node.gpu_vram_gb else float(node_cand.gpu_memory_gb)
+                if node_vram < job.resources.gpu_memory_gb:
+                    is_eligible = False
+                    reasons.append(f"INSUFFICIENT_VRAM: requires {job.resources.gpu_memory_gb}GB, node has {node_vram}GB")
+
+            # 4. Cost Ceiling Check - INDEPENDENT of GPU (V04 fix)
+            if job.cost_ceiling_usd and compute_node.cost_profile.cost_per_hour_usd > job.cost_ceiling_usd:
                 is_eligible = False
-                filter_reason = f"COST_EXCEEDS_CEILING: ${compute_node.cost_profile.cost_per_hour_usd:.2f} > ${job.cost_ceiling_usd:.2f}"
-            elif kappa_i < 0.05:
+                reasons.append(f"COST_EXCEEDS_CEILING: ${compute_node.cost_profile.cost_per_hour_usd:.2f} > ${job.cost_ceiling_usd:.2f}")
+
+            # 5. Workload Intent / QoS Spot Rule - INDEPENDENT (V04 fix)
+            if job.workload_type == WorkloadType.LATENCY_CRITICAL:
+                if compute_node.cost_profile.instance_type == InstanceType.SPOT or compute_node.cost_profile.interruption_prob > 0.05:
+                    is_eligible = False
+                    reasons.append("SPOT_DISALLOWED_FOR_LATENCY_CRITICAL")
+
+            # 6. Telemetry Zero-Trust Threshold Check - INDEPENDENT (V04 fix)
+            if kappa_i < 0.05:
                 is_eligible = False
-                filter_reason = f"UNTRUSTED_TELEMETRY: confidence {kappa_i:.4f} < 0.05"
+                reasons.append(f"UNTRUSTED_TELEMETRY: confidence {kappa_i:.4f} < 0.05")
+
+            filter_reason = "; ".join(reasons) if not is_eligible else "PASSED"
 
             if is_eligible:
                 # Compute base cost score
